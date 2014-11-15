@@ -3,7 +3,8 @@ webVR-playing-with
 
 put stuff in face web, based on https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate
 
-web links: 
+web links for use with VR headset and webVR browser: 
+
 interactive mouse-around pile of stuffs: http://vihart.github.io/webVR-playing-with/spindex
 
 basic stuffs: http://vihart.github.io/webVR-playing-with/

@@ -1,12 +1,10 @@
 webVR-playing-with
 ==================
 
-put stuff in face web, based on https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate
+pages for webVR browser and headset.
+f or enter for fullscreen, space bar clicks links, some mouse interaction.
 
-web links for use with VR headset and webVR browser: 
-
-interactive mouse-around pile of stuffs: http://vihart.github.io/webVR-playing-with/spindex
-
-basic stuffs: http://vihart.github.io/webVR-playing-with/
-
-From inside cubes, mouse around to change spin, click to change color: http://vihart.github.io/webVR-playing-with/inside
+pages:
+http://vihart.github.io/webVR-playing-with/
+http://vihart.github.io/webVR-playing-with/spindex
+http://vihart.github.io/webVR-playing-with/inside

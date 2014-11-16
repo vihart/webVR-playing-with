@@ -8,3 +8,5 @@ pages:
 http://vihart.github.io/webVR-playing-with/
 http://vihart.github.io/webVR-playing-with/spindex
 http://vihart.github.io/webVR-playing-with/inside
+
+based on https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate

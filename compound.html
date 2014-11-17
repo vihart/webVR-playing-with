@@ -150,6 +150,14 @@
 			fturn = 1.25*((mouseY-500)/50000);
 
 
+			scalefactor = ((mouseX-800)/100);
+
+			tet.scale.set(scalefactor,scalefactor,scalefactor);
+			tet2.scale.set(scalefactor,scalefactor,scalefactor);
+			tet3.scale.set(scalefactor,scalefactor,scalefactor);
+			tet4.scale.set(scalefactor,scalefactor,scalefactor);
+			tet5.scale.set(scalefactor,scalefactor,scalefactor);
+
 			tet.rotateOnAxis (axis, tetr1);
 			tet2.rotateOnAxis (axis, fturn + tetr1);
 			tet3.rotateOnAxis (axis, 2*fturn + tetr1);

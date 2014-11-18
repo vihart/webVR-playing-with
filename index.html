@@ -74,24 +74,55 @@
 
 		var geometry = new THREE.BoxGeometry( 20, .5, 40 );
 		var spheregeom = new THREE.SphereGeometry( 10, 10, 4 );
+		var tetgeom = new THREE.TetrahedronGeometry(10);
 
 		var material = new THREE.MeshNormalMaterial();
 
-		var cube = new THREE.Mesh( geometry, material );
+		var cube = new THREE.Mesh( geometry, material ); //spinnycubes
 		var cube2 = new THREE.Mesh( geometry, material );
 		var cube3 = new THREE.Mesh( geometry, material );
 		var cube4 = new THREE.Mesh( geometry, material );
 		var cube5 = new THREE.Mesh( geometry, material );
 
-		var sphere = new THREE.Mesh( spheregeom, material );
+		var sphere = new THREE.Mesh( spheregeom, material ); //top sphere
 
-		var cubeArray = new Array();
-		for (var i=0; i<24; i++){
-			cubeArray[i] = new THREE.Mesh( geometry, material);
-			cubeArray[i].position.z = -20;
-			cubeArray[i].position.x = -20;
-			scene.add(cubeArray[i]);
-		}
+
+		//create FIT:
+		var tet = new THREE.Mesh( tetgeom, material );
+		var tet2 = new THREE.Mesh( tetgeom, material );
+		var tet3 = new THREE.Mesh( tetgeom, material );
+		var tet4 = new THREE.Mesh( tetgeom, material );
+		var tet5 = new THREE.Mesh( tetgeom, material );
+
+		tet.position.z = -20;
+		tet2.position.z = -20;
+		tet3.position.z = -20;
+		tet4.position.z = -20;
+		tet5.position.z = -20;
+		tet.position.x = -15;
+		tet2.position.x = -15;
+		tet3.position.x = -15;
+		tet4.position.x = -15;
+		tet5.position.x = -15;
+
+		var t = ((1 + Math.sqrt(5))/2);
+		var fturn = 6.283/5;
+		var axis = new THREE.Vector3( t, 1, 0 );
+		axis.normalize();
+
+		scene.add( tet );
+		scene.add( tet2 );
+		scene.add( tet3 );
+		scene.add( tet4 );
+		scene.add( tet5 );
+
+		tet.rotateOnAxis (axis, 0);
+		tet2.rotateOnAxis (axis, fturn);
+		tet3.rotateOnAxis (axis, 2*fturn);
+		tet4.rotateOnAxis (axis, 3*fturn);
+		tet5.rotateOnAxis (axis, 4*fturn);
+
+		//create spirallytower:
 
 		var spiralArray = new Array();
 		for (var i=0; i<36; i++){
@@ -104,7 +135,7 @@
 		}
 		/*
 
-		Position cube mesh
+		Position mesh
 		*/
 
 		cube2.position.x = 20;
@@ -148,10 +179,7 @@
 			sphere.rotation.y += 0.04;
 
 
-		for (var i=0; i<24; i++){
-			var inc = i*0.0002 + .0005;
-			cubeArray[i].rotation.x += inc;
-		}
+
 		for (var i=0; i<36; i++){
 			var inc = i*0.0001 + .0002;
 			spiralArray[i].rotation.x += inc;
@@ -168,6 +196,7 @@
 			effect.render( scene, camera );
 
 			requestAnimationFrame( animate );
+
 		}
 
 		/*
@@ -186,6 +215,8 @@
 			   window.location="http://vihart.github.io/webVR-playing-with/spindex.html";
 			 } else if ((camera.rotation.x < 3) && (camera.rotation.y < -1)){
 				window.location= "http://vihart.github.io/webVR-playing-with/inside.html";
+			} else if ((camera.rotation.x > -1) && (camera.rotation.x < 0) && (camera.rotation.y > .3) && (camera.rotation.y < .7)) {
+				window.location= "http://vihart.github.io/webVR-playing-with/compound.html";
 			} else {
 				false
 			}
@@ -205,6 +236,10 @@
 	    	effect.setFullScreen(true) //fullscreen
 	    } else if (event.keyCode == 32) {//space
 	  		link();
+	  	// } else if (event.keyCode == 37){ //right arrow
+	  	// 	camera.rotation.x += .1; //do not know how to do this thing
+	  	// } else if (event.keyCode == 39){ //left arrow
+	  	// 	camera.rotation.x += -.1;
 	  	} else if (event.keyCode == 72) {//h
 	  		rotest();
 	  		}

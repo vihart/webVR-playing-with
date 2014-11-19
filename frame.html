@@ -17,7 +17,6 @@
 	</head>
 
 	<body>
-		<iframe id="frame" allowFullScreen=true style="display:none"></iframe>
 	</body>
 
 	<!--
@@ -226,27 +225,6 @@
 			}
 
 		}
-		
-		var frame = document.getElementById('frame');
-		frame.height = window.innerHeight;
-		frame.width = window.innerWidth;
-
-		function fullscreen() {
-			frame.style.display = "block";
-			frame.src = "http://vihart.github.io/webVR-playing-with/frame.html";
-			frame.focus();
-
-		  if (frame.mozRequestFullScreen) {
-		    frame.mozRequestFullScreen({ vrDisplay: effect._vrHMD }); // Firefox
-		    frame.focus();
-		  } else if (frame.webkitRequestFullscreen) {
-		    frame.webkitRequestFullscreen({ vrDisplay: effect._vrHMD }); // Chrome and Safari
-		    frame.focus();
-		  } else if (frame.requestFullScreen){
-		    frame.requestFullscreen();
-		    frame.focus();
-		  }
-		}
 
 		/*
 		Listen for keyboard events zero positional sensor on appropriate keypress.
@@ -257,8 +235,7 @@
 	    if (event.keyCode == 90) { // z
 	    	controls.zeroSensor(); //zero rotation
 	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
-	    	fullscreen();
-	    	// effect.setFullScreen(true) //fullscreen
+	    	effect.setFullScreen(true) //fullscreen
 	    } else if (event.keyCode == 32) {//space
 	  		link();
 	  	// } else if (event.keyCode == 37){ //right arrow
@@ -277,9 +254,6 @@
 		Handle window resizes
 		*/
 		function onWindowResize() {
-			frame.height = window.innerHeight;
-			frame.width = window.innerWidth;
-
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 

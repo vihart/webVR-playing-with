@@ -136,10 +136,25 @@
 		  Things[i].position.y = -20;
 		  Things[i].position.z = 40;
 		  }
-		/*
+		
 
-		Position mesh
-		*/
+		//create pointland
+		var pointThings = [];
+		  var pointWave = 0;
+
+		  for (var i = 0; i < 9; i++) {
+		    pointThings[i] = new THREE.PointCloud(
+		    	new THREE.BoxGeometry(3,3,3),
+		    	new THREE.PointCloudMaterial(0x55ff00));
+		  scene.add(pointThings[i]);
+		  pointThings[i].position.x = ((i*6) % 18) -9;
+		  pointThings[i].position.y = -20;
+		  pointThings[i].position.z = Math.floor(i/3)*6 -9;
+		  }
+
+
+		//Position mesh
+		
 
 		cube2.position.x = 20;
 		cube3.position.x = 20;
@@ -185,9 +200,15 @@
 			FIT.rotation.x += .002;
 
 
-		boxWave += .1
+		boxWave += .1 
+		//blue boxes
 		  for (var i = 0; i < 4; i++) {
 		    Things[i].position.y += Math.sin(boxWave*(1/(i+2)));
+		  }
+		  //pointland
+		  for (var i = 0; i < pointThings.length; i++) {
+		    pointThings[i].position.y = Math.sin(boxWave*((1/(pointThings[i].position.x))+2)) + Math.sin(boxWave*(2/pointThings[i].position.z)) - 20;
+		    pointThings[i].material.color.setRGB((Math.abs(pointThings[i].position.y)/30),(Math.abs(pointThings[i].position.y)/40),(Math.abs(pointThings[i].position.y)/20));
 		  }
 
 
@@ -225,6 +246,8 @@
 				window.location= "http://vihart.github.io/webVR-playing-with/compound.html";
 			} else if (((camera.rotation.x > 2.3) || (camera.rotation.x < -2.8)) && (camera.rotation.y > 0) && (camera.rotation.y < .7)){
 				window.location= "http://vihart.github.io/webVR-playing-with/wave.html";
+			} else if ((camera.rotation.x > -2.5) && (camera.rotation.x < -1) && (camera.rotation.y > -.2) && (camera.rotation.y < .5)){
+				window.location= "http://vihart.github.io/webVR-playing-with/pointland.html";
 			} else {
 				false
 			}

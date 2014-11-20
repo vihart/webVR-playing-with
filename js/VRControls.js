@@ -1,5 +1,6 @@
 /**
  * @author dmarcos / https://github.com/dmarcos
+ with additions by https://github.com/hawksley
  */
 
 THREE.VRControls = function ( camera, done ) {
@@ -40,16 +41,54 @@ THREE.VRControls = function ( camera, done ) {
 
 	this._init();
 
+	this.manualRotation = quat.create();
+
+	this.manualControls = {
+      'a' : {index: 1, sign: 1, active: 0},
+      'd' : {index: 1, sign: -1, active: 0},
+      'w' : {index: 0, sign: 1, active: 0},
+      's' : {index: 0, sign: -1, active: 0},
+      'q' : {index: 2, sign: -1, active: 0},
+      'e' : {index: 2, sign: 1, active: 0},
+    };
+
+	this.manualRotateRate = new Float32Array([0, 0, 0]);
+	this.updateTime = 0;
+
 	this.update = function() {
 		var camera = this._camera;
-		var quat;
 		var vrState = this.getVRState();
-		if ( !vrState ) {
-			return;
-		}
-		// Applies head rotation from sensors data.
+		var manualRotation = this.manualRotation;
+		var oldTime = this.updateTime;
+		var newTime = performance.now();
+		this.updateTime = newTime;
+
+	  var interval = (newTime - oldTime) * 0.001;
+	  var update = quat.fromValues(this.manualRotateRate[0] * interval,
+	                               this.manualRotateRate[1] * interval,
+	                               this.manualRotateRate[2] * interval, 1.0);
+	  quat.normalize(update, update);
+	  quat.multiply(manualRotation, manualRotation, update);
+
 		if ( camera ) {
-			camera.quaternion.fromArray( vrState.hmd.rotation );
+			if ( !vrState ) {
+				camera.quaternion.fromArray(manualRotation);
+				return;
+			}
+
+			// Applies head rotation from sensors data.
+			var totalRotation = quat.create();
+      var state = vrState.hmd.rotation;
+      if (vrState.hmd.rotation[0] !== 0 ||
+					vrState.hmd.rotation[1] !== 0 ||
+					vrState.hmd.rotation[2] !== 0 ||
+					vrState.hmd.rotation[3] !== 0) {
+        quat.multiply(totalRotation, manualRotation, vrState.hmd.rotation);
+      } else {
+        totalRotation = manualRotation;
+      }
+
+			camera.quaternion.fromArray( totalRotation );
 		}
 	};
 

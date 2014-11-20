@@ -25,6 +25,9 @@
 	-->
 	<script src="js/three.min.js"></script>
 
+		<!--rotating quaternions library-->
+	<script src="lib/gl-matrix.js"></script>
+
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
@@ -197,6 +200,20 @@
 
 	  };
 	  window.addEventListener("keydown", onkey, true);
+
+	  //hold down keys to do rotations and stuff
+		function key(event, sign) {
+		  var control = controls.manualControls[String.fromCharCode(event.keyCode).toLowerCase()];
+		  if (!control)
+		    return;
+		  if (sign === 1 && control.active || sign === -1 && !control.active)
+		    return;
+		  control.active = (sign === 1);
+		  controls.manualRotateRate[control.index] += sign * control.sign;
+		}
+		document.addEventListener('keydown', function(event) { key(event, 1); }, false);
+		document.addEventListener('keyup', function(event) { key(event, -1); }, false);
+
 		/*
 		Handle window resizes
 		*/

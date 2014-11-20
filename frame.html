@@ -74,49 +74,44 @@
 		*/
 
 
-		var geometry = new THREE.BoxGeometry( 20, .5, 40 );
+		var geometry = new THREE.BoxGeometry( 15, 15, 15 );
 		var spheregeom = new THREE.SphereGeometry( 10, 10, 4 );
 		var tetgeom = new THREE.TetrahedronGeometry(10);
 
-		var material = new THREE.MeshNormalMaterial();
+		var material = new THREE.MeshBasicMaterial({color:0xffff00, wireframe: true});
+		var cubematerial = new THREE.MeshBasicMaterial( {color: 0Xff0000, wireframe: true})
+		var tetred = new THREE.MeshBasicMaterial( {color: 0x880044} );
+		var tetblue = new THREE.MeshBasicMaterial( {color: 0xff3300} );
+		var tetgreen = new THREE.MeshBasicMaterial( {color: 0xff5077} );
+		var tetyellow = new THREE.MeshBasicMaterial( {color: 0x332222} );
+		var tetcyan = new THREE.MeshBasicMaterial( {color: 0x004444} );
 
-		var cube = new THREE.Mesh( geometry, material ); //spinnycubes
-		var cube2 = new THREE.Mesh( geometry, material );
-		var cube3 = new THREE.Mesh( geometry, material );
-		var cube4 = new THREE.Mesh( geometry, material );
-		var cube5 = new THREE.Mesh( geometry, material );
+		var cube = new THREE.Mesh( geometry, cubematerial ); //spinnycubes
+		var cube2 = new THREE.Mesh( geometry, cubematerial );
+		var cube3 = new THREE.Mesh( geometry, cubematerial );
+		var cube4 = new THREE.Mesh( geometry, cubematerial );
+		var cube5 = new THREE.Mesh( geometry, cubematerial );
 
 		var sphere = new THREE.Mesh( spheregeom, material ); //top sphere
 
 
 		//create FIT:
-		var tet = new THREE.Mesh( tetgeom, material );
-		var tet2 = new THREE.Mesh( tetgeom, material );
-		var tet3 = new THREE.Mesh( tetgeom, material );
-		var tet4 = new THREE.Mesh( tetgeom, material );
-		var tet5 = new THREE.Mesh( tetgeom, material );
+		var tet = new THREE.Mesh( tetgeom, tetred );
+		var tet2 = new THREE.Mesh( tetgeom, tetblue );
+		var tet3 = new THREE.Mesh( tetgeom, tetgreen );
+		var tet4 = new THREE.Mesh( tetgeom, tetcyan );
+		var tet5 = new THREE.Mesh( tetgeom, tetyellow );
 
-		tet.position.z = -20;
-		tet2.position.z = -20;
-		tet3.position.z = -20;
-		tet4.position.z = -20;
-		tet5.position.z = -20;
-		tet.position.x = -15;
-		tet2.position.x = -15;
-		tet3.position.x = -15;
-		tet4.position.x = -15;
-		tet5.position.x = -15;
+		var FIT = new THREE.Object3D(); FIT.add(tet, tet2, tet3, tet4, tet5);
+		FIT.position.z = -20;
+		FIT.position.x = -15;
+		FIT.add(tet, tet2, tet3, tet4, tet5);
+		scene.add(FIT);
 
 		var t = ((1 + Math.sqrt(5))/2);
 		var fturn = 6.283/5;
 		var axis = new THREE.Vector3( t, 1, 0 );
 		axis.normalize();
-
-		scene.add( tet );
-		scene.add( tet2 );
-		scene.add( tet3 );
-		scene.add( tet4 );
-		scene.add( tet5 );
 
 		tet.rotateOnAxis (axis, 0);
 		tet2.rotateOnAxis (axis, fturn);
@@ -183,6 +178,9 @@
 			sphere.rotation.x += 0.1;
 			sphere.rotation.y += 0.04;
 
+			FIT.rotation.y += .006;
+			FIT.rotation.x += .002;
+
 		boxWave += .1
 		  for (var i = 0; i < 4; i++) {
 		    Things[i].position.y += Math.sin(boxWave*(1/(i+2)));
@@ -219,7 +217,7 @@
 			   window.location="http://vihart.github.io/webVR-playing-with/spindex.html";
 			 } else if ((camera.rotation.x < 3) && (camera.rotation.y < -1)){
 				window.location= "http://vihart.github.io/webVR-playing-with/inside.html";
-			} else if ((camera.rotation.x > -1) && (camera.rotation.x < 0) && (camera.rotation.y > .3) && (camera.rotation.y < .7)) {
+			} else if ((camera.rotation.x > -.5) && (camera.rotation.x < 1) && (camera.rotation.y > .3) && (camera.rotation.y < .9)) {
 				window.location= "http://vihart.github.io/webVR-playing-with/compound.html";
 			} else if (((camera.rotation.x > 2.3) || (camera.rotation.x < -2.8)) && (camera.rotation.y > 0) && (camera.rotation.y < .7)){
 				window.location= "http://vihart.github.io/webVR-playing-with/wave.html";

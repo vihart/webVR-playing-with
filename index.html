@@ -104,7 +104,7 @@
 		var tet4 = new THREE.Mesh( tetgeom, tetcyan );
 		var tet5 = new THREE.Mesh( tetgeom, tetyellow );
 
-		var FIT = new THREE.Object3D();
+		var FIT = new THREE.Object3D(); FIT.add(tet, tet2, tet3, tet4, tet5);
 		FIT.position.z = -20;
 		FIT.position.x = -15;
 		FIT.add(tet, tet2, tet3, tet4, tet5);
@@ -221,7 +221,7 @@
 			   window.location="http://vihart.github.io/webVR-playing-with/spindex.html";
 			 } else if ((camera.rotation.x < 3) && (camera.rotation.y < -1)){
 				window.location= "http://vihart.github.io/webVR-playing-with/inside.html";
-			} else if ((camera.rotation.x > -1) && (camera.rotation.x < 0) && (camera.rotation.y > .3) && (camera.rotation.y < .7)) {
+			} else if ((camera.rotation.x > -.5) && (camera.rotation.x < 1) && (camera.rotation.y > .3) && (camera.rotation.y < .9)) {
 				window.location= "http://vihart.github.io/webVR-playing-with/compound.html";
 			} else if (((camera.rotation.x > 2.3) || (camera.rotation.x < -2.8)) && (camera.rotation.y > 0) && (camera.rotation.y < .7)){
 				window.location= "http://vihart.github.io/webVR-playing-with/wave.html";

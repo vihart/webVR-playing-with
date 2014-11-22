@@ -46,14 +46,6 @@
 
 
 	<script>
-		//sound
-		// var soundleft = new THREE.Audio(new THREE.AudioListener());
-		// soundleft.load( 'teeth-and-clicks.ogg' );
-		// soundleft.setRefDistance( 20 );
-
-		// var soundright = new THREE.Audio( listener );
-		// soundright.load( 'media/teeth-and-clicks2.ogg' );
-		// soundright.setRefDistance( -20 );
 		/*
 		Setup three.js WebGL renderer
 		*/
@@ -122,8 +114,6 @@
 
 		scene.add(particleSystem);
 
-		// particleSystem.add(soundleft);
-
 		/*
 		Request animation frame loop function
 		*/
@@ -157,6 +147,7 @@
 			    // update the velocity
 			    if(clicky===0){
 			   		particle.velocity.y -= (Math.random() * .01);
+			   		particleSystem.material.color.setRGB((mouseX/400),(mouseX/600),(mouseY/200));
 				} else if (clicky === 1 ) {
 					particle.velocity.y += (Math.random() * .01) -(mouseY/10000 - .03); //click for mouse interaction
 				}
@@ -170,6 +161,7 @@
 			    	particle.velocity.y += Math.random()*(Math.sin(particle.y/10))/2;
 			    	particle.velocity.z += Math.sin(particle.z/100)/5;
 			    	particle.velocity.x += Math.sin(particle.x/200)/5;
+
 			    }
 
 			    //particles slowly center on you:
@@ -179,6 +171,7 @@
 			  		particle.y += particle.velocity.y;
 			    	particle.z += particle.velocity.z;
 			    	particle.x += particle.velocity.x;
+			    	particleSystem.material.color.setRGB((mouseX/400),(mouseY/400),(mouseX/200));
 			    }
 
 			    //particles get more or less random bouncy based on mouse:
@@ -186,6 +179,7 @@
 			    	particle.velocity.y += (mouseY/500)*Math.random()*(Math.sin(particle.y/((mouseY/100)+.00001)))/2+.00001;
 			    	particle.velocity.z += (mouseX/1000)*Math.sin(particle.x/((mouseX/10000)+.00001))/5 - .001;
 			    	particle.velocity.x += (mouseX/1000)*Math.sin(particle.z/((mouseX/20000)+.00001))/5 -.001;
+			    	particleSystem.material.color.setRGB((mouseX/600),(mouseY/200),(mouseX/200));
 			    }
 
 			    //go back to standard velocities, plus a little wiggle:

@@ -2,7 +2,7 @@
 
 <html lang="en">
 	<head>
-		<title>VR WebGL boilerplate using three.js</title>
+		<title>Spindex for webVR</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
@@ -236,11 +236,11 @@
 
 		function link(){
 			if((camera.rotation.x > 1.2) && (camera.rotation.x < 1.8) && (camera.rotation.y > -0.4) && (camera.rotation.y < .4)){
-			   window.location="http://vihart.github.io/webVR-playing-with/index.html";
+			   window.location="http://vihart.github.io/webVR-playing-with/";
 			 } else if ((camera.rotation.x < 3) && (camera.rotation.y < -1)){
 				window.location= "http://vihart.github.io/webVR-playing-with/inside.html";
 			} else {
-				false
+				window.location= "http://vihart.github.io/webVR-playing-with/undefined.html";
 			}
 
 		}

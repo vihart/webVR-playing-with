@@ -113,31 +113,46 @@
 		Request animation frame loop function
 		*/
 		function animate() {
-				
-
+			
 			if(clicky===0){
 				for( var i=0; i<mytext.length; i++){
-				RotateAround(mytext[i], -(mouseX)*i,-(mouseY/10)*i,5, .0004*i,.0005*i,.01);
+				RotateAround(mytext[i], -i,-i,5, .0004*i,.0005*i,.01);
+				mytext[i].material.wireframe=true;
 				}
 
 			}
 			if(clicky===1){
 				for( var i=0; i<mytext.length; i++){
-				mytext[i].material.wireframe = true;
 				RotateAround(mytext[i], -(mouseX)*i,-(mouseY/10)*i,5, .0004*i,.0005*i,.01);
 				}
 			}
 			if(clicky===2){
 				for( var i=0; i<mytext.length; i++){
 				mytext[i].lookAt(camera.position);
+				mytext[i].material.wireframe = false;
 				}
 			}
 			if(clicky===3){
 				for( var i=0; i<mytext.length; i++){
 				RotateAround(mytext[i], -500*i,-50*i,5, .0004*i,.0005*i,.01);
-				mytext[i].material.wireframe = false;
+				mytext[i].material.wireframe=true;
 				mytext[i].lookAt(camera.position);
 				}
+			}
+			if(clicky===4){
+				for (var i=0; i<mytext.length; i++){
+				if((Math.abs(mytext[i].position.x+mytext[i].position.y+mytext[i].position.z)) > 10){
+					mytext[i].position.x = Math.abs(mytext[i].position.x)-(mouseY/100);
+					mytext[i].position.y = Math.abs(mytext[i].position.y)-(mouseX/200);
+					mytext[i].position.z = Math.abs(mytext[i].position.z)-(mouseY/50);
+					} else{
+					mytext[i].position.x = 0;
+					mytext[i].position.y = 0;
+					mytext[i].position.z = 0;	
+					}
+				mytext[i].lookAt(camera.position);
+				}
+
 			}
 
 
@@ -177,7 +192,7 @@
 		//listen for click
 
 		document.body.addEventListener( 'click', function(){
-			clicky = (clicky + 1) % 4;
+			clicky = (clicky + 1) % 5;
 		})
 		/*
 		Listen for double click event to enter full-screen VR mode

@@ -147,45 +147,71 @@
 		  pointThings[i].position.y = -20;
 		  pointThings[i].position.z = Math.floor(i/3)*6 -9;
 		  }
-		/*
-
-		Position mesh
-		*/
-
+		
+		//red spinny cubes
 		cube2.position.x = 20;
 		cube3.position.x = 20;
 		cube4.position.x = 20;
 		cube5.position.x = 20;
-
-		sphere.position.y = 30;
-		sphere.position.z = -10;
-		/*
-		Add cube mesh to your three.js scene
-		*/
-
+		cube2.position.z = 15;
+		cube3.position.z = 15;
+		cube4.position.z = 15;
+		cube5.position.z = 15;
+		cube2.position.y = -7;
+		cube3.position.y = -7;
+		cube4.position.y = -7;
+		cube5.position.y = -7;
 		scene.add( cube2 );
 		scene.add( cube3 );
 		scene.add( cube4 );
 		scene.add( cube5 );
 
+		//top spinny sphere
+		sphere.position.y = 30;
+		sphere.position.z = -10;
 		scene.add( sphere );
+
+
+		//particles
+		var particles = new THREE.Geometry();
+		var partCount = 7;
+
+		for (var p = 0; p<partCount; p++){
+			var part = (new THREE.Vector3(15+Math.random()*5,15+Math.random()*5,-15-Math.random()*5));
+			part.velocity = new THREE.Vector3(
+				Math.random()/10,
+				Math.random()/12,
+				Math.random()/9)
+			particles.vertices.push(part);
+		}
+
+		var particleSystem = new THREE.PointCloud(
+			particles,
+			new THREE.PointCloudMaterial({
+				color: 0x333366,
+				size: 20,
+				map: THREE.ImageUtils.loadTexture("media/particle.png"),
+				blending: THREE.AdditiveBlending,
+				transparent: true
+				}));
+
+		particleSystem.sortParticles = true;
+		scene.add(particleSystem);
+
 		/*
 		Request animation frame loop function
 		*/
 		function animate() {
 			/*
-			Apply rotation to cube mesh
+			Apply rotations to meshes
 			*/
 
 			cube2.rotation.x += 0.005;
 			cube2.rotation.z += 0.007;
-
 			cube3.rotation.x += 0.006;
 			cube3.rotation.z += 0.008;
-
 			cube4.rotation.x += 0.007;
 			cube4.rotation.z += 0.009;
-
 			cube5.rotation.x += 0.008;
 			cube5.rotation.z += 0.01;
 
@@ -205,6 +231,18 @@
 		  for (var i = 0; i < pointThings.length; i++) {
 		    pointThings[i].position.y = Math.sin(boxWave*((1/(pointThings[i].position.x))+2)) + Math.sin(boxWave*(2/pointThings[i].position.z)) - 20;
 		    pointThings[i].material.color.setRGB((Math.abs(pointThings[i].position.y)/30),(Math.abs(pointThings[i].position.y)/40),(Math.abs(pointThings[i].position.y)/20));
+		  }
+
+		  //animate particles
+		  for (var p = 0; p<partCount; p++){
+		  	//update velocity
+		  	particles.vertices[p].velocity.y -= (particles.vertices[p].y-20)/1000 + Math.random()/100; 
+		  	particles.vertices[p].velocity.z -= (particles.vertices[p].z+20)/1200 + Math.random()/200;
+		  	particles.vertices[p].velocity.x -= (particles.vertices[p].x-20)/1300 + Math.random()/200;
+		  	//update position based on velocity
+		  	particles.vertices[p].y += particles.vertices[p].velocity.y;
+		  	particles.vertices[p].z += particles.vertices[p].velocity.z;
+		  	particles.vertices[p].x += particles.vertices[p].velocity.x;
 		  }
 
 
@@ -234,9 +272,9 @@
 
 		//linking function
 		function link(){
-			if((camera.rotation.x > 1.2) && (camera.rotation.x < 1.8) && (camera.rotation.y > -0.4) && (camera.rotation.y < .4)){
+		if((camera.rotation.x > 1.2) && (camera.rotation.x < 1.8) && (camera.rotation.y > -0.4) && (camera.rotation.y < .4)){
 			   window.location="http://vihart.github.io/webVR-playing-with/spindex.html";
-			 } else if ((camera.rotation.x < 3) && (camera.rotation.y < -1)){
+			 } else if (((camera.rotation.x < -2.5)||(camera.rotation.x > 2.4)) && (camera.rotation.y < -.5) && (camera.rotation.y > -1.2)){
 				window.location= "http://vihart.github.io/webVR-playing-with/inside.html";
 			} else if ((camera.rotation.x > -.5) && (camera.rotation.x < 1) && (camera.rotation.y > .3) && (camera.rotation.y < .9)) {
 				window.location= "http://vihart.github.io/webVR-playing-with/compound.html";
@@ -244,8 +282,8 @@
 				window.location= "http://vihart.github.io/webVR-playing-with/wave.html";
 			} else if ((camera.rotation.x > -2.5) && (camera.rotation.x < -1) && (camera.rotation.y > -.2) && (camera.rotation.y < .5)){
 				window.location= "http://vihart.github.io/webVR-playing-with/pointland.html";
-			} else {
-				false
+			} else if ((camera.rotation.x > -.1) && (camera.rotation.x < .9) && (camera.rotation.y > -.9) && (camera.rotation.y < -.2)){
+				window.location= "http://vihart.github.io/webVR-playing-with/particles.html";
 			}
 
 		}

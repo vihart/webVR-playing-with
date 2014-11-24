@@ -25,7 +25,7 @@
 
 	<body>
 		<!--Audio from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
-		<audio src = "media/satie.mp3" autoplay=true loop=true/> 
+		<audio id='music' src="media/satie.mp3" autoplay=true loop=true/> 
 	</body>
 
 	<!--
@@ -292,6 +292,13 @@
 	    	effect.setFullScreen(true) //fullscreen
 	    } else if (event.keyCode == 32) {//space
 	  		link();
+	  	} else if (event.keyCode == 80) {//p
+	  		var music = document.querySelector('#music');
+	  		if (music.paused){
+	  			music.play();
+	  		} else{
+	  			music.pause();	
+	  		}
 	  	}
 
 

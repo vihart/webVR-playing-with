@@ -148,6 +148,24 @@
 		  pointThings[i].position.z = Math.floor(i/3)*6 -9;
 		  }
 		
+
+		//create exclamation point
+		var exclaim = new THREE.Mesh(
+			new THREE.BoxGeometry(1,8,1),
+			new THREE.MeshNormalMaterial({wireframe: true}));
+		exclaim.position.y = 5;
+
+		var exclaimDot = new THREE.Mesh(
+			new THREE.BoxGeometry(1,1,1),
+			new THREE.MeshNormalMaterial({wireframe: true}));
+		exclaimDot.position.y = -1;
+
+		var exclamation = new THREE.Object3D();
+		exclamation.position.x = -10;
+		exclamation.add(exclaim, exclaimDot);
+		scene.add(exclamation);
+
+
 		//red spinny cubes
 		cube2.position.x = 20;
 		cube3.position.x = 20;
@@ -221,6 +239,9 @@
 			FIT.rotation.y += .006;
 			FIT.rotation.x += .002;
 
+			exclamation.rotation.y += .005;
+			exclamation.position.y += Math.sin(exclamation.rotation.y)/100;
+
 		boxWave += .1
 		//animate blue boxes
 		  for (var i = 0; i < 4; i++) {
@@ -284,6 +305,8 @@
 				window.location= "http://vihart.github.io/webVR-playing-with/pointland.html";
 			} else if ((camera.rotation.x > -.1) && (camera.rotation.x < .9) && (camera.rotation.y > -.9) && (camera.rotation.y < -.2)){
 				window.location= "http://vihart.github.io/webVR-playing-with/particles.html";
+			} else if ((camera.rotation.x > -2) && (camera.rotation.x < 1.7) && (camera.rotation.y > 1.1) && (camera.rotation.y < 1.4)){
+				window.location= "http://vihart.github.io/webVR-playing-with/undefined.html";
 			}
 
 		}

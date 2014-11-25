@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html lang="en">
+	<head>
+		<title>Under Construction</title>
+
+		<!-- 
+		Placeholder site for your great upcoming webVR experiences!!!
+		 -->
+
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000;
+				color: #fff;
+				margin: 0px;
+				padding: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!--Audio from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
+		<audio id='music' src="media/satie.mp3" autoplay=true loop=true/> 
+	</body>
+
+	<!--
+	three.js 3d library
+	-->
+	<script src="js/three.min.js"></script>
+
+	<!--
+	library for fast quaternion rotation
+	-->
+	<script src="lib/gl-matrix.js"></script>
+
+	<!--
+	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
+	 -->
+	<script src="js/VRControls.js"></script>
+
+	<!--
+	VREffect.js handles stereo camera setup and rendering.
+	-->
+	<script src="js/VREffect.js"></script>
+
+	<!--font from http://mrdoob.github.com/three.js/examples/fonts/helvetiker_regular.typeface.js -->
+	<script src="lib/helvetiker.js"></script>
+
+	<script>
+		/*
+		Setup three.js WebGL renderer
+		*/
+		var renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setClearColor( 0xffff00, 1 );
+		/*
+		Append the canvas element created by the renderer to document body element.
+		*/
+		document.body.appendChild( renderer.domElement );
+		/*
+		Create a three.js scene
+		*/
+		var scene = new THREE.Scene();
+		/*
+		Create a three.js camera
+		*/
+		var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+		/*
+		Apply VR headset positional data to camera.
+		*/
+		var controls = new THREE.VRControls( camera );
+		/*
+		Apply VR stereo rendering to renderer
+		*/
+		var effect = new THREE.VREffect( renderer );
+		effect.setSize( window.innerWidth, window.innerHeight );
+
+		/*
+		define interaction variables
+		*/
+		var mouseY = 1;
+		var mouseX = 1;
+
+		// create main particles: adapted from aerotwist.com's particle creation tutorial
+		var particleCount = 500,
+		    particles = new THREE.Geometry(),
+		    pMaterial = new THREE.PointCloudMaterial({
+		      color: 0xFFFFFF,
+		      size: 50,
+			  map: THREE.ImageUtils.loadTexture(
+			    "media/construction2.png"), //adapted from http://www.textfiles.com/underconstruction/
+			  blending: THREE.SubtractiveBlending,
+			  transparent: true
+			    });
+
+		for (var p = 0; p < particleCount; p++) {
+		  var pX = Math.random() * 800 - 500,
+		      pY = Math.random() * 500,
+		      pZ = Math.random() * 800 - 500,
+		      particle = (
+		        new THREE.Vector3(pX, pY, pZ)
+		      );
+			particle.velocity = new THREE.Vector3(
+			  Math.random(),
+			  -Math.random()*2,
+			  Math.random());
+		  particles.vertices.push(particle);
+		}
+
+		var particleSystem = new THREE.PointCloud(
+		    particles,
+		    pMaterial);
+
+		particleSystem.sortParticles = true;
+
+		scene.add(particleSystem);
+
+		//create "thank you" text
+		var thanksText = ['Thank you', 'for your', 'patience!', ' ', ' ', 'Thank you', 'for your', 'patience!', ' '];
+
+		var message2 = [];
+		var messageGroup2 = [];
+
+		  for (var i = 0; i < thanksText.length; i++) {
+		    message2[i] = new THREE.Mesh(
+		    	new THREE.TextGeometry(thanksText[i]),
+		    	new THREE.MeshNormalMaterial());
+		 message2[i].position.x = -800;
+		 message2[i].position.z = -500;
+		 message2[i].position.y = 400;
+		 messageGroup2[i] = new THREE.Object3D();
+		 messageGroup2[i].add(message2[i]);
+		 messageGroup2[i].rotation.y = i*.7;
+		 scene.add(messageGroup2[i]);
+		  } 
+
+		  //create under construction text
+		var message = [];
+		var messageGroup = [];
+
+		  for (var i = 0; i < 3; i++) {
+		    message[i] = new THREE.Mesh(
+		    	new THREE.TextGeometry("UNDER CONSTRUCTION"),
+		    	new THREE.MeshNormalMaterial());
+		 message[i].position.x = -800;
+		 message[i].position.z = -500;
+		 message[i].position.y = -400;
+		 messageGroup[i] = new THREE.Object3D();
+		 messageGroup[i].add(message[i]);
+		 messageGroup[i].rotation.y = i* 2.1;
+		 scene.add(messageGroup[i]);
+		  } 
+
+		//create triangle
+		var geometry = new THREE.TetrahedronGeometry(200);
+		var material = new THREE.MeshBasicMaterial( {color: 0xff6600, wireframe: false} );
+		var triangle = new THREE.Mesh( geometry, material );
+
+		triangle.position.z = -400;
+		triangle.rotation.x = 0;
+		triangle.rotation.y = -.7;
+		scene.add( triangle );
+
+		 //create exclamation point
+		var exclaim = new THREE.Mesh(
+			new THREE.BoxGeometry(1,8,1),
+			new THREE.MeshBasicMaterial({color: 0x000000, wireframe: false}));
+		exclaim.position.y = 1;
+
+		var exclaimDot = new THREE.Mesh(
+			new THREE.BoxGeometry(1,1,1),
+			new THREE.MeshBasicMaterial({color: 0x000000, wireframe: false}));
+		exclaimDot.position.y = -5;
+
+		var exclamation = new THREE.Object3D();
+		exclamation.position.z = -20;
+		exclamation.add(exclaim, exclaimDot);
+		scene.add(exclamation);
+
+		/*
+		Request animation frame loop function
+		*/
+		function animate() {
+
+			//rotate stuff
+
+			triangle.position.y += Math.sin(exclamation.rotation.y)/8;
+			
+			exclamation.rotation.y += .05;
+			exclamation.position.y += Math.sin(exclamation.rotation.y)/10;
+
+
+			for (var i = 0; i< message.length; i++){
+				messageGroup[i].rotation.y += .01;
+			}
+
+			for (var i = 0; i< message2.length; i++){
+				messageGroup2[i].rotation.y += -.02;
+			}
+
+			//animate particles; messy, sorry!
+
+			var pCount = particleCount;
+
+			particleSystem.rotation.y -= mouseX/50000 - .01;
+	
+			while (pCount--) {
+
+			    // get the particle
+			    var particle =
+			      particles.vertices[pCount];
+
+			    // check if we need to reset
+			    if (particle.y < -310) {
+			      particle.y = 500;
+			      particle.x = 800*Math.random() - 500;
+			      particle.z = 800*Math.random() - 500;
+			      particle.velocity.y = -Math.random();
+			    } else if (particle.y > 510){
+			      particle.y = -300;
+			      particle.x = 800*Math.random() - 500;
+			      particle.z = 800*Math.random() - 500;
+			      particle.velocity.y = -Math.random();
+			    }
+
+				particle.velocity.y += (Math.random() * .01) -(mouseY/10000 - .03);
+
+			    particle.y += particle.velocity.y;
+			    particle.z += particle.velocity.z;
+			    particle.x += particle.velocity.x;
+
+		       	particle.velocity.x = Math.random();
+		       	particle.velocity.y = -Math.random()*(mouseY/100);
+		       	particle.velocity.z = Math.random(); 
+
+
+		 	 }
+
+			/*
+			Update VR headset position and apply to camera.
+			*/
+			controls.update();
+			/*
+			Render the scene through the VREffect.
+			*/
+			effect.render( scene, camera );
+			requestAnimationFrame( animate );
+		}
+		/*
+		Kick off animation loop
+		*/
+		animate();
+
+		//links
+
+		function link(){
+
+				window.location="http://vihart.github.io/webVR-playing-with/";
+
+		}
+
+		//listen for mouse movement to get mouseX and mouseY
+
+		document.body.addEventListener( 'mousemove', function (event) {
+		 	mouseY = event.clientY;
+		 	mouseX = event.clientX;
+		});
+
+		//listen for click
+
+		document.body.addEventListener( 'click', function(){
+			clicky = (clicky + 1) % 6;
+		})
+		/*
+		Listen for double click event to enter full-screen VR mode
+		*/
+		document.body.addEventListener( 'dblclick', function() {
+			effect.setFullScreen( true );
+		});
+		/*
+		Listen for keyboard events 
+		*/
+		function onkey(event) {
+	    event.preventDefault();
+
+	    if (event.keyCode == 90) { // z
+	    	controls.zeroSensor(); //zero rotation
+	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
+	    	effect.setFullScreen(true) //fullscreen
+	    } else if (event.keyCode == 32) {//space
+	  		link();
+	  	} else if (event.keyCode == 80) {//p
+	  		var music = document.querySelector('#music');
+	  		if (music.paused){
+	  			music.play();
+	  		} else{
+	  			music.pause();	
+	  		}
+	  	}
+
+
+	  };
+	  window.addEventListener("keydown", onkey, true);
+
+	  	  //hold down keys to do rotations and stuff
+		function key(event, sign) {
+		  var control = controls.manualControls[String.fromCharCode(event.keyCode).toLowerCase()];
+		  if (!control)
+		    return;
+		  if (sign === 1 && control.active || sign === -1 && !control.active)
+		    return;
+		  control.active = (sign === 1);
+		  controls.manualRotateRate[control.index] += sign * control.sign;
+		}
+		document.addEventListener('keydown', function(event) { key(event, 1); }, false);
+		document.addEventListener('keyup', function(event) { key(event, -1); }, false);
+
+		/*
+		Handle window resizes
+		*/
+		function onWindowResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			effect.setSize( window.innerWidth, window.innerHeight );
+		}
+		window.addEventListener( 'resize', onWindowResize, false );
+	</script>
+</html>

@@ -22,8 +22,8 @@
 	</head>
 
 	<body>
-		<!--Audio from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
-		<audio id='music' src="media/satie.mp3" autoplay=true loop=true/> 
+	<!--Audio from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
+	<audio id='music' src="media/satie.mp3" autoplay=true loop=true/> 
 	</body>
 
 	<!--
@@ -66,7 +66,7 @@
 		/*
 		Create a three.js camera
 		*/
-		var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+		var camera = new THREE.PerspectiveCamera( 110, window.innerWidth / window.innerHeight, 1, 10000 );
 		/*
 		Apply VR headset positional data to camera.
 		*/
@@ -82,11 +82,12 @@
 		*/
 		var mouseY = 1;
 		var mouseX = 1;
+		var clicky = 0;
 
 		// create main particles: adapted from aerotwist.com's particle creation tutorial
-		var particleCount = 500,
-		    particles = new THREE.Geometry(),
-		    pMaterial = new THREE.PointCloudMaterial({
+		var particleCount = 20;
+		var particles = new THREE.Geometry();
+		var pMaterial = new THREE.PointCloudMaterial({
 		      color: 0xFFFFFF,
 		      size: 50,
 			  map: THREE.ImageUtils.loadTexture(
@@ -126,7 +127,7 @@
 		  for (var i = 0; i < thanksText.length; i++) {
 		    message2[i] = new THREE.Mesh(
 		    	new THREE.TextGeometry(thanksText[i]),
-		    	new THREE.MeshNormalMaterial());
+		    	new THREE.MeshLambertMaterial());
 		 message2[i].position.x = -800;
 		 message2[i].position.z = -500;
 		 message2[i].position.y = 400;
@@ -153,15 +154,48 @@
 		 scene.add(messageGroup[i]);
 		  } 
 
-		//create triangle
-		var geometry = new THREE.TetrahedronGeometry(200);
-		var material = new THREE.MeshBasicMaterial( {color: 0xff6600, wireframe: false} );
-		var triangle = new THREE.Mesh( geometry, material );
+		  var message3 = [];
+		 var message3Group = [];
+		 var comeBackSoon = ['Come', 'back', 'soon!']
+		 
+		 for (var i = 0; i < 3; i++) {
+		    message3[i] = new THREE.Mesh(
+		    	new THREE.TextGeometry(comeBackSoon[i]),
+		    	new THREE.MeshLambertMaterial());
+		 message3[i].position.x = -60;
+		 message3[i].position.z = -60;
+		 message3[i].position.y = 800;
+		 message3Group[i] = new THREE.Object3D();
+		 message3Group[i].add(message3[i]);
+		 message3Group[i].rotation.y = i* 4.2;
+		 scene.add(message3Group[i]);
+		  } 
 
+		  var message4 = new THREE.Mesh(
+		  	new THREE.TextGeometry("HARD HAT AREA"),
+		  	new THREE.MeshBasicMaterial({color: 0xff0000}));
+		  message4.position.x = 1000;
+		  message4.position.z = 800;
+		  message4.position.y = -50;
+		  message4.rotation.y = 3.7;
+		  scene.add(message4);
+
+		//create sign border
+		var geometry = new THREE.BoxGeometry(250,250,100);
+		var material = new THREE.MeshLambertMaterial( {color: 0x221100, wireframe: false} );
+		var triangle = new THREE.Mesh( geometry, material );
 		triangle.position.z = -400;
 		triangle.rotation.x = 0;
-		triangle.rotation.y = -.7;
+		triangle.rotation.y = 0;
 		scene.add( triangle );
+		//create sign
+		var geometry2 = new THREE.BoxGeometry(200,200,150);
+		var material2 = new THREE.MeshLambertMaterial( {color: 0x222200, wireframe: false} );
+		var triangle2 = new THREE.Mesh( geometry2, material2 );
+		triangle2.position.z = -390;
+		triangle2.rotation.x = 0;
+		triangle2.rotation.y = 0;
+		scene.add( triangle2 );
 
 		 //create exclamation point
 		var exclaim = new THREE.Mesh(
@@ -179,26 +213,176 @@
 		exclamation.add(exclaim, exclaimDot);
 		scene.add(exclamation);
 
+		//create hammer
+		var hammerHandle = new THREE.Mesh(
+			new THREE.CylinderGeometry(25,25,280,6),
+			new THREE.MeshLambertMaterial({color: 0x331100}));
+		hammerHandle.position.z = 190;
+		hammerHandle.rotation.x = 1.55;
+
+		var hammerHead = new THREE.Mesh(
+			new THREE.CylinderGeometry(60,60,180,12),
+			new THREE.MeshLambertMaterial({color: 0x333333}));
+		hammerHead.position.z = 390;
+
+		var hammer = new THREE.Object3D();
+		hammer.position.x = -600;
+		hammer.position.y = -100;
+		hammer.add(hammerHead, hammerHandle);
+		scene.add(hammer);
+
+		//traffic cone
+
+		var coneTop = new THREE.Mesh(
+			new THREE.CylinderGeometry(.1,2,5,20),
+			new THREE.MeshLambertMaterial({color: 0x221100}));
+		coneTop.position.x = 3;
+		coneTop.position.z = -1;
+		coneTop.position.y = -4;
+		scene.add(coneTop);
+
+		var coneBottom = new THREE.Mesh(
+			new THREE.BoxGeometry(4,1,4),
+			new THREE.MeshLambertMaterial({color:0x221100}));
+		coneBottom.position.x = 3;
+		coneBottom.position.z = -1;
+		coneBottom.position.y = -6;
+		scene.add(coneBottom);
+
+		var coneTop2 = new THREE.Mesh(
+			new THREE.CylinderGeometry(.1,2,5,20),
+			new THREE.MeshLambertMaterial({color: 0x221100}));
+		coneTop2.position.x = -2;
+		coneTop2.position.z = -3;
+		coneTop2.position.y = -5;
+		scene.add(coneTop2);
+
+		var coneBottom2 = new THREE.Mesh(
+			new THREE.BoxGeometry(4,1,4),
+			new THREE.MeshLambertMaterial({color:0x221100}));
+		coneBottom2.position.x = -2;
+		coneBottom2.position.z = -3;
+		coneBottom2.position.y = -7;
+		coneBottom2.rotation.y = 2;
+		scene.add(coneBottom2);
+
+		var coneTop3 = new THREE.Mesh(
+			new THREE.CylinderGeometry(.1,2,5,20),
+			new THREE.MeshLambertMaterial({color: 0x221100}));
+		coneTop3.position.x = -3;
+		coneTop3.position.z = 3;
+		coneTop3.position.y = -6;
+		scene.add(coneTop3);
+
+		var coneBottom3 = new THREE.Mesh(
+			new THREE.BoxGeometry(4,1,4),
+			new THREE.MeshLambertMaterial({color:0x221100}));
+		coneBottom3.position.x = -3;
+		coneBottom3.position.z = 3;
+		coneBottom3.position.y = -8;
+		scene.add(coneBottom3);
+
+		var coneTop4 = new THREE.Mesh(
+			new THREE.CylinderGeometry(.1,2,5,20),
+			new THREE.MeshLambertMaterial({color: 0x221100}));
+		coneTop4.position.x = 3;
+		coneTop4.position.z = 6;
+		coneTop4.position.y = -6;
+		scene.add(coneTop4);
+
+		var coneBottom4 = new THREE.Mesh(
+			new THREE.BoxGeometry(4,1,4),
+			new THREE.MeshLambertMaterial({color:0x221100}));
+		coneBottom4.position.x = 3;
+		coneBottom4.position.z = 6;
+		coneBottom4.position.y = -8;
+		coneBottom4.rotation.y = 2;
+		scene.add(coneBottom4);
+
+
+		//create light
+		var light = new THREE.PointLight( 0xffffff, 10, 600);
+		light.position.set( -100,1,1);
+		light.castShadow = true; 
+		scene.add( light );
+
+		var light2 = new THREE.PointLight( 0xffffff, 10, 1000);
+		light2.position.set( 0,400,1);
+		light2.castShadow = true; 
+		scene.add( light2 );
+
+
+		// var light3 = new THREE.PointLight( 0xffffff, 60, 800);
+		// light3.position.set( 0,600,1);
+		// light3.castShadow = true; 
+		// scene.add( light3 );
+
+		//sprite adapted from http://www.textfiles.com/underconstruction/
+		var map1 = THREE.ImageUtils.loadTexture( "media/shovel1.png" );
+		var map2 = THREE.ImageUtils.loadTexture( "media/shovel2.png" );
+		var map3 = THREE.ImageUtils.loadTexture( "media/shovel3.png" );
+		var map4 = THREE.ImageUtils.loadTexture( "media/shovel4.png" ); 
+
+		var spriteMap = [map1,map2,map3,map4];
+
+		var maSprite = new THREE.SpriteMaterial( { 
+				map: spriteMap[0], 
+				color: 0xffffff, 
+				fog:true, 
+				// blending: THREE.AdditiveBlending,  
+				// transparent: false
+				}); 
+		var sprite = new THREE.Sprite( maSprite ); 
+		// sprite.position.x = 50;
+		sprite.position.z = -.1;
+		sprite.position.x = 2;
+		scene.add( sprite );
+
+		//time for blinking and animating
+		var t = 0;
+
 		/*
 		Request animation frame loop function
 		*/
 		function animate() {
 
+			t = (t + .05) % 4;
+
+			//animate gif
+				sprite.material.map = spriteMap[Math.floor(t)];
+
+			//blink
+			if (t<2){
+				message4.material.visible = false;
+				triangle.material.color.setRGB(t/4,0,0);
+			} else {
+				message4.material.visible = true;
+				triangle.material.color.setRGB((1-(t - 2)/2),0,0);
+			}
+
 			//rotate stuff
 
 			triangle.position.y += Math.sin(exclamation.rotation.y)/8;
+
 			
 			exclamation.rotation.y += .05;
 			exclamation.position.y += Math.sin(exclamation.rotation.y)/10;
 
+			hammer.rotation.x += - Math.sin(exclamation.rotation.y)/30;
+
 
 			for (var i = 0; i< message.length; i++){
 				messageGroup[i].rotation.y += .01;
+				message3[i].lookAt(camera.position);
+				message3Group[i].rotation.y += .03;
+				message3[i].material.color.setRGB(Math.random(),Math.random(),Math.random());
 			}
 
 			for (var i = 0; i< message2.length; i++){
 				messageGroup2[i].rotation.y += -.02;
+				message2[i].material.color.setRGB((t/8), 0, (1-t/4));
 			}
+
 
 			//animate particles; messy, sorry!
 

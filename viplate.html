@@ -34,6 +34,8 @@
 	</head>
 
 	<body>
+	<!--Audio from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
+	<audio id='music' src="media/satie.mp3"/> 
 
 	</body>
 
@@ -92,6 +94,17 @@
 		var mouseX = 1;
 		var clicky = 0;
 
+		//create info overlay
+		var infoText = THREE.ImageUtils.loadTexture( "media/overlay.png" ); 
+		var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, color: 0xffffff}); 
+		var infoBox = new THREE.BoxGeometry(2,2,2);
+		var infoSign = new THREE.Mesh( infoBox, infoMaterial );
+		infoSign.position.z = -3;
+		infoSign.position.x = -3;
+		infoSign.position.y = -.5;
+		(infoSign);
+		scene.add( infoSign );
+
 		/*
 		Create 3d objects
 		*/
@@ -120,6 +133,7 @@
 			*/
 				
 			thing.rotation.x += .01;
+			infoSign.rotation.y +=.001;
 
 			//change parameters on click
 			if (clicky === 1){
@@ -184,6 +198,15 @@
 	    	effect.setFullScreen(true) //fullscreen
 	    } else if (event.keyCode == 32) {//space
 	  		link();
+	  	}else if (event.keyCode === 73){ //i
+	  		infoSign.material.visible = !infoSign.material.visible;
+	  	}else if (event.keyCode == 80) {//p
+	  		var music = document.querySelector('#music');
+	  		if (music.paused){
+	  			music.play();
+	  		} else{
+	  			music.pause();	
+	  		} 
 	  	}
 
 

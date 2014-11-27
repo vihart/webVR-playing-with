@@ -84,6 +84,17 @@
 		var mouseX = 1;
 		var clicky = 0;
 
+		//create info overlay
+		var infoText = THREE.ImageUtils.loadTexture( "media/infographic.jpg" ); 
+		var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, color: 0xffffff}); 
+		var infoBox = new THREE.BoxGeometry(2,2,2);
+		var infoSign = new THREE.Mesh( infoBox, infoMaterial );
+		infoSign.position.z = -3;
+		infoSign.position.x = -3;
+		infoSign.position.y = -.5;
+		(infoSign);
+		scene.add( infoSign );
+
 		// create main particles: adapted from aerotwist.com's particle creation tutorial
 		var particleCount = 20;
 		var particles = new THREE.Geometry();
@@ -176,7 +187,7 @@
 		  	new THREE.MeshBasicMaterial({color: 0xff0000}));
 		  message4.position.x = 1000;
 		  message4.position.z = 800;
-		  message4.position.y = -50;
+		  message4.position.y = 150;
 		  message4.rotation.y = 3.7;
 		  scene.add(message4);
 
@@ -299,6 +310,38 @@
 		coneBottom4.rotation.y = 2;
 		scene.add(coneBottom4);
 
+		var cautionTape = new THREE.Mesh(
+			new THREE.CylinderGeometry(1000,1000,100,50,0,0),
+			new THREE.MeshBasicMaterial({
+				color:0xffffff, 
+				map: THREE.ImageUtils.loadTexture("media/caution2.png"),
+				}));
+		cautionTape.material.side = THREE.BackSide;
+		scene.add(cautionTape);
+
+		var cautionTape2 = new THREE.Mesh(
+			new THREE.CylinderGeometry(1020,1020,100,50,0,0),
+			new THREE.MeshBasicMaterial({
+				color:0xffffff, 
+				map: THREE.ImageUtils.loadTexture("media/caution2.png"),
+				}));
+		cautionTape2.material.side = THREE.BackSide;
+		cautionTape2.position.z = -30;
+		cautionTape2.position.x = -200;
+		cautionTape2.rotation.x = 1;
+		scene.add(cautionTape2);
+
+		var cautionTape3 = new THREE.Mesh(
+			new THREE.CylinderGeometry(1040,1040,100,50,0,0),
+			new THREE.MeshBasicMaterial({
+				color:0xffffff, 
+				map: THREE.ImageUtils.loadTexture("media/caution2.png"),
+				}));
+		cautionTape3.material.side = THREE.BackSide;
+		cautionTape3.position.z = 300;
+		cautionTape3.position.x = 200;
+		cautionTape3.rotation.x = -.7;
+		scene.add(cautionTape3);
 
 		//create light
 		var light = new THREE.PointLight( 0xffffff, 10, 600);
@@ -347,6 +390,17 @@
 		function animate() {
 
 			t = (t + .05) % 4;
+
+			//info sign
+			infoSign.rotation.y += .01;
+			infoSign.position.y += .001;
+
+			//animate caution tape
+			cautionTape2.rotation.y += .01;
+			cautionTape.rotation.y += -.005;
+			cautionTape2.rotation.x += .01*clicky;
+			cautionTape3.rotation.y += -.015;
+			cautionTape3.rotation.x += mouseX*clicky*.00001;
 
 			//animate gif
 				sprite.material.map = spriteMap[Math.floor(t)];
@@ -455,7 +509,14 @@
 		//listen for click
 
 		document.body.addEventListener( 'click', function(){
-			clicky = (clicky + 1) % 6;
+			clicky = (clicky + 1) % 3;
+			if (clicky ===1){
+				renderer.setClearColor( 0xffcc00, 1 );
+			}else if(clicky === 2){
+				renderer.setClearColor( 0xccff00, 1 );
+			}else {
+				renderer.setClearColor( 0xffff00, 1 );
+			}
 		})
 		/*
 		Listen for double click event to enter full-screen VR mode
@@ -481,7 +542,10 @@
 	  			music.play();
 	  		} else{
 	  			music.pause();	
-	  		}
+	  		} 
+	  	} else if (event.keyCode === 73){ //i
+	  		infoSign.material.visible = !infoSign.material.visible;
+	  		infoSign.position.y = -.5;
 	  	}
 
 

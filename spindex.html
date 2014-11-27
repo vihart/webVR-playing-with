@@ -118,6 +118,15 @@
 		scene.add( sphere );
 
 
+		//create pizza john link
+		var pizzaText = THREE.ImageUtils.loadTexture( "media/pizzajohn.png" ); 
+		var pizzaMaterial = new THREE.MeshBasicMaterial( {map: pizzaText, wireframe: true, color: 0xffff00 }); 
+		var pizzaBox = new THREE.BoxGeometry(1,1,1);
+		var pizza = new THREE.Mesh( pizzaBox, pizzaMaterial );
+		pizza.position.z = -1;
+		pizza.position.x = .5;
+		pizza.position.y = -2;
+		scene.add( pizza );
 
 
 		//create windmill cube thing:
@@ -156,9 +165,15 @@
 
 		if(clicky==1){
 			materialX=material1;
+			pizza.material.wireframe = false;
 		}	else{
 			materialX=material2;
+			pizza.material.wireframe = true;
 		}	
+
+		pizza.rotation.y += .001 * (mouseX/400);
+		pizza.rotation.z += .003 * (mouseY/200);
+		pizza.rotation.x += .004 * (mouseX/200);
 
 		//clumsy spinnycube:
 
@@ -239,6 +254,8 @@
 			   window.location="http://vihart.github.io/webVR-playing-with/";
 			 } else if ((camera.rotation.x < 3) && (camera.rotation.y < -1)){
 				window.location= "http://vihart.github.io/webVR-playing-with/inside.html";
+			} else if ((camera.rotation.x > -2.5) && (camera.rotation.x < 0) && (camera.rotation.y > -1) && (camera.rotation.y < .2)){
+				window.location= "http://vihart.github.io/webVR-playing-with/pizzajohn.html";
 			} else {
 				window.location= "http://vihart.github.io/webVR-playing-with/undefined.html";
 			}

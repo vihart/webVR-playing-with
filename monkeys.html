@@ -142,7 +142,7 @@ void main()
     vColor = HopfColor(n);
 	
 	// take the final 3D position and project it onto the screen
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,1.5), 1.0 );
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
     
     // do fog
     if ( fogType == 1 )

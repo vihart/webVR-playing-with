@@ -37,9 +37,7 @@
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
-
-	<script src="js/loaders/OBJLoader.js"></script>  
+	<script src="js/VREffect.js"></script> 
 
 	<!--vertex shader for monkeys-->
 	<script type="x-shader/x-vertex" id="vertexShader">
@@ -185,25 +183,12 @@ void main()
 	        matArray[i] = materialBase.clone();
 	    }
 
-		// load the monkey mesh
-	    var manager = new THREE.LoadingManager();
-	    var loader = new THREE.OBJLoader(manager);
-	    loader.load('media/monkey.obj', function (object) {
-
-			// make 8 copies of the mesh and assign them a unique material out of the 8 we created previously
-	        for (var i = 0; i < 8; i++)
-	        {
-	            var newObject = object.clone();
-
-	            newObject.traverse(function (child) {
-	                if (child instanceof THREE.Mesh) {
-	                    child.material = matArray[i];
-	                }
-	            });
-
-	            scene.add(newObject);
-	        }
-	    });
+		 for (var i = 0; i < 8; i++){
+	    	scene.add(new THREE.Mesh(
+	    		new THREE.OctahedronGeometry(0.6),
+	    		matArray[i])
+	    	);
+	    }
 
 
 		var geometry = new THREE.BoxGeometry( 15, 15, 15 );

@@ -38,7 +38,54 @@
 	-->
 	<script src="js/VREffect.js"></script>
 
-	<script>
+	<script src="js/loaders/OBJLoader.js"></script> 
+
+	<!--vertex shader for monkeys-->
+	<script type="x-shader/x-vertex" id="vertexShader">
+// This shader moves vertices around
+
+// Quaternion Multiplication
+vec4 quatMult( in vec4 p, in vec4 q ) 
+{
+    vec4 r;    
+    r.w = + p.w*q.w - p.x*q.x - p.y*q.y - p.z*q.z;
+    r.x = + p.w*q.x + p.x*q.w + p.y*q.z - p.z*q.y;
+    r.y = + p.w*q.y - p.x*q.z + p.y*q.w + p.z*q.x;
+    r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;    
+    return r;
+}
+
+// input
+uniform float time; // global time in seconds
+uniform vec4 quatPerMonkey; // quaternion that moves this monkey into 4-space, set once per monkey
+
+void main() 
+{
+    // base position
+	// turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing To get onto the unit 3-sphere
+	vec4 p3sphere = normalize( vec4(position.zyx, 1.0) );
+	
+	// then rotate using this monkey's quaternion to place in 4D
+    vec4 p = quatMult( p3sphere, quatPerMonkey );
+    // also rotate everything over time
+    vec4 quatOverTime = normalize (vec4(1.0, sin(time), 1.0, cos(time)));
+    p = quatMult( p, quatOverTime );
+
+    // stereographic projection from 4D to 3D
+    vec3 pos3 = vec3( p.x / (1.0-p.w), -p.y / (1.0-p.w), p.z / (1.0-p.w) );
+	
+	// take the final 3D position and project it onto the screen
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(4.0,-2.0,5.0), 1.0 );
+}
+</script> 
+<script type="x-shader/x-vertex" id="fragmentShader">
+void main() 
+{
+	// just use the color we computed and assign it to this pixel
+    gl_FragColor = vec4(0.8,0.2,0.3, 1. );
+}
+</script>
+	<script type="text/javascript" id="mainCode">
 		/*
 		Setup three.js WebGL renderer
 		*/
@@ -70,7 +117,7 @@
 		var effect = new THREE.VREffect( renderer );
 		effect.setSize( window.innerWidth, window.innerHeight );
 
-
+		var start = Date.now();
 		/*
 		define interaction variables
 		*/
@@ -93,13 +140,77 @@
 		Create 3d objects
 		*/
 
+		//MONKEYS
+
+		var mesh;
+	var matArray = new Array(8);
+
+	// one quaternion per monkey
+	// these are just the 8 sides of the hypercube
+	var quatPerMonkeyArray = [
+	    new THREE.Vector4(1, 0, 0, 0),
+	    new THREE.Vector4(0, 1, 0, 0),
+	    new THREE.Vector4(0, 0, 1, 0),
+	    new THREE.Vector4(0, 0, 0, 1),
+
+	    new THREE.Vector4(-1, 0, 0, 0),
+	    new THREE.Vector4(0, -1, 0, 0),
+	    new THREE.Vector4(0, 0, -1, 0),
+	    new THREE.Vector4(0, 0, 0, -1)
+	];
+
+			// material for the monkeys is a shader
+    materialBase = new THREE.ShaderMaterial({
+		// these are the parameters for the shader
+        uniforms: {
+			// global time
+            time: {
+                type: "f",
+                value: 0.0
+            },
+			// quaternion that moves this monkey into 4-space, set once per monkey
+            quatPerMonkey: {
+                type: "v4",
+                value: new THREE.Vector4( 0, 0, 0, 0 )
+            }
+        },
+        vertexShader: document.getElementById('vertexShader').textContent,
+        fragmentShader: document.getElementById('fragmentShader').textContent
+    });
+    materialBase.side = THREE.FrontSide;
+			// one material per monkey, since they have a different quaternion
+	    for (var i = 0; i < 8; i++)
+	    {
+	        matArray[i] = materialBase.clone();
+	    }
+
+		// load the monkey mesh
+	    var manager = new THREE.LoadingManager();
+	    var loader = new THREE.OBJLoader(manager);
+	    loader.load('media/monkey.obj', function (object) {
+
+			// make 8 copies of the mesh and assign them a unique material out of the 8 we created previously
+	        for (var i = 0; i < 8; i++)
+	        {
+	            var newObject = object.clone();
+
+	            newObject.traverse(function (child) {
+	                if (child instanceof THREE.Mesh) {
+	                    child.material = matArray[i];
+	                }
+	            });
+
+	            scene.add(newObject);
+	        }
+	    });
+
 
 		var geometry = new THREE.BoxGeometry( 15, 15, 15 );
 		var spheregeom = new THREE.SphereGeometry( 10, 10, 4 );
 		var tetgeom = new THREE.TetrahedronGeometry(10);
 
 		var material = new THREE.MeshBasicMaterial({color:0xffff00, wireframe: true});
-		var cubematerial = new THREE.MeshBasicMaterial( {color: 0Xff0000, wireframe: true})
+		var cubematerial = new THREE.MeshBasicMaterial( {color: 0x440000, wireframe: true})
 		var tetred = new THREE.MeshBasicMaterial( {color: 0x880044} );
 		var tetblue = new THREE.MeshBasicMaterial( {color: 0xff3300} );
 		var tetgreen = new THREE.MeshBasicMaterial( {color: 0xff5077} );
@@ -187,18 +298,18 @@
 
 
 		//red spinny cubes
-		cube2.position.x = 20;
-		cube3.position.x = 20;
-		cube4.position.x = 20;
-		cube5.position.x = 20;
-		cube2.position.z = 15;
-		cube3.position.z = 15;
-		cube4.position.z = 15;
-		cube5.position.z = 15;
-		cube2.position.y = -7;
-		cube3.position.y = -7;
-		cube4.position.y = -7;
-		cube5.position.y = -7;
+		cube2.position.x = 10;
+		cube3.position.x = 10;
+		cube4.position.x = 10;
+		cube5.position.x = 10;
+		cube2.position.z = 25;
+		cube3.position.z = 25;
+		cube4.position.z = 25;
+		cube5.position.z = 25;
+		cube2.position.y = 30;
+		cube3.position.y = 30;
+		cube4.position.y = 30;
+		cube5.position.y = 30;
 		scene.add( cube2 );
 		scene.add( cube3 );
 		scene.add( cube4 );
@@ -271,6 +382,12 @@
 			/*
 			Apply rotations to meshes
 			*/
+				// send the time every frame so that we can rotate the monkeys over time
+		    for (var i = 0; i < 8; i++)
+		    {
+		        matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
+		        matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
+		    }
 
 			cube2.rotation.x += 0.005+ (clicky*(mouseX/8000));
 			cube2.rotation.z += 0.007;
@@ -352,7 +469,7 @@
 		if((camera.rotation.x > 1.2) && (camera.rotation.x < 1.8) && (camera.rotation.y > -0.4) && (camera.rotation.y < .4)){
 			   window.location="http://vihart.github.io/webVR-playing-with/spindex.html";
 			 } else if (((camera.rotation.x < -2.5)||(camera.rotation.x > 2.4)) && (camera.rotation.y < -.5) && (camera.rotation.y > -1.2)){
-				window.location= "http://vihart.github.io/webVR-playing-with/inside.html";
+				window.location= "http://vihart.github.io/webVR-playing-with/monkeys.html";
 			} else if ((camera.rotation.x > -.5) && (camera.rotation.x < 1) && (camera.rotation.y > .3) && (camera.rotation.y < .9)) {
 				window.location= "http://vihart.github.io/webVR-playing-with/compound.html";
 			} else if (((camera.rotation.x > 2.3) || (camera.rotation.x < -2.8)) && (camera.rotation.y > 0) && (camera.rotation.y < .7)){

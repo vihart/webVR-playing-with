@@ -79,8 +79,7 @@ void main()
 <script type="x-shader/x-vertex" id="fragmentShader">
 void main() 
 {
-	// just use the color we computed and assign it to this pixel
-    gl_FragColor = vec4(0.8,0.2,0.3, 1. );
+    gl_FragColor = vec4(0.8,0.1,0.3, 1. );
 }
 </script>
 	<script type="text/javascript" id="mainCode">
@@ -184,7 +183,7 @@ void main()
 
 	    for (var i = 0; i < 8; i++){
 	    	scene.add(new THREE.Mesh(
-	    		new THREE.OctahedronGeometry(0.6),
+	    		new THREE.OctahedronGeometry(1),
 	    		matArray[i])
 	    	);
 	    }

@@ -81,6 +81,20 @@ vec4 quatMult( in vec4 p, in vec4 q )
     return r;
 }
 
+// Project the vector p to the 3-space perpendicular to q
+vec4 projVecPerp( in vec4 p, in vec4 q )
+{
+    vec4 r;
+    float pDotq = p.w*q.w + p.x*q.x + p.y*q.y + p.z*q.z;
+    float qDotq = q.w*q.w + q.x*q.x + q.y*q.y + q.z*q.z;
+    float foo = pDotq / qDotq;
+    r.x = p.x - foo * q.x;
+    r.y = p.y - foo * q.y;
+    r.z = p.z - foo * q.z;
+    r.w = p.w - foo * q.w;
+    return r;
+}
+
 // input
 uniform float time; // global time in seconds
 uniform vec4 quatPerMonkey; // quaternion that moves this monkey into 4-space, set once per monkey
@@ -91,11 +105,7 @@ uniform vec2 mousePos;
 // returns a color based on the 4D normal
 vec3 HopfColor( in vec4 nBase )
 {    
-	// first rotate the 4D normal to a space aligned with the 120-cell
-    float cosx = -sqrt( 0.1*(5.+sqrt(5.)) );
-    float sinx = sqrt( 0.1*(5.-sqrt(5.)) );
-    mat4 mat = mat4( vec4(1.,0.,0.,0.),  vec4(0.,1.,0.,0.),  vec4(0.,0.,cosx,-sinx),  vec4(0.,0.,sinx,cosx) );
-    vec4 n = mat * nBase;
+    vec4 n = nBase;
 
 	// compute the color
     float y = n.x;
@@ -117,22 +127,24 @@ varying vec3 vColor; // this shader computes the color of each vertex
 void main() 
 {
     // base position
-	// turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing To get onto the unit 3-sphere
+	// turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing to get onto the unit 3-sphere
 	vec4 p3sphere = normalize( vec4(position.zyx, 1.0) );
 	
 	// then rotate using this monkey's quaternion to place in 4D
     vec4 p = quatMult( p3sphere, quatPerMonkey );
-    // also rotate everything over time
-    vec4 quatOverTime = normalize (vec4(clamp((mousePos.x/1000.0),0.0,1.0), sin(time), clamp((mousePos.y/1000.0),0.0,1.0), cos(time)));
-    p = quatMult( p, quatOverTime );
-    
+
 	// this is the normal to the point
 	// same concept as for the position, but we add a 0 as the w component
 	vec4 n3sphere = vec4( normal.zyx, 0.0);
-	
-	// then rotate using this monkey's quaternion to place in 4D
-    vec4 n = quatMult( n3sphere, quatPerMonkey );
-    // rotate over time
+    // above is normal on a cubical cell of the hypercube, below we get the corresponding 
+    // normal on the 3-sphere
+    n3sphere = projVecPerp( n3sphere, p3sphere ); 
+    // rotate the normal using this monkey's quaternion 
+	vec4 n = quatMult( n3sphere, quatPerMonkey );
+
+    // also rotate everything over time
+    vec4 quatOverTime = normalize (vec4(clamp((mousePos.x/1000.0),0.0,1.0), sin(time), clamp((mousePos.y/1000.0),0.0,1.0), cos(time)));
+    p = quatMult( p, quatOverTime );
     n = quatMult( n, quatOverTime );
 
     // stereographic projection from 4D to 3D

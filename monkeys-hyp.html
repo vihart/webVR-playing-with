@@ -86,6 +86,7 @@ uniform float time; // global time in seconds
 uniform vec4 quatPerMonkey; // quaternion that moves this monkey into 4-space, set once per monkey
 uniform int fogType; // which type of fog to use
 uniform vec2 mousePos;
+uniform mat4 boost;
 
 // Hopf fibration coloring
 // returns a color based on the 4D normal
@@ -124,7 +125,8 @@ float sinh(float x) {
 }
 
 vec4 projectToHyperboloid(vec4 v) {
-    float scaleFactor = sqrt(v.w * v.w - v.x * v.x - v.y * v.y - v.z * v.z) + 0.0000001;
+    float scaleFactor = sqrt(v.w * v.w * 5.0 - v.x * v.x - v.y * v.y - v.z * v.z);
+
     vec4 result;
     result.x = v.x / scaleFactor;
     result.y = v.y / scaleFactor;
@@ -139,11 +141,7 @@ void main()
     // base position
     // turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing To get onto the unit 3-sphere
     vec4 p = projectToHyperboloid( vec4(position.zyx, 1.0) );
-    
-    // then boost using this monkey's quaternion to place in 4D
-    // vec4 p = quatMult( p3sphere, quatPerMonkey );
-    
-    // also rotate everything over time
+    p = boost * p;
     
     // this is the normal to the point
     // same concept as for the position, but we add a 0 as the w component
@@ -214,6 +212,7 @@ var controls;
 var clicky = 0;
 var mouseX = 1;
 var mouseY = 1;
+var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 // one quaternion per monkey
 // these are just the 8 sides of the hypercube
@@ -285,6 +284,10 @@ function init()
             mousePos: {
                 type: "v2",
                 value: new THREE.Vector2(0,0)
+            },
+            boost: {
+                type: "m4",
+                value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
             }
         },
         vertexShader: document.getElementById('vertexShader').textContent,
@@ -333,91 +336,121 @@ function animate() {
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
         matArray[i].uniforms['fogType'].value = clicky;
         matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
+        matArray[i].uniforms['boost'].value = currentBoost;
     }
 
 
     controls.update();
 
-        effect.render(scene, camera);
+    effect.render(scene, camera);
 
     requestAnimationFrame(animate);
 }
 
-        //links
+//links
 
-        function link(){
+function link(){
 
-                window.location="http://vihart.github.io/webVR-playing-with/index.html";
-            
+        window.location="http://vihart.github.io/webVR-playing-with/index.html";
+    
 
+}
+
+//listen for mouse movement to get mouseX and mouseY
+
+document.body.addEventListener( 'mousemove', function (event) {
+    mouseY = event.clientY;
+    mouseX = event.clientX;
+});
+
+//listen for click
+
+document.body.addEventListener( 'click', function(){
+    clicky = (clicky + 1) % 4;
+})
+/*
+Listen for double click event to enter full-screen VR mode
+*/
+document.body.addEventListener( 'dblclick', function() {
+    effect.setFullScreen( true );
+});
+
+/*
+Listen for keyboard events 
+*/
+function onkey(event) {
+    event.preventDefault();
+
+    if (event.keyCode == 90) { // z
+        controls.zeroSensor(); //zero rotation
+    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
+        effect.setFullScreen(true) //fullscreen
+    } else if (event.keyCode == 32) {//space
+        link();
+    } else if (event.keyCode === 73){ //i
+        infoSign.material.visible = !infoSign.material.visible;
+    } else if (event.keyCode == 80) {//p
+        var music = document.querySelector('#music');
+        if (music.paused){
+            music.play();
+        } else{
+            music.pause();  
+        } 
+    }
+};
+window.addEventListener("keydown", onkey, true);
+var step = 0.05;
+
+var ud = new THREE.Matrix4().set(1,0,0,0,
+                        0,1,0,0,
+                        0,0,Math.cosh(step),Math.sinh(step),
+                        0,0,Math.sinh(step),Math.cosh(step));
+var lr = new THREE.Matrix4().set(1,0,0,0,
+                        0,Math.cosh(step),0,Math.sinh(step),
+                        0,0,1,0,
+                        0,Math.sinh(step),0,Math.cosh(step))
+var fb = new THREE.Matrix4().set(Math.cosh(step),0,0,Math.sinh(step),
+                        0,1,0,0,
+                        0,0,1,0,
+                        Math.sinh(step),0,0,Math.cosh(step));
+var udi = new THREE.Matrix4().getInverse(ud);
+var lri = new THREE.Matrix4().getInverse(lr);
+var fbi = new THREE.Matrix4().getInverse(fb);
+
+var infinitesimalBoosts = {
+    3: ud,
+    4: lr,
+    5: fb,
+    6: udi,
+    7: lri,
+    8: fbi
+};
+//hold down keys to do rotations and stuff
+function key(event, sign) {
+    var letter = String.fromCharCode(event.keyCode).toLowerCase();
+    var control = controls.manualControls[letter];
+    if (!control) {
+        if (infinitesimalBoosts[letter]) {
+            currentBoost.multiply(infinitesimalBoosts[letter]);
         }
+        return;
+    }
+    if (sign === 1 && control.active || sign === -1 && !control.active)
+      return;
+    control.active = (sign === 1);
+    controls.manualRotateRate[control.index] += sign * control.sign;
+}
+document.addEventListener('keydown', function(event) { key(event, 1); }, false);
+document.addEventListener('keyup', function(event) { key(event, -1); }, false);
 
-        //listen for mouse movement to get mouseX and mouseY
-
-        document.body.addEventListener( 'mousemove', function (event) {
-            mouseY = event.clientY;
-            mouseX = event.clientX;
-        });
-
-        //listen for click
-
-        document.body.addEventListener( 'click', function(){
-            clicky = (clicky + 1) % 4;
-        })
-        /*
-        Listen for double click event to enter full-screen VR mode
-        */
-        document.body.addEventListener( 'dblclick', function() {
-            effect.setFullScreen( true );
-        });
-        /*
-        Listen for keyboard events 
-        */
-        function onkey(event) {
-        event.preventDefault();
-
-        if (event.keyCode == 90) { // z
-            controls.zeroSensor(); //zero rotation
-        } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
-            effect.setFullScreen(true) //fullscreen
-        } else if (event.keyCode == 32) {//space
-            link();
-        }else if (event.keyCode === 73){ //i
-            infoSign.material.visible = !infoSign.material.visible;
-        }else if (event.keyCode == 80) {//p
-            var music = document.querySelector('#music');
-            if (music.paused){
-                music.play();
-            } else{
-                music.pause();  
-            } 
-        }
-
-
-      };
-      window.addEventListener("keydown", onkey, true);
-
-          //hold down keys to do rotations and stuff
-        function key(event, sign) {
-          var control = controls.manualControls[String.fromCharCode(event.keyCode).toLowerCase()];
-          if (!control)
-            return;
-          if (sign === 1 && control.active || sign === -1 && !control.active)
-            return;
-          control.active = (sign === 1);
-          controls.manualRotateRate[control.index] += sign * control.sign;
-        }
-        document.addEventListener('keydown', function(event) { key(event, 1); }, false);
-        document.addEventListener('keyup', function(event) { key(event, -1); }, false);
-
-        /*
-        Handle window resizes
-        */
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            effect.setSize( window.innerWidth, window.innerHeight );
-        }
-        window.addEventListener( 'resize', onWindowResize, false );
-    </script>
+/*
+Handle window resizes
+*/
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    effect.setSize( window.innerWidth, window.innerHeight );
+}
+window.addEventListener( 'resize', onWindowResize, false );
+</script>
 </html>

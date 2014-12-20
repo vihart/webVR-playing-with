@@ -387,18 +387,59 @@ var infinitesimalBoosts = {
     7: fb,
     8: fbi
 };
+
+THREE.Matrix4.prototype.add = function (m) {
+    this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
+};
+
+function translateByVector(v) {
+    var dx = v.x;
+    var dy = v.y;
+    var dz = v.z;
+    var len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    dx /= len;
+    dy /= len;
+    dz /= len;
+    var m = new THREE.Matrix4().set(
+         0, 0, 0, dx,
+         0, 0, 0, dy,
+         0, 0, 0, dz,
+        dx,dy,dz, 0);
+    var m2 = new THREE.Matrix4().copy(m).multiply(m);
+    var c1 = Math.sinh(len);
+    var c2 = Math.cosh(len) - 1;
+    m.multiplyScalar(c1);
+    m2.multiplyScalar(c2);
+    var result = new THREE.Matrix4().identity();
+    result.add(m);
+    result.add(m2);
+    return result;
+}
+
+function getForwardVector() {
+    return new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
+}
+
 //hold down keys to do rotations and stuff
 function key(event, sign) {
     var letter = String.fromCharCode(event.keyCode).toLowerCase();
     var control = controls.manualControls[letter];
     if (!control) {
         if (infinitesimalBoosts[letter]) {
-            currentBoost.multiply(infinitesimalBoosts[letter]);
+            var m = new THREE.Matrix4().copy(infinitesimalBoosts[letter]);
+            m.multiply(currentBoost);
+            currentBoost.copy(m);
+        } else if (event.keyCode === 38) {
+            var fwd = getForwardVector();
+            fwd.multiplyScalar(step);
+            var m = translateByVector(fwd);
+            m.multiply(currentBoost);
+            currentBoost.copy(m);
         }
         return;
     }
     if (sign === 1 && control.active || sign === -1 && !control.active)
-      return;
+        return;
     control.active = (sign === 1);
     controls.manualRotateRate[control.index] += sign * control.sign;
 }

@@ -182,7 +182,7 @@ var camera;
 var scene;
 var renderer;
 var mesh;
-var matArray = new Array(13);
+var matArray = new Array(169);
 var effect;
 var controls;
 var clicky = 0;
@@ -258,7 +258,7 @@ function init()
     materialBase.side = THREE.FrontSide;
 
     // one material per monkey, since they have a different quaternion
-    for (var i = 0; i < 13; i++)
+    for (var i = 0; i < 169; i++)
     {
         matArray[i] = materialBase.clone();
     }
@@ -269,7 +269,7 @@ function init()
     loader.load('media/spiky_dodec.obj', function (object) {
 
         // make 8 copies of the mesh and assign them a unique material out of the 8 we created previously
-        for (var i = 0; i < 13; i++)
+        for (var i = 0; i < 169; i++)
         {
             var newObject = object.clone();
 
@@ -292,9 +292,9 @@ function animate() {
 
     
     // send the time every frame so that we can rotate the monkeys over time
-    for (var i = 0; i < 13; i++)
+    for (var i = 0; i < 169; i++)
     {
-        matArray[i].uniforms['translation'].value = dodec[i];
+        matArray[i].uniforms['translation'].value = new THREE.Matrix4().copy(dodec[(i/13)|0]).multiply(dodec[i%13]);
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
         matArray[i].uniforms['fogType'].value = clicky;
         matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);

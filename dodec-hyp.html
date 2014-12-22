@@ -2,28 +2,21 @@
 
 <html lang="en">
     <head>
-        <title>Quaternion Monkeys</title>
+        <title>Mirrored Dodecahedron Hyperbolic Space</title>
         
         <!--
-        4D Monkeys
+        Hyperbolic Space prototype with webVR support. WASD + Arrows to move.
 
-        interactive webVR version (by Marc ten Bosch and Vi Hart) of a 4d monkey sculpture (by Henry Segerman and Will Segerman) inspired by work on 4 dimensional symmetry groups (by Henry Segerman and Vi Hart) inspired by work on 4d graphics (by Marc ten Bosch) and 3d modeling (by Will Segerman).
-
-        http://www.marctenbosch.com
+        Initial version developed at a hyperbolic webVR "hackalot" with Vi Hart, Mike Stay, Henry Segerman, Andrea Hawksley, and Andrew Lutomirski, with help from Marc ten Bosch's 4d graphics shader, Jeff Week's Curved Spaces, Mozilla's webVR framework for THREEjs.
+        
         http://vihart.com
         http://www.segerman.org/
-        http://www.willsegerman.com/
-
-
-        It has oculus support for webVR browsers (thanks Mozilla!)
-        
+        http://reperiendi.wordpress.com/
+        https://github.com/hawksley
+        http://www.geometrygames.org/CurvedSpaces/
+        http://www.marctenbosch.com
         https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate
 
-        And WASD + E/Q navigation support both in and out of VR (thanks, Andrea Hawksley!)
-        Enter to go into VR mode, S for sound,
-        Space to click links based on camera rotation
-        
-        https://github.com/hawksley
 
         -->
 
@@ -416,8 +409,14 @@ function translateByVector(v) {
     return result;
 }
 
-function getForwardVector() {
+function getFwdVector() {
     return new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
+}
+function getRightVector() {
+    return new THREE.Vector3(-1,0,0).applyQuaternion(camera.quaternion);
+}
+function getUpVector() {
+    return new THREE.Vector3(0,-1,0).applyQuaternion(camera.quaternion);
 }
 
 //hold down keys to do rotations and stuff
@@ -430,9 +429,27 @@ function key(event, sign) {
             m.multiply(currentBoost);
             currentBoost.copy(m);
         } else if (event.keyCode === 38) {
-            var fwd = getForwardVector();
-            fwd.multiplyScalar(step);
-            var m = translateByVector(fwd);
+            var offset = getFwdVector();
+            offset.multiplyScalar(step);
+            var m = translateByVector(offset);
+            m.multiply(currentBoost);
+            currentBoost.copy(m);
+        } else if (event.keyCode === 40) {
+            var offset = getFwdVector();
+            offset.multiplyScalar(-step);
+            var m = translateByVector(offset);
+            m.multiply(currentBoost);
+            currentBoost.copy(m);
+        } else if (event.keyCode === 37) {
+            var offset = getRightVector();
+            offset.multiplyScalar(-step);
+            var m = translateByVector(offset);
+            m.multiply(currentBoost);
+            currentBoost.copy(m);
+        } else if (event.keyCode === 39) {
+            var offset = getRightVector();
+            offset.multiplyScalar(step);
+            var m = translateByVector(offset);
             m.multiply(currentBoost);
             currentBoost.copy(m);
         }

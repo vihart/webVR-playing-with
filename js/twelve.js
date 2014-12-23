@@ -3,6 +3,7 @@ var scene;
 var renderer;
 var mesh;
 var bigMatArray = new Array(1728); //12 times 144, one for each gift
+var infoSprite = new THREE.Mesh();
 var effect;
 var controls;
 var music = document.querySelector('#music');
@@ -75,14 +76,6 @@ function init() {
         type: "m4",
         value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
       },
-      fogType: {
-        type: "i",
-        value: 0
-      },
-      mousePos: {
-        type: "v2",
-        value: new THREE.Vector2(0,0)
-      },
       boost: {
         type: "m4",
         value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
@@ -91,6 +84,7 @@ function init() {
     vertexShader: document.getElementById('vertexShader').textContent,
     fragmentShader: document.getElementById('fragmentShader').textContent
   });
+  
   materialBase.side = THREE.DoubleSide;
 
   // one material per object, since they have a different positions
@@ -209,16 +203,33 @@ function init() {
     }
   });
 
+  //create info overlay
+  var infoText = THREE.ImageUtils.loadTexture( "media/twelve-ui.png" ); 
+  var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, wireframe: false, color: 0x777777 }); 
+  var infoBox = new THREE.BoxGeometry(2,1,1);
+  infoSprite = new THREE.Mesh( infoBox, infoMaterial );
+  infoSprite.position.z = -2;
+  infoSprite.position.x = -.5;
+  infoSprite.position.y = -1;
+  infoSprite.rotation.x = -.3;
+  scene.add( infoSprite );
+
   effect.render(scene, camera);
 }
 
+
 function animate() {
+
   var currentPhrase = phraseOrder[0];  //update in the following for loop
   for (var n = phraseTimes.length - 1; n >= 0; n--) {
     if ((music.currentTime*140/60) > phraseTimes[n]) {
       currentPhrase = phraseOrder[n+1];
       break;
     }
+  }
+
+  if (currentPhrase > 0){
+  infoSprite.visible = false;
   }
 
   for (var i = 0; i < 1728; i++) {

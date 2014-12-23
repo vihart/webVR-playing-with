@@ -102,42 +102,6 @@
       // p.w /= p.w;
 
       gl_Position = projectionMatrix * modelViewMatrix * p; //vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
-
-      // do fog
-      if ( fogType == 1 )
-      {
-        // ramp fog
-        // compute distance to camera from 0 to 1
-        float zz = gl_Position.z / gl_Position.w;
-        // go from 1 to 0 instead (0 is furthest and 1 is where the camera is )
-        // ( note that the computed distance is not linear )
-        float fogScale = 1. - zz;
-        // anything closer than 0.1 gets regular color
-        if ( fogScale > 0.1 )
-        fogScale = 1.0;
-        // everything else ramps from 0 to 1
-        else
-        fogScale = fogScale / 0.1;
-        // mutliply color by this value to make it go to black
-        vColor *= fogScale;
-      }
-      else if ( fogType == 2 )
-      {
-        // near fog
-        float zz = gl_Position.z / gl_Position.w;
-        // go from 1 to 0, and make the curve less straight
-        float fogScale = pow( 1. - zz, 0.7 );
-        // everything closer than 0.2 gets regular color
-        // but everything else stays the same, creating a discontinuity
-        if ( fogScale > 0.2 ) fogScale = 1.0;
-        // mutliply color by this value to make it go to black
-        vColor *= fogScale;
-      } else if (fogType == 3 ){
-        vColor.r *= mousePos.x/1000.;
-        vColor.g *= mousePos.y/1000.;
-        vColor.b *= abs(1. - (mousePos.x + mousePos.y)/1000.);
-      }
-
     }
   </script>
 

@@ -30,32 +30,6 @@ function onkey(event) {
 
 window.addEventListener("keydown", onkey, true);
 
-var step = 0.05;
-var ud = new THREE.Matrix4().set(1,0,0,0,
-  0,1,0,0,
-  0,0,Math.cosh(step),Math.sinh(step),
-  0,0,Math.sinh(step),Math.cosh(step));
-var lr = new THREE.Matrix4().set(1,0,0,0,
-  0,Math.cosh(step),0,Math.sinh(step),
-  0,0,1,0,
-  0,Math.sinh(step),0,Math.cosh(step));
-var fb = new THREE.Matrix4().set(Math.cosh(step),0,0,Math.sinh(step),
-  0,1,0,0,
-  0,0,1,0,
-  Math.sinh(step),0,0,Math.cosh(step));
-var udi = new THREE.Matrix4().getInverse(ud);
-var lri = new THREE.Matrix4().getInverse(lr);
-var fbi = new THREE.Matrix4().getInverse(fb);
-
-var infinitesimalBoosts = {
-  3: ud,
-  4: udi,
-  5: lr,
-  6: lri,
-  7: fb,
-  8: fbi
-};
-
 THREE.Matrix4.prototype.add = function (m) {
   this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
 };
@@ -84,6 +58,27 @@ function translateByVector(v) {
   return result;
 }
 
+function parabolicBy2DVector(v) {  
+  var dx = v.x; /// first make parabolic fixing point at infinity in pos z direction
+  var dy = v.y;
+  var m = new THREE.Matrix4().set(
+    0, 0, -dx, dx,
+    0, 0, -dy, dy,
+    dx, dy, 0, 0,
+    dx, dy, 0, 0);
+  var m2 = new THREE.Matrix4().copy(m).multiply(m);
+  m2.multiplyScalar(0.5);
+  var result = new THREE.Matrix4().identity();
+  result.add(m);
+  result.add(m2);
+  //now conjugate to get based on camera orientation
+  var cameraM = new THREE.Matrix4();
+  cameraM.makeRotationFromQuaternion(camera.quaternion);
+  var cameraMinv = new THREE.Matrix4().getInverse(cameraM);
+
+  return cameraM.multiply(result).multiply(cameraMinv);
+}
+
 function getFwdVector() {
   return new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
 }
@@ -96,7 +91,6 @@ function getUpVector() {
 
 //hold down keys to do rotations and stuff
 function key(event, sign) {
-  // var letter = event.keyCode; // String.fromCharCode(event.keyCode).toLowerCase();
   var control = controls.manualControls[event.keyCode];
 
   if (sign === 1 && control.active || sign === -1 && !control.active) {
@@ -107,8 +101,11 @@ function key(event, sign) {
   if (control.index <= 2){
     controls.manualRotateRate[control.index] += sign * control.sign;
   }
-  else {
+  else if (control.index <= 5) {
     controls.manualMoveRate[control.index - 3] += sign * control.sign;
+  }
+  else {
+    controls.manualParabolicRate[control.index - 6] += sign * control.sign;
   }
 }
 

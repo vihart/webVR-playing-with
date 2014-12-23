@@ -1,6 +1,6 @@
 /**
  * @author dmarcos / https://github.com/dmarcos
- with additions by https://github.com/hawksley
+ with additions by https://github.com/hawksley and https://github.com/henryseg
  */
 
 THREE.VRControls = function ( camera, done ) {
@@ -53,11 +53,19 @@ THREE.VRControls = function ( camera, done ) {
       38 : {index: 3, sign: 1, active: 0},  // up
       40 : {index: 3, sign: -1, active: 0}, // down
       37 : {index: 4, sign: -1, active: 0}, // left
-      39 : {index: 4, sign: 1, active: 0}   // right
+      39 : {index: 4, sign: 1, active: 0},   // right
+      222 : {index: 5, sign: 1, active: 0}, // single quote
+      191 : {index: 5, sign: -1, active: 0},   // fwd slash
+      73 : {index: 7, sign: -1, active: 0},   // i
+      75 : {index: 7, sign: 1, active: 0},   // k
+      74 : {index: 6, sign: 1, active: 0},   // j
+      76 : {index: 6, sign: -1, active: 0}   // l
+
     };
 
 	this.manualRotateRate = new Float32Array([0.0, 0.0, 0.0]);
 	this.manualMoveRate = new Float32Array([0.0, 0.0, 0.0]);
+	this.manualParabolicRate = new Float32Array([0.0, 0.0]);
 	this.updateTime = 0;
 
 	this.update = function() {
@@ -72,15 +80,27 @@ THREE.VRControls = function ( camera, done ) {
 		var interval = (newTime - oldTime) * 0.001;
 
 		///do translation 
-
-		  var m, offset;
-		  if (this.manualMoveRate[0] != 0 || this.manualMoveRate[1] != 0 || this.manualMoveRate[2] != 0){
-		      offset = getFwdVector().multiplyScalar(0.2 * interval * this.manualMoveRate[0]).add(
-		      			getRightVector().multiplyScalar(0.2 * interval * this.manualMoveRate[1]));
-		      m = translateByVector(offset);
-		      m.multiply(currentBoost);
-		      currentBoost.copy(m);
+		var m, offset;
+		if (this.manualMoveRate[0] != 0 || this.manualMoveRate[1] != 0 || this.manualMoveRate[2] != 0){
+		    offset = getFwdVector().multiplyScalar(0.2 * interval * this.manualMoveRate[0]).add(
+		      		   getRightVector().multiplyScalar(0.2 * interval * this.manualMoveRate[1])).add(
+		      		   getUpVector().multiplyScalar(0.2 * interval * this.manualMoveRate[2]));
+		    m = translateByVector(offset);
+		    m.multiply(currentBoost);
+		    currentBoost.copy(m);
 		    }
+
+		//do parabolic motion
+		var m2, parabolicVector;
+		if (this.manualParabolicRate[0] != 0 || this.manualParabolicRate[1] != 0){
+			parabolicVector = new THREE.Vector2(0.2 * interval * this.manualParabolicRate[0], 
+												0.2 * interval * this.manualParabolicRate[1]);
+		    m2 = parabolicBy2DVector(parabolicVector);
+		    m2.multiply(currentBoost);
+		    currentBoost.copy(m2);
+		    }
+
+
 
 	  var update = quat.fromValues(this.manualRotateRate[0] * 0.2 * interval,
 	                               this.manualRotateRate[1] * 0.2 * interval,

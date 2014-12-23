@@ -228,7 +228,7 @@ function animate() {
     }
   }
 
-  if (currentPhrase > 0){
+  if (music.currentTime > 20){
   infoSprite.visible = false;
   }
 

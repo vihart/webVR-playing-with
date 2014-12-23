@@ -11,7 +11,7 @@ var clicky = 0;
 var mouseX = 1;
 var mouseY = 1;
 var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
-var phraseOrder = [0,2,1,
+var phraseOrder = [0,2,1,  // phrases in the song are ordered like this
   13,3,2,1,
   14,4,3,2,1,
   15,5,4,3,2,1,

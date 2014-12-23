@@ -100,6 +100,10 @@ THREE.VRControls = function ( camera, done ) {
 		    currentBoost.copy(m2);
 		    }
 
+		//run to avoid error accumulation
+		fastGramSchmidt( currentBoost );
+ 
+
 
 
 	  var update = quat.fromValues(this.manualRotateRate[0] * 0.2 * interval,
@@ -179,22 +183,7 @@ function playPause() {
   }
 }
 
-/*
-Listen for keyboard events
-*/
-function onkey(event) {
-  event.preventDefault();
-
-  if (event.keyCode == 90) { // z
-    controls.zeroSensor(); //zero rotation
-  } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
-    effect.setFullScreen(true); //fullscreen
-  } else if (event.keyCode == 32 || event.keyCode == 80) {//space or p
-    playPause();
-  }
-}
-
-window.addEventListener("keydown", onkey, true);
+//hyperbolic matrix functions
 
 THREE.Matrix4.prototype.add = function (m) {
   this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
@@ -254,6 +243,94 @@ function getRightVector() {
 function getUpVector() {
   return new THREE.Vector3(0,-1,0).applyQuaternion(camera.quaternion);
 }
+
+// fastGramSchmidt from Jeff Week's CurvedSpaces. Causes some wobble when far from the origin...
+
+function fastGramSchmidt( mat )
+{
+	//	Numerical errors can accumulate and force aMatrix "out of round",
+	//	in the sense that its rows are no longer orthonormal.
+	//	This effect is small in spherical and flat spaces,
+	//	but can be significant in hyperbolic spaces, especially
+	//	if the camera travels far from the origin.
+
+	//	The Gram-Schmidt process consists of rescaling each row to restore
+	//	unit length, and subtracting small multiples of one row from another
+	//	to restore orthogonality.  Here we carry out a first-order approximation
+	//	to the Gram-Schmidt process.  That is, we normalize each row
+	//	to unit length, but then assume that the subsequent orthogonalization step
+	//	doesn't spoil the unit length.  This assumption will be well satisfied
+	//	because small first order changes orthogonal to a given vector affect
+	//	its length only to second order.
+
+	var m = mat.elements;
+	var spaceLike = new Float32Array([1,1,1,-1]);
+	var timeLike = new Float32Array([-1,-1,-1,1]);
+
+	var rows = new Array();
+	//	Normalize each row to unit length.
+	for (var i = 0; i < 4; i++)
+	{
+		var metric; 
+		if (i==3){
+			metric = timeLike;
+		}
+		else {
+			metric = spaceLike;
+		}
+
+		var innerProduct = 0.0;
+		for (var j = 0; j < 4; j++)
+			innerProduct += metric[j] * m[4*i + j] * m[4*i + j];
+
+		var factor = 1.0 / Math.sqrt(innerProduct);
+		for (var j = 0; j < 4; j++)
+			m[4*i + j] *= factor;
+	}
+
+	//	Make the rows orthogonal.
+	for (i = 4; i-- > 0; )	//	leaves the last row untouched
+	{
+		var metric; 
+		if (i==3){
+			metric = timeLike;
+		}
+		else {
+			metric = spaceLike;
+		}
+
+		for (var j = i; j-- > 0; )
+		{
+			var innerProduct = 0.0;
+			for (var k = 0; k < 4; k++)
+				innerProduct += metric[k] * m[4*i + k] * m[4*j + k];
+
+			for (var k = 0; k < 4; k++)
+				m[4*j + k] -= innerProduct * m[4*i + k];
+		}
+	}
+	mat.elements = m;
+}
+
+
+
+
+/*
+Listen for keyboard events
+*/
+function onkey(event) {
+  event.preventDefault();
+
+  if (event.keyCode == 90) { // z
+    controls.zeroSensor(); //zero rotation
+  } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
+    effect.setFullScreen(true); //fullscreen
+  } else if (event.keyCode == 32 || event.keyCode == 80) {//space or p
+    playPause();
+  }
+}
+
+window.addEventListener("keydown", onkey, true);
 
 //hold down keys to do rotations and stuff
 function key(event, sign) {

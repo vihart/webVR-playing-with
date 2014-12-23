@@ -1,6 +1,7 @@
 /**
+/**
  * @author dmarcos / https://github.com/dmarcos
- with additions by https://github.com/hawksley and https://github.com/henryseg
+ with additions by https://github.com/hawksley
  */
 
 THREE.VRControls = function ( camera, done ) {
@@ -44,32 +45,18 @@ THREE.VRControls = function ( camera, done ) {
 	this.manualRotation = quat.create();
 
 	this.manualControls = {
-      65 : {index: 1, sign: 1, active: 0},  // a
-      68 : {index: 1, sign: -1, active: 0}, // d
-      87 : {index: 0, sign: 1, active: 0},  // w
-      83 : {index: 0, sign: -1, active: 0}, // s
-      81 : {index: 2, sign: -1, active: 0}, // q
-      69 : {index: 2, sign: 1, active: 0},  // e
-      38 : {index: 3, sign: 1, active: 0},  // up
-      40 : {index: 3, sign: -1, active: 0}, // down
-      37 : {index: 4, sign: -1, active: 0}, // left
-      39 : {index: 4, sign: 1, active: 0},   // right
-      222 : {index: 5, sign: 1, active: 0}, // single quote
-      191 : {index: 5, sign: -1, active: 0},   // fwd slash
-      73 : {index: 7, sign: -1, active: 0},   // i
-      75 : {index: 7, sign: 1, active: 0},   // k
-      74 : {index: 6, sign: 1, active: 0},   // j
-      76 : {index: 6, sign: -1, active: 0}   // l
-
+      'a' : {index: 1, sign: 1, active: 0},
+      'd' : {index: 1, sign: -1, active: 0},
+      'w' : {index: 0, sign: 1, active: 0},
+      's' : {index: 0, sign: -1, active: 0},
+      'q' : {index: 2, sign: -1, active: 0},
+      'e' : {index: 2, sign: 1, active: 0},
     };
 
-	this.manualRotateRate = new Float32Array([0.0, 0.0, 0.0]);
-	this.manualMoveRate = new Float32Array([0.0, 0.0, 0.0]);
-	this.manualParabolicRate = new Float32Array([0.0, 0.0]);
+	this.manualRotateRate = new Float32Array([0, 0, 0]);
 	this.updateTime = 0;
 
 	this.update = function() {
-
 		var camera = this._camera;
 		var vrState = this.getVRState();
 		var manualRotation = this.manualRotation;
@@ -77,34 +64,10 @@ THREE.VRControls = function ( camera, done ) {
 		var newTime = performance.now();
 		this.updateTime = newTime;
 
-		var interval = (newTime - oldTime) * 0.001;
-
-		///do translation 
-		var m, offset;
-		if (this.manualMoveRate[0] != 0 || this.manualMoveRate[1] != 0 || this.manualMoveRate[2] != 0){
-		    offset = getFwdVector().multiplyScalar(0.2 * interval * this.manualMoveRate[0]).add(
-		      		   getRightVector().multiplyScalar(0.2 * interval * this.manualMoveRate[1])).add(
-		      		   getUpVector().multiplyScalar(0.2 * interval * this.manualMoveRate[2]));
-		    m = translateByVector(offset);
-		    m.multiply(currentBoost);
-		    currentBoost.copy(m);
-		    }
-
-		//do parabolic motion
-		var m2, parabolicVector;
-		if (this.manualParabolicRate[0] != 0 || this.manualParabolicRate[1] != 0){
-			parabolicVector = new THREE.Vector2(0.2 * interval * this.manualParabolicRate[0], 
-												0.2 * interval * this.manualParabolicRate[1]);
-		    m2 = parabolicBy2DVector(parabolicVector);
-		    m2.multiply(currentBoost);
-		    currentBoost.copy(m2);
-		    }
-
-
-
-	  var update = quat.fromValues(this.manualRotateRate[0] * 0.2 * interval,
-	                               this.manualRotateRate[1] * 0.2 * interval,
-	                               this.manualRotateRate[2] * 0.2 * interval, 1.0);
+	  var interval = (newTime - oldTime) * 0.001;
+	  var update = quat.fromValues(this.manualRotateRate[0] * interval,
+	                               this.manualRotateRate[1] * interval,
+	                               this.manualRotateRate[2] * interval, 1.0);
 	  quat.normalize(update, update);
 	  quat.multiply(manualRotation, manualRotation, update);
 
@@ -128,7 +91,6 @@ THREE.VRControls = function ( camera, done ) {
 
 			camera.quaternion.fromArray( totalRotation );
 		}
-
 	};
 
 	this.zeroSensor = function() {

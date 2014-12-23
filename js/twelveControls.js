@@ -96,49 +96,20 @@ function getUpVector() {
 
 //hold down keys to do rotations and stuff
 function key(event, sign) {
-  var letter = String.fromCharCode(event.keyCode).toLowerCase();
-  var control = controls.manualControls[letter];
-  var m, offset;
-  if (!control) {
-    if (infinitesimalBoosts[letter]) {
-      m = new THREE.Matrix4().copy(infinitesimalBoosts[letter]);
-      m.multiply(currentBoost);
-      currentBoost.copy(m);
-    } else if (event.keyCode === 38) {
-      offset = getFwdVector();
-      offset.multiplyScalar(step);
-      m = translateByVector(offset);
-      m.multiply(currentBoost);
-      currentBoost.copy(m);
-    } else if (event.keyCode === 40) {
-      offset = getFwdVector();
-      offset.multiplyScalar(-step);
-      m = translateByVector(offset);
-      m.multiply(currentBoost);
-      currentBoost.copy(m);
-    } else if (event.keyCode === 37) {
-      offset = getRightVector();
-      offset.multiplyScalar(-step);
-      m = translateByVector(offset);
-      m.multiply(currentBoost);
-      currentBoost.copy(m);
-    } else if (event.keyCode === 39) {
-      offset = getRightVector();
-      offset.multiplyScalar(step);
-      m = translateByVector(offset);
-      m.multiply(currentBoost);
-      currentBoost.copy(m);
-    }
-
-    return;
-  }
+  // var letter = event.keyCode; // String.fromCharCode(event.keyCode).toLowerCase();
+  var control = controls.manualControls[event.keyCode];
 
   if (sign === 1 && control.active || sign === -1 && !control.active) {
     return;
   }
 
   control.active = (sign === 1);
-  controls.manualRotateRate[control.index] += sign * control.sign;
+  if (control.index <= 2){
+    controls.manualRotateRate[control.index] += sign * control.sign;
+  }
+  else {
+    controls.manualMoveRate[control.index - 3] += sign * control.sign;
+  }
 }
 
 document.addEventListener('keydown', function(event) { key(event, 1); }, false);

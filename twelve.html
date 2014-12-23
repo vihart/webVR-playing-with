@@ -3,13 +3,14 @@
 <html lang="en">
     <head>
         <title>Hyperbolic 12 Tones of Christmas</title>
-        
+
         <!--
         Hyperbolic space, 12 tones of christmas, with webVR support. WASD + Arrows to move, space or p to play/pause.
 
         A websperience by Vi Hart, Andrea Hawksley, and Henry Segerman, using the hyperbolic space prototype developed at a hyperbolic webVR "hackalot" with Vi Hart, Mike Stay, Henry Segerman, Andrea Hawksley, and Andrew Lutomirski, with help from Marc ten Bosch's 4d graphics shader, Jeff Week's Curved Spaces, Mozilla's webVR framework for THREEjs, etc.
-        
+
         http://vihart.com
+        http://andreahawksley.com
         http://www.segerman.org/
         http://reperiendi.wordpress.com/
         https://github.com/hawksley
@@ -37,9 +38,118 @@
     </head>
 
     <body>
-    <audio id='music' src="media/12tonesofchristmas.mp3" /> 
-
+      <audio id='music' src="media/12tonesofchristmas.mp3" autoplay />
     </body>
+
+    <script type="x-shader/x-vertex" id="vertexShader">
+    // This shader moves vertices around
+
+    // input
+    uniform float time; // global time in seconds
+    uniform mat4 translation; // dodecahedral
+    uniform int fogType; // which type of fog to use
+    uniform vec2 mousePos;
+    uniform mat4 boost;
+
+
+    vec3 ChooseColor( in vec3 nBase )
+    {
+
+      float r = nBase.x;
+      float g = nBase.y;
+      float b = nBase.z;
+      float sin_a = 0.973255;
+      float cos_a = 0.229727;
+      float rot_r = cos_a * r + sin_a * g;
+      float rot_g = -sin_a * r + cos_a * g;
+
+      return vec3(-rot_r*0.5 + 0.5,-rot_g*0.5 + 0.5,-b*0.5 + 0.5);
+    }
+
+    // output
+    varying vec3 vColor; // this shader computes the color of each vertex
+
+    vec4 projectToHyperboloid(vec4 v) {
+      float scaleFactor = sqrt(v.w * v.w - v.x * v.x - v.y * v.y - v.z * v.z);
+
+      vec4 result;
+      result.x = v.x / scaleFactor;
+      result.y = v.y / scaleFactor;
+      result.z = v.z / scaleFactor;
+      result.w = v.w / scaleFactor;
+      return result;
+    }
+
+    // this gets called once per vertex of the monkey mesh (and 8 times since there are 8 monkeys)
+    void main()
+    {
+      // base position
+      // turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing To get onto the unit 3-sphere
+      vec4 p = projectToHyperboloid( vec4(position.zyx / 1.3, 1.0) );
+      p = boost * translation * p;
+
+      // this is the normal to the point
+      // same concept as for the position, but we add a 0 as the w component
+      // vec4 n3sphere = vec4( normal.zyx, 0.0);
+
+      // compute the color from the normal
+      vColor = ChooseColor(-normal.zyx);
+
+      // take the final 3D position and project it onto the screen
+      // p.x /= p.w;
+      // p.y /= p.w;
+      // p.z /= p.w;
+      // p.w /= p.w;
+
+      gl_Position = projectionMatrix * modelViewMatrix * p; //vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
+
+      // do fog
+      if ( fogType == 1 )
+      {
+        // ramp fog
+        // compute distance to camera from 0 to 1
+        float zz = gl_Position.z / gl_Position.w;
+        // go from 1 to 0 instead (0 is furthest and 1 is where the camera is )
+        // ( note that the computed distance is not linear )
+        float fogScale = 1. - zz;
+        // anything closer than 0.1 gets regular color
+        if ( fogScale > 0.1 )
+        fogScale = 1.0;
+        // everything else ramps from 0 to 1
+        else
+        fogScale = fogScale / 0.1;
+        // mutliply color by this value to make it go to black
+        vColor *= fogScale;
+      }
+      else if ( fogType == 2 )
+      {
+        // near fog
+        float zz = gl_Position.z / gl_Position.w;
+        // go from 1 to 0, and make the curve less straight
+        float fogScale = pow( 1. - zz, 0.7 );
+        // everything closer than 0.2 gets regular color
+        // but everything else stays the same, creating a discontinuity
+        if ( fogScale > 0.2 ) fogScale = 1.0;
+        // mutliply color by this value to make it go to black
+        vColor *= fogScale;
+      } else if (fogType == 3 ){
+        vColor.r *= mousePos.x/1000.;
+        vColor.g *= mousePos.y/1000.;
+        vColor.b *= abs(1. - (mousePos.x + mousePos.y)/1000.);
+      }
+
+    }
+  </script>
+
+  <script type="x-shader/x-vertex" id="fragmentShader">
+    // this gets called once per pixel
+    varying vec3 vColor;
+    void main()
+    {
+      // just use the color we computed and assign it to this pixel
+      gl_FragColor = vec4( vColor, 1. );
+    }
+  </script>
 
     <!--
     three.js 3d library
@@ -61,632 +171,9 @@
     -->
     <script src="js/VREffect.js"></script>
 
-    <script src="js/loaders/OBJLoader.js"></script>  
-    <script src="js/dodec_no_id.js"></script>  
- 
-<script type="x-shader/x-vertex" id="vertexShader">
-// This shader moves vertices around
+    <script src="js/loaders/OBJLoader.js"></script>
+    <script src="js/dodec_no_id.js"></script>
 
-// input
-uniform float time; // global time in seconds
-uniform mat4 translation; // dodecahedral
-uniform int fogType; // which type of fog to use
-uniform vec2 mousePos;
-uniform mat4 boost;
-
-
-vec3 ChooseColor( in vec3 nBase )
-{    
-
-    float r = nBase.x;
-    float g = nBase.y;
-    float b = nBase.z;
-    float sin_a = 0.973255;
-    float cos_a = 0.229727;
-    float rot_r = cos_a * r + sin_a * g;
-    float rot_g = -sin_a * r + cos_a * g;
-
-    return vec3(-rot_r*0.5 + 0.5,-rot_g*0.5 + 0.5,-b*0.5 + 0.5);
-}
-
-// output
-varying vec3 vColor; // this shader computes the color of each vertex
-
-vec4 projectToHyperboloid(vec4 v) {
-    float scaleFactor = sqrt(v.w * v.w - v.x * v.x - v.y * v.y - v.z * v.z);
-
-    vec4 result;
-    result.x = v.x / scaleFactor;
-    result.y = v.y / scaleFactor;
-    result.z = v.z / scaleFactor;
-    result.w = v.w / scaleFactor;
-    return result;
-}
-
-// this gets called once per vertex of the monkey mesh (and 8 times since there are 8 monkeys)
-void main() 
-{
-    // base position
-    // turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing To get onto the unit 3-sphere
-    vec4 p = projectToHyperboloid( vec4(position.zyx / 1.3, 1.0) );
-    p = boost * translation * p;
-    
-    // this is the normal to the point
-    // same concept as for the position, but we add a 0 as the w component
-    // vec4 n3sphere = vec4( normal.zyx, 0.0);
-    
-    // compute the color from the normal
-    vColor = ChooseColor(-normal.zyx);
-    
-    // take the final 3D position and project it onto the screen
-    // p.x /= p.w;
-    // p.y /= p.w;
-    // p.z /= p.w;
-    // p.w /= p.w;
-
-    gl_Position = projectionMatrix * modelViewMatrix * p; //vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
-    
-    // do fog
-    if ( fogType == 1 )
-    {
-        // ramp fog
-        // compute distance to camera from 0 to 1
-        float zz = gl_Position.z / gl_Position.w;
-        // go from 1 to 0 instead (0 is furthest and 1 is where the camera is )
-        // ( note that the computed distance is not linear )
-        float fogScale = 1. - zz; 
-        // anything closer than 0.1 gets regular color
-        if ( fogScale > 0.1 ) 
-            fogScale = 1.0;
-        // everything else ramps from 0 to 1
-        else 
-            fogScale = fogScale / 0.1;
-        // mutliply color by this value to make it go to black
-        vColor *= fogScale;
-    }
-    else if ( fogType == 2 )
-    {    
-        // near fog
-        float zz = gl_Position.z / gl_Position.w;
-        // go from 1 to 0, and make the curve less straight
-        float fogScale = pow( 1. - zz, 0.7 );
-        // everything closer than 0.2 gets regular color
-        // but everything else stays the same, creating a discontinuity
-        if ( fogScale > 0.2 ) fogScale = 1.0;
-        // mutliply color by this value to make it go to black
-        vColor *= fogScale;
-    } else if (fogType == 3 ){
-        vColor.r *= mousePos.x/1000.;
-        vColor.g *= mousePos.y/1000.;
-        vColor.b *= abs(1. - (mousePos.x + mousePos.y)/1000.);
-    }
-
-}
-</script>
-
-<script type="x-shader/x-vertex" id="fragmentShader">
-// this gets called once per pixel
-varying vec3 vColor;
-void main() 
-{
-    // just use the color we computed and assign it to this pixel
-    gl_FragColor = vec4( vColor, 1. );
-}
-</script>
-
-<script type="text/javascript" id="mainCode">
-var timing = {
-    start: Date.now(),
-    moment: 0,
-    pauseTime: Date.now()
-};
-
-var music = document.querySelector('#music');
-
-var playPause = function() {
-    if (music.paused){
-        timing.start = timing.start + Date.now() - timing.pauseTime;
-        music.play();
-    } else{
-        timing.pauseTime = Date.now();
-        music.pause();  
-    } 
-}
-
-var loaded = function() {
-    playPause();
-}
-
-music.addEventListener("canplaythrough", loaded());
-
-
-
-
-
-var camera;
-var scene;
-var renderer;
-var mesh;
-var bigMatArray = new Array(1728); //12 times 144, one for each gift 
-var effect;
-var controls;
-var clicky = 0;
-var mouseX = 1;
-var mouseY = 1;
-var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
-var phraseOrder = [0,2,1,
-                13,3,2,1,
-                14,4,3,2,1,
-                15,5,4,3,2,1,
-                16,6,5,4,3,2,1,
-                17,7,6,5,4,3,2,1,
-                18,8,7,6,5,4,3,2,1,
-                19,9,8,7,6,5,4,3,2,1,
-                20,10,9,8,7,6,5,4,3,2,1,
-                21,11,10,9,8,7,6,5,4,3,2,1,
-                22,12,11,10,9,8,7,6,5,4,3,2,23]; // #last one goes forever
-var phraseTimes = [25, 28, 36, 45, 48, 51, 59, 68, 71, 74, 77, 85, 94, 102, 105, 108, 111, 119, 128, 131, 139, 142, 145, 148, 156, 165, 168, 171, 179, 182, 185, 188, 196, 205, 208, 211, 214, 222, 225, 228, 231, 239, 248, 251, 254, 257, 260, 268, 271, 274, 277, 285, 294, 297, 300, 303, 306, 309, 317, 320, 323, 326, 334, 343, 346, 349, 352, 355, 358, 361, 369, 372, 375, 378, 386, 395, 398, 401, 404, 407, 410, 413, 416, 424, 427, 430, 433];
-
-var phraseOnOffMaps = [
-                        [true, false, false, false, false, false, false, false, false, false, false, false ], //phrase 0
-                        [true, false, false, false, false, false, false, false, false, false, false, false ],
-                        [false, true, false, false, false, false, false, false, false, false, false, false ],
-                        [false, false, true, false, false, false, false, false, false, false, false, false ],
-                        [false, false, false, true, false, false, false, false, false, false, false, false ],
-                        [false, false, false, false, true, false, false, false, false, false, false, false ],
-                        [false, false, false, false, false, true, false, false, false, false, false, false ],
-                        [false, false, false, false, false, false, true, false, false, false, false, false ],
-                        [false, false, false, false, false, false, false, true, false, false, false, false ],
-                        [false, false, false, false, false, false, false, false, true, false, false, false ],
-                        [false, false, false, false, false, false, false, false, false, true, false, false ],
-                        [false, false, false, false, false, false, false, false, false, false, true, false ],
-                        [false, false, false, false, false, false, false, false, false, false, false, true ],
-                        [true, true, false, false, false, false, false, false, false, false, false, false ],
-                        [true, true, true, false, false, false, false, false, false, false, false, false ],
-                        [true, true, true, true, false, false, false, false, false, false, false, false ],
-                        [true, true, true, true, true, false, false, false, false, false, false, false ],
-                        [true, true, true, true, true, true, false, false, false, false, false, false ],
-                        [true, true, true, true, true, true, true, false, false, false, false, false ],
-                        [true, true, true, true, true, true, true, true, false, false, false, false ],
-                        [true, true, true, true, true, true, true, true, true, false, false, false ],
-                        [true, true, true, true, true, true, true, true, true, true, false, false ],
-                        [true, true, true, true, true, true, true, true, true, true, true, false ],
-                        [true, true, true, true, true, true, true, true, true, true, true, true ]  //phrase 23
-                        ];
- 
-
-init();
-animate();
-
-function onkey(event) {
-    event.preventDefault();
-    if (event.keyCode == 90) { // z
-        controls.zeroSensor();
-    }
-};
-window.addEventListener("keydown", onkey, true);
- 
-document.body.addEventListener('dblclick', function () {
-    effect.setFullScreen(true);
-});
-
-function init()
-{
-    start = Date.now();
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.x = 0;
-    camera.position.z = 0;
-
-    // -----
-    // vr stuff
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    document.body.appendChild(renderer.domElement);
-
-    controls = new THREE.VRControls(camera);
-
-    effect = new THREE.VREffect(renderer);
-    effect.setSize(window.innerWidth, window.innerHeight);
-    // -----
-
-    // material for the monkeys is a shader
-    materialBase = new THREE.ShaderMaterial({
-        // these are the parameters for the shader
-        uniforms: {
-            // global time
-            time: {
-                type: "f",
-                value: 0.0
-            },
-            // quaternion that moves this monkey into 4-space, set once per monkey
-            translation: {
-                type: "m4",
-                value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-            },
-            fogType: {
-                type: "i",
-                value: 0
-            },
-            mousePos: {
-                type: "v2",
-                value: new THREE.Vector2(0,0)
-            },
-            boost: {
-                type: "m4",
-                value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-            }
-        },
-        vertexShader: document.getElementById('vertexShader').textContent,
-        fragmentShader: document.getElementById('fragmentShader').textContent
-    });
-    // materialBase.side = THREE.FrontSide;
-    materialBase.side = THREE.DoubleSide;
-
-    // one material per monkey, since they have a different quaternion
-    for (var i = 0; i < 1728; i++)
-    {
-        bigMatArray[i] = materialBase.clone();
-    }
-
-
-    // load the monkey mesh
-    var manager = new THREE.LoadingManager();
-    
-    // loader.load('media/spiky_dodec.obj', function (object) {
-
-    //cant seem to get for loop working...
-    // for (var dodecNum = 1; dodecNum <= 12; dodecNum++) {
-    //     var loader = new THREE.OBJLoader(manager);
-    //     loader.load('media/12_days_of_xmas_dodec_'.concat(dodecNum.toString()).concat('.obj'), dodecNum, function (object) {    
-    //         for (var i = 0; i < 144; i++) {
-    //             var newObject = object.clone();
-    //             newObject.traverse(function (child) {
-    //                 if (child instanceof THREE.Mesh) {
-    //                     // child.material = bigMatArray[i]; 
-    //                     child.frustumCulled = false;  //otherwise things randomly vanish from view...
-    //                     child.material = bigMatArray[(i + 144*(dodecNum-1))]; 
-
-    //                 }
-    //             });
-    //             scene.add(newObject);
-    //         }
-    //     } );
-    // }
-
-    var loader1 = new THREE.OBJLoader(manager);
-    var giftNum = 0;
-
-    giftNum = 1;
-    var loader1 = new THREE.OBJLoader(manager);
-    loader1.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });
-    giftNum = 2;
-    var loader2 = new THREE.OBJLoader(manager);
-    loader2.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 1*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });    
-    giftNum = 3;
-    var loader3 = new THREE.OBJLoader(manager);
-    loader3.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 2*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 4;
-    var loader4 = new THREE.OBJLoader(manager);
-    loader4.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 3*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 5;
-    var loader5 = new THREE.OBJLoader(manager);
-    loader5.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone(); 
-            newObject.children[0].material = bigMatArray[(i + 4*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 6;
-    var loader6 = new THREE.OBJLoader(manager);
-    loader6.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 5*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 7;
-    var loader7 = new THREE.OBJLoader(manager);
-    loader7.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 6*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 8;
-    var loader8 = new THREE.OBJLoader(manager);
-    loader8.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 7*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 9;
-    var loader9 = new THREE.OBJLoader(manager);
-    loader9.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 8*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 10;
-    var loader10 = new THREE.OBJLoader(manager);
-    loader10.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 9*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 11;
-    var loader11 = new THREE.OBJLoader(manager);
-    loader11.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 10*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-    giftNum = 12;
-    var loader12 = new THREE.OBJLoader(manager);
-    loader12.load('media/12_days_of_xmas_dodec_'.concat(giftNum.toString()).concat('.obj'), function (object) {    
-        for (var i = 0; i < 144; i++) {
-            var newObject = object.clone();
-            newObject.children[0].material = bigMatArray[(i + 11*144)];
-            newObject.children[0].frustumCulled = false;
-            scene.add(newObject);
-        }
-    });  
-
-
-    window.addEventListener('resize', onWindowResize, false);
-
-    effect.render(scene, camera);
-}
-
-function animate() {
-    // send the time every frame so that we can rotate the monkeys over time
-    if (!music.paused) {
-        timing.moment = (Date.now() - timing.start) / 428.5714;
-    }
-    var currentPhrase = phraseOrder[0];  //update in the following for loop
-    for (var n = phraseTimes.length - 1; n >= 0; n--)
-    {
-        if (timing.moment > phraseTimes[n]) {
-            currentPhrase = phraseOrder[n+1];
-            break;
-        }
-    }
-
-    for (var i = 0; i < 1728; i++)
-    {
-        var j = i%144;
-        var k = (i/144)|0;
-        bigMatArray[i].uniforms['translation'].value = new THREE.Matrix4().copy(dodec_no_id[(j/12)|0]).multiply(dodec_no_id[j%12]);
-        // bigMatArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
-        // bigMatArray[i].uniforms['fogType'].value = clicky;
-        // bigMatArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
-        bigMatArray[i].uniforms['boost'].value = currentBoost;
-
-        bigMatArray[i].visible = phraseOnOffMaps[currentPhrase][k];   
-
-        // bigMatArray[i].visible = true;
-        // if ( i < 144 ){
-        //     bigMatArray[i].visible = true;
-        // }
-        // else {
-        //     bigMatArray[i].visible = false;
-        // }
-
-
-
-        // if (((((Date.now() - start))) % (2*428.5714) ) < 428.5714){
-        //     matArray2[i].visible = true;
-        // }
-        // else {
-        //     matArray2[i].visible = true;
-        // }
-    }
-
-    controls.update();
-    effect.render(scene, camera);
-    requestAnimationFrame(animate);
-}
-
-//listen for mouse movement to get mouseX and mouseY
-
-document.body.addEventListener( 'mousemove', function (event) {
-    mouseY = event.clientY;
-    mouseX = event.clientX;
-});
-
-//listen for click
-
-document.body.addEventListener( 'click', function(){
-    clicky = (clicky + 1) % 4;
-})
-/*
-Listen for double click event to enter full-screen VR mode
-*/
-document.body.addEventListener( 'dblclick', function() {
-    effect.setFullScreen( true );
-});
-
-/*
-Listen for keyboard events 
-*/
-function onkey(event) {
-    event.preventDefault();
-
-    if (event.keyCode == 90) { // z
-        controls.zeroSensor(); //zero rotation
-    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
-        effect.setFullScreen(true) //fullscreen
-    } else if (event.keyCode == 32) {//space
-        playPause();
-    } else if (event.keyCode === 73){ //i
-        infoSign.material.visible = !infoSign.material.visible;
-    } else if (event.keyCode == 80) {//p
-        playPause();
-    }
-};
-window.addEventListener("keydown", onkey, true);
-var step = 0.05;
-
-var ud = new THREE.Matrix4().set(1,0,0,0,
-                        0,1,0,0,
-                        0,0,Math.cosh(step),Math.sinh(step),
-                        0,0,Math.sinh(step),Math.cosh(step));
-var lr = new THREE.Matrix4().set(1,0,0,0,
-                        0,Math.cosh(step),0,Math.sinh(step),
-                        0,0,1,0,
-                        0,Math.sinh(step),0,Math.cosh(step))
-var fb = new THREE.Matrix4().set(Math.cosh(step),0,0,Math.sinh(step),
-                        0,1,0,0,
-                        0,0,1,0,
-                        Math.sinh(step),0,0,Math.cosh(step));
-var udi = new THREE.Matrix4().getInverse(ud);
-var lri = new THREE.Matrix4().getInverse(lr);
-var fbi = new THREE.Matrix4().getInverse(fb);
-
-var infinitesimalBoosts = {
-    3: ud,
-    4: udi,
-    5: lr,
-    6: lri,
-    7: fb,
-    8: fbi
-};
-
-THREE.Matrix4.prototype.add = function (m) {
-    this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
-};
-
-function translateByVector(v) {
-    var dx = v.x;
-    var dy = v.y;
-    var dz = v.z;
-    var len = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    dx /= len;
-    dy /= len;
-    dz /= len;
-    var m = new THREE.Matrix4().set(
-         0, 0, 0, dx,
-         0, 0, 0, dy,
-         0, 0, 0, dz,
-        dx,dy,dz, 0);
-    var m2 = new THREE.Matrix4().copy(m).multiply(m);
-    var c1 = Math.sinh(len);
-    var c2 = Math.cosh(len) - 1;
-    m.multiplyScalar(c1);
-    m2.multiplyScalar(c2);
-    var result = new THREE.Matrix4().identity();
-    result.add(m);
-    result.add(m2);
-    return result;
-}
-
-function getFwdVector() {
-    return new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
-}
-function getRightVector() {
-    return new THREE.Vector3(-1,0,0).applyQuaternion(camera.quaternion);
-}
-function getUpVector() {
-    return new THREE.Vector3(0,-1,0).applyQuaternion(camera.quaternion);
-}
-
-//hold down keys to do rotations and stuff
-function key(event, sign) {
-    var letter = String.fromCharCode(event.keyCode).toLowerCase();
-    var control = controls.manualControls[letter];
-    if (!control) {
-        if (infinitesimalBoosts[letter]) {
-            var m = new THREE.Matrix4().copy(infinitesimalBoosts[letter]);
-            m.multiply(currentBoost);
-            currentBoost.copy(m);
-        } else if (event.keyCode === 38) {
-            var offset = getFwdVector();
-            offset.multiplyScalar(step);
-            var m = translateByVector(offset);
-            m.multiply(currentBoost);
-            currentBoost.copy(m);
-        } else if (event.keyCode === 40) {
-            var offset = getFwdVector();
-            offset.multiplyScalar(-step);
-            var m = translateByVector(offset);
-            m.multiply(currentBoost);
-            currentBoost.copy(m);
-        } else if (event.keyCode === 37) {
-            var offset = getRightVector();
-            offset.multiplyScalar(-step);
-            var m = translateByVector(offset);
-            m.multiply(currentBoost);
-            currentBoost.copy(m);
-        } else if (event.keyCode === 39) {
-            var offset = getRightVector();
-            offset.multiplyScalar(step);
-            var m = translateByVector(offset);
-            m.multiply(currentBoost);
-            currentBoost.copy(m);
-        }
-        return;
-    }
-    if (sign === 1 && control.active || sign === -1 && !control.active)
-        return;
-    control.active = (sign === 1);
-    controls.manualRotateRate[control.index] += sign * control.sign;
-}
-document.addEventListener('keydown', function(event) { key(event, 1); }, false);
-document.addEventListener('keyup', function(event) { key(event, -1); }, false);
-
-/*
-Handle window resizes
-*/
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    effect.setSize( window.innerWidth, window.innerHeight );
-}
-window.addEventListener( 'resize', onWindowResize, false );
-</script>
+    <script src="js/twelve.js" type="text/javascript" id="mainCode"></script>
+    <script src="js/twelveControls.js" type="text/javascript"></script>
 </html>

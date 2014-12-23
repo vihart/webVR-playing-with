@@ -5,7 +5,7 @@ document.body.addEventListener( 'dblclick', function() {
   effect.setFullScreen( true );
 });
 
-var playPause = function() {
+function playPause() {
   if (music.paused) {
     music.play();
   } else{
@@ -22,13 +22,12 @@ function onkey(event) {
   if (event.keyCode == 90) { // z
     controls.zeroSensor(); //zero rotation
   } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
-    effect.setFullScreen(true) //fullscreen
+    effect.setFullScreen(true); //fullscreen
   } else if (event.keyCode == 32 || event.keyCode == 80) {//space or p
     playPause();
-  } else if (event.keyCode === 73){ //i
-    infoSign.material.visible = !infoSign.material.visible;
   }
-};
+}
+
 window.addEventListener("keydown", onkey, true);
 
 var step = 0.05;
@@ -99,33 +98,34 @@ function getUpVector() {
 function key(event, sign) {
   var letter = String.fromCharCode(event.keyCode).toLowerCase();
   var control = controls.manualControls[letter];
+  var m, offset;
   if (!control) {
     if (infinitesimalBoosts[letter]) {
-      var m = new THREE.Matrix4().copy(infinitesimalBoosts[letter]);
+      m = new THREE.Matrix4().copy(infinitesimalBoosts[letter]);
       m.multiply(currentBoost);
       currentBoost.copy(m);
     } else if (event.keyCode === 38) {
-      var offset = getFwdVector();
+      offset = getFwdVector();
       offset.multiplyScalar(step);
-      var m = translateByVector(offset);
+      m = translateByVector(offset);
       m.multiply(currentBoost);
       currentBoost.copy(m);
     } else if (event.keyCode === 40) {
-      var offset = getFwdVector();
+      offset = getFwdVector();
       offset.multiplyScalar(-step);
-      var m = translateByVector(offset);
+      m = translateByVector(offset);
       m.multiply(currentBoost);
       currentBoost.copy(m);
     } else if (event.keyCode === 37) {
-      var offset = getRightVector();
+      offset = getRightVector();
       offset.multiplyScalar(-step);
-      var m = translateByVector(offset);
+      m = translateByVector(offset);
       m.multiply(currentBoost);
       currentBoost.copy(m);
     } else if (event.keyCode === 39) {
-      var offset = getRightVector();
+      offset = getRightVector();
       offset.multiplyScalar(step);
-      var m = translateByVector(offset);
+      m = translateByVector(offset);
       m.multiply(currentBoost);
       currentBoost.copy(m);
     }

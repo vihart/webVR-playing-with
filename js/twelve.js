@@ -57,8 +57,6 @@ function init() {
   camera.position.x = 0;
   camera.position.z = 0;
 
-  // -----
-  // vr stuff
   renderer = new THREE.WebGLRenderer({ antialias: true });
   document.body.appendChild(renderer.domElement);
 
@@ -66,19 +64,14 @@ function init() {
 
   effect = new THREE.VREffect(renderer);
   effect.setSize(window.innerWidth, window.innerHeight);
-  // -----
 
-  // material for the monkeys is a shader
   materialBase = new THREE.ShaderMaterial({
-    // these are the parameters for the shader
-    uniforms: {
-      // global time
-      time: {
+    uniforms: { // these are the parameters for the shader
+      time: { // global time
         type: "f",
         value: 0.0
       },
-      // quaternion that moves this monkey into 4-space, set once per monkey
-      translation: {
+      translation: { // quaternion that moves shifts the object, set once per object
         type: "m4",
         value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
       },
@@ -100,13 +93,12 @@ function init() {
   });
   materialBase.side = THREE.DoubleSide;
 
-  // one material per monkey, since they have a different quaternion
+  // one material per object, since they have a different positions
   for (var i = 0; i < 1728; i++) {
     bigMatArray[i] = materialBase.clone();
   }
 
   var manager = new THREE.LoadingManager();
-
   var loader = new THREE.OBJLoader(manager);
 
   loader.load('media/12_days_of_xmas_dodec_1.obj', function (object) {

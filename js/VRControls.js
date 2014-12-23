@@ -82,9 +82,9 @@ THREE.VRControls = function ( camera, done ) {
 		      currentBoost.copy(m);
 		    }
 
-	  var update = quat.fromValues(this.manualRotateRate[0] * interval,
-	                               this.manualRotateRate[1] * interval,
-	                               this.manualRotateRate[2] * interval, 1.0);
+	  var update = quat.fromValues(this.manualRotateRate[0] * 0.2 * interval,
+	                               this.manualRotateRate[1] * 0.2 * interval,
+	                               this.manualRotateRate[2] * 0.2 * interval, 1.0);
 	  quat.normalize(update, update);
 	  quat.multiply(manualRotation, manualRotation, update);
 

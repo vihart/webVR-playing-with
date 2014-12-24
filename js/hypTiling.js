@@ -58,7 +58,7 @@ function init() {
     fragmentShader: document.getElementById('fragmentShader').textContent
   });
   
-  materialBase.side = THREE.DoubleSide;
+  // materialBase.side = THREE.DoubleSide;
 
 
 

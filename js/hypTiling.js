@@ -70,7 +70,7 @@ function init() {
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader(manager);
 
-  loader.load('media/monkey.obj', function (object) {
+  loader.load('media/monkey_15k_tris.obj', function (object) {
     for (var i = 0; i < numTiles; i++) {
       var newObject = object.clone();
       newObject.children[0].material = bigMatArray[(i)];

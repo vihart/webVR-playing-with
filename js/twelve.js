@@ -14,6 +14,11 @@ var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 var fixOutside = false; //moves you back inside the central cell if you leave it
 
+var tsfms = new Array(144);
+for (j = 0; j < 144; j++){
+  tsfms[j] = new THREE.Matrix4().copy(tilingGens[((j/12)|0) + 1]).multiply(tilingGens[(j%12) + 1]);
+}
+
 var phraseOrder = [0,2,1,  // phrases in the song are ordered like this
   13,3,2,1,
   14,4,3,2,1,
@@ -238,7 +243,7 @@ function animate() {
   for (var i = 0; i < 1728; i++) {
     var j = i%144;
     var k = (i/144)|0;
-    bigMatArray[i].uniforms['translation'].value = new THREE.Matrix4().copy(tilingGens[((j/12)|0) + 1]).multiply(tilingGens[(j%12) + 1]);
+    bigMatArray[i].uniforms['translation'].value = tsfms[j];
     bigMatArray[i].uniforms['boost'].value = currentBoost;
 
     bigMatArray[i].visible = phraseOnOffMaps[currentPhrase][k];

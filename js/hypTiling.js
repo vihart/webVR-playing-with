@@ -18,11 +18,17 @@ var tilingDepth = 3;  //not properly working to change this yet...
 var numTiles = Math.pow(numGens, tilingDepth);
 var bigMatArray = new Array(numObjects * numTiles); 
 
-//// to do!
-// var tsfms = new Array ( Math.pow(numGens, tilingDepth) );
-// for (i = 0, i < Math.pow(numGens, tilingDepth), i++) {
+//// assume tilingDepth = 3 for now
+var tsfms = new Array ( Math.pow(numGens, tilingDepth) );
+for (j = 0; j < Math.pow(numGens, tilingDepth); j++) {
 
-// }
+    var j0 = j%numGens;
+    var ja = (j/numGens)|0;
+    var j1 = ja%numGens;
+    var j2 = (ja/numGens)|0; 
+
+    tsfms[j] = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]);
+}
 
 function init() {
   start = Date.now();
@@ -112,13 +118,14 @@ function animate() {
     var k = (i/numTiles)|0;
     // bigMatArray[i].uniforms['translation'].value = new THREE.Matrix4().copy(tilingGens[(j/numGens)|0]).multiply(tilingGens[j%numGens]);
     
-    var j0 = j%numGens;
-    var ja = (j/numGens)|0;
-    var j1 = ja%numGens;
-    var j2 = (ja/numGens)|0; 
+    // var j0 = j%numGens;
+    // var ja = (j/numGens)|0;
+    // var j1 = ja%numGens;
+    // var j2 = (ja/numGens)|0; 
 
-    bigMatArray[i].uniforms['translation'].value = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]);
+    // bigMatArray[i].uniforms['translation'].value = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]);
 
+    bigMatArray[i].uniforms['translation'].value = tsfms[j];
     bigMatArray[i].uniforms['boost'].value = currentBoost;
 
     // bigMatArray[i].visible = phraseOnOffMaps[currentPhrase][k];

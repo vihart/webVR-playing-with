@@ -12,6 +12,8 @@ var mouseX = 1;
 var mouseY = 1;
 var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
+var fixOutside = true; //moves you back inside the central cell if you leave it
+
 var numObjects = 1; //number of obj files to load
 var numGens = tilingGens.length;
 var tilingDepth = 3;  //not properly working to change this yet...

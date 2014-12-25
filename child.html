@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html lang="en">
+	<head>
+		<title>What Child is This?</title>
+
+		<!-- 
+		A Christmas Musical for VR
+
+		uses three.js, Mozilla's webVR basics, and Andrea Hawksley's webVR navigation.
+		 -->
+
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000;
+				color: #fff;
+				margin: 0px;
+				padding: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- <audio id='music' src="media/pizzajohn.ogg" autoplay=true loop=true/>  -->
+	</body>
+
+	<!--
+	three.js 3d library
+	-->
+	<script src="js/three.min.js"></script>
+
+	<!--
+	library for fast quaternion rotation
+	-->
+	<script src="lib/gl-matrix.js"></script>
+
+	<!--
+	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object. VRControlsPlus adds rotation and movement controls that move and rotate the world relative to the camera, using arrow keys, WASD, plus interaction controls.
+	 -->
+	<script src="js/VRControlsPlus.js"></script>
+
+	<!--
+	VREffect.js handles stereo camera setup and rendering.
+	-->
+	<script src="js/VREffect.js"></script>
+
+
+	<script>
+		/*
+		Setup three.js WebGL renderer
+		*/
+		var renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setClearColor( 0x000000, 1 );
+		/*
+		Append the canvas element created by the renderer to document body element.
+		*/
+		document.body.appendChild( renderer.domElement );
+		/*
+		Create a three.js scene
+		*/
+		var scene = new THREE.Scene();
+		/*
+		Create a three.js camera
+		*/
+		var camera = new THREE.PerspectiveCamera( 110, window.innerWidth / window.innerHeight, 1, 10000 );
+		/*
+		Apply VR headset positional data to camera.
+		*/
+		var controls = new THREE.VRControls( camera );
+		/*
+		Apply VR stereo rendering to renderer
+		*/
+		var effect = new THREE.VREffect( renderer );
+		effect.setSize( window.innerWidth, window.innerHeight );
+
+		/*
+		define interaction variables
+		*/
+		var mouseY = 1;
+		var mouseX = 1;
+		var clicky = 0;
+
+		//particles
+		var particles = new THREE.Geometry();
+		var partCount = 1000;
+
+		for (var p = 0; p<partCount; p++){
+			var part = (new THREE.Vector3(
+				1200*Math.random() - 800, 
+				Math.random()*800 - 400,
+				1200*Math.random() - 800));
+			part.velocity = new THREE.Vector3(
+				Math.random(),
+				-Math.random()*2,
+				Math.random()/9);
+			particles.vertices.push(part);
+		}
+
+		var particleSystem = new THREE.PointCloud(
+			particles,
+			new THREE.PointCloudMaterial({
+				color: 0x333366,
+				size: 20,
+				map: THREE.ImageUtils.loadTexture("media/starflake.png"),
+				blending: THREE.AdditiveBlending,
+				transparent: true
+				}));
+
+		particleSystem.sortParticles = true;
+		scene.add(particleSystem);
+
+
+		//dodecahedra
+
+		var dodecArray = [];
+		var dodecCount = 100;
+		var dodecGeom = new THREE.DodecahedronGeometry(10);
+		var dodecMat = new THREE.MeshLambertMaterial();
+		var size = 0;
+
+		for (var p = 0; p<dodecCount; p++){
+			dodecArray[p] = new THREE.Mesh(dodecGeom, dodecMat);
+			dodecArray[p].position.x = Math.random()*1000 -500;
+			dodecArray[p].position.z = Math.random()*1000 -500;
+			dodecArray[p].position.y = Math.random()*100 -400;
+			size = Math.random()*8;
+			dodecArray[p].scale.set(size, size, size);
+			scene.add(dodecArray[p]);
+		}
+
+		//sign
+
+		var infoText = THREE.ImageUtils.loadTexture( "media/arrows.jpg" ); 
+		var signMat = new THREE.MeshLambertMaterial({map: infoText, color: 0xffffff});
+		var sign = new THREE.Mesh(dodecGeom, signMat);
+
+		sign.position.x = -8;
+		sign.position.z = -12;
+		sign.position.y = -265;
+		sign.rotation.y = 2;
+		scene.add(sign);
+
+		//icosahedra
+
+		var icosArray = [];
+		var icosCount = 100;
+		var icosGeom = new THREE.IcosahedronGeometry(10);
+		var icosMat = new THREE.MeshLambertMaterial({wireframe:true});
+
+		for (var p = 0; p<icosCount; p++){
+			icosArray[p] = new THREE.Mesh(icosGeom, icosMat);
+			icosArray[p].position.x = Math.random()*1000 -500;
+			icosArray[p].position.z = Math.random()*1000 -500;
+			icosArray[p].position.y = Math.random()*100 -300;
+			size = Math.random()*10;
+			icosArray[p].scale.set(size, size, size);
+			scene.add(icosArray[p]);
+		}
+
+		//create light
+		var light = new THREE.SpotLight( 0xffffff, 2, 6000);
+		light.position.set( -500,250,1);
+		light.castShadow = true; 
+		scene.add( light );
+
+		var light2 = new THREE.SpotLight( 0xffffff, 1, 5000);
+		light2.position.set( 300,150,400);
+		light2.castShadow = true; 
+		scene.add( light2 );
+
+		camera.position.y=-250;
+
+		/*
+		Request animation frame loop function
+		*/
+		function animate() {
+	
+			for (var p = 0; p<partCount; p++) {
+
+			    // get the particle
+			    var particle =  particles.vertices[p];
+
+			    // check if we need to reset
+			    if (particle.y < -310) {
+			      particle.y = 500;
+			      particle.x = 1200*Math.random() - 800;
+			      particle.z = 1200*Math.random() - 800;
+			      particle.velocity.y = -Math.random();
+			    } 
+
+		       	particle.velocity.x = Math.random();
+		       	particle.velocity.y = -Math.random()*2;
+		       	particle.velocity.z = Math.random(); 
+		       	particleSystem.material.color.setRGB(1,1,1);
+
+			    particle.y += particle.velocity.y;
+			    particle.z += particle.velocity.z;
+			    particle.x += particle.velocity.x;
+
+		 	 }
+
+			/*
+			Update VR headset position and apply to camera.
+			*/
+			controls.update();
+			/*
+			Render the scene through the VREffect.
+			*/
+			effect.render( scene, camera );
+			requestAnimationFrame( animate );
+		}
+		/*
+		Kick off animation loop
+		*/
+		animate();
+
+		//listen for mouse movement to get mouseX and mouseY
+
+		document.body.addEventListener( 'mousemove', function (event) {
+		 	mouseY = event.clientY;
+		 	mouseX = event.clientX;
+		});
+
+		//listen for click
+
+		document.body.addEventListener( 'click', function(){
+			clicky = (clicky + 1) % 6;
+		})
+		/*
+		Listen for double click event to enter full-screen VR mode
+		*/
+		document.body.addEventListener( 'dblclick', function() {
+			effect.setFullScreen( true );
+		});
+		/*
+		Listen for keyboard events 
+		*/
+		function onkey(event) {
+	    event.preventDefault();
+
+	    if (event.keyCode == 90) { // z
+	    	controls.zeroSensor(); //zero rotation
+	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
+	    	effect.setFullScreen(true) //fullscreen else if (event.keyCode == 80) {//p
+	  		var music = document.querySelector('#music');
+	  		if (music.paused){
+	  			music.play();
+	  		} else{
+	  			music.pause();	
+	  		}
+	  	}
+
+	  };
+
+	    window.addEventListener("keydown", onkey, true);
+
+		document.addEventListener('keydown', function(event) { key(event, 1); }, false);
+		document.addEventListener('keyup', function(event) { key(event, -1); }, false);
+
+		/*
+		Handle window resizes
+		*/
+		function onWindowResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			effect.setSize( window.innerWidth, window.innerHeight );
+		}
+		window.addEventListener( 'resize', onWindowResize, false );
+	</script>
+</html>

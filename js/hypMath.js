@@ -4,11 +4,31 @@ THREE.Matrix4.prototype.add = function (m) {
   this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
 };
 
-function hypDistFromOrigin(v) {
-// put the point onto Klein model
-// hyp dist is arctanh(euclidean dist)
-	return Math.atanh(Math.sqrt((v.x*v.x + v.y*v.y + v.z*v.z) / (v.w*v.w)));
-}  //may not need this for calculating nearest point to origin - atanh is increasing function
+function areSameMatrix(mat1, mat2) {
+	delta = 0.0001;
+	for (var coord=0; coord<16; coord++) {
+		if (Math.abs(mat1.elements[coord] - mat2.elements[coord]) > delta) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function isMatrixInArray(mat, matArray) {
+	for (var i=0; i<matArray.length; i++) {
+		if (areSameMatrix(mat, matArray[i])) {
+		// if (i > 3) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// function hypDistFromOrigin(v) {
+// // put the point onto Klein model
+// // hyp dist is arctanh(euclidean dist)
+// 	return Math.atanh(Math.sqrt((v.x*v.x + v.y*v.y + v.z*v.z) / (v.w*v.w)));
+// }  //dont need this for calculating nearest point to origin - atanh is increasing function
 
 function translateByVector(v) {
   var dx = v.x;
@@ -110,7 +130,7 @@ function fastGramSchmidt( mat )
 	}
 
 	//	Make the rows orthogonal.
-	for (i = 4; i-- > 0; )	//	leaves the last row untouched
+	for (var i = 4; i-- > 0; )	//	leaves the last row untouched
 	{
 		var metric; 
 		if (i==3){
@@ -144,7 +164,7 @@ function fixOutsideCentralCell( mat, gens ) {
 	//assume first in Gens is identity, should probably fix when we get a proper list of matrices
 	var cPos = new THREE.Vector4(0,0,0,1).applyMatrix4( mat ); //central
 	var cDist = fakeDist(cPos);
-	for (i=1; i < gens.length; i++){  
+	for (var i=1; i < gens.length; i++){  
 		pos = new THREE.Vector4(0,0,0,1).applyMatrix4( gens[i] ).applyMatrix4( mat );
 		if (fakeDist(pos) < cDist) {
 			// mat.multiply(gens[i].getInverse());

@@ -17,20 +17,40 @@ var fixOutside = true; //moves you back inside the central cell if you leave it
 var numObjects = 1; //number of obj files to load
 var numGens = tilingGens.length;
 var tilingDepth = 3;  //not properly working to change this yet...
-var numTiles = Math.pow(numGens, tilingDepth);
-var bigMatArray = new Array(numObjects * numTiles); 
+// var numTiles = Math.pow(numGens, tilingDepth);
 
-//// assume tilingDepth = 3 for now
-var tsfms = new Array ( Math.pow(numGens, tilingDepth) );
-for (j = 0; j < Math.pow(numGens, tilingDepth); j++) {
 
+
+var tsfms = [];
+for (var j = 0; j < Math.pow(numGens, tilingDepth); j++) {
+
+  //// assume tilingDepth = 3 for now
     var j0 = j%numGens;
     var ja = (j/numGens)|0;
     var j1 = ja%numGens;
     var j2 = (ja/numGens)|0; 
 
-    tsfms[j] = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]);
+    newTsfm = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]);
+
+    //// assume tilingDepth = 4 for now
+    // var ja = (j/numGens)|0;
+    // var jb = (ja/numGens)|0;
+    // var jc = (jb/numGens)|0;
+    // var j0 = j%numGens;
+    // var j1 = ja%numGens;
+    // var j2 = jb%numGens;
+    // var j3 = jc
+
+    // newTsfm = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]).multiply(tilingGens[j3]);
+
+
+    if ( !isMatrixInArray(newTsfm, tsfms) ) {
+      tsfms[tsfms.length] = newTsfm;
+    }
 }
+
+var numTiles = tsfms.length;
+var bigMatArray = new Array(numObjects * numTiles); 
 
 function init() {
   start = Date.now();
@@ -113,24 +133,14 @@ function init() {
 
 
 function animate() {
-
-
-  for (var i = 0; i < bigMatArray.length; i++) {
-    var j = i%numTiles;
-    var k = (i/numTiles)|0;
-    // bigMatArray[i].uniforms['translation'].value = new THREE.Matrix4().copy(tilingGens[(j/numGens)|0]).multiply(tilingGens[j%numGens]);
-    
-    // var j0 = j%numGens;
-    // var ja = (j/numGens)|0;
-    // var j1 = ja%numGens;
-    // var j2 = (ja/numGens)|0; 
-
-    // bigMatArray[i].uniforms['translation'].value = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]);
-
-    bigMatArray[i].uniforms['translation'].value = tsfms[j];
-    bigMatArray[i].uniforms['boost'].value = currentBoost;
+  for (var k = 0; k < numObjects; k++) {
+    for (var j = 0; j < numTiles; j++) {
+      var i = j + numTiles*k;
+      bigMatArray[i].uniforms['translation'].value = tsfms[j];
+      bigMatArray[i].uniforms['boost'].value = currentBoost;
 
     // bigMatArray[i].visible = phraseOnOffMaps[currentPhrase][k];
+    }
   }
 
   controls.update();

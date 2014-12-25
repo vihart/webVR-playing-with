@@ -16,33 +16,21 @@ var fixOutside = true; //moves you back inside the central cell if you leave it
 
 var numObjects = 1; //number of obj files to load
 var numGens = tilingGens.length;
-var tilingDepth = 3;  //not properly working to change this yet...
-// var numTiles = Math.pow(numGens, tilingDepth);
-
-
+var tilingDepth = 5; 
 
 var tsfms = [];
 for (var j = 0; j < Math.pow(numGens, tilingDepth); j++) {
-
-  //// assume tilingDepth = 3 for now
-    var j0 = j%numGens;
-    var ja = (j/numGens)|0;
-    var j1 = ja%numGens;
-    var j2 = (ja/numGens)|0; 
-
-    newTsfm = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]);
-
-    //// assume tilingDepth = 4 for now
-    // var ja = (j/numGens)|0;
-    // var jb = (ja/numGens)|0;
-    // var jc = (jb/numGens)|0;
-    // var j0 = j%numGens;
-    // var j1 = ja%numGens;
-    // var j2 = jb%numGens;
-    // var j3 = jc
-
-    // newTsfm = new THREE.Matrix4().copy(tilingGens[j0]).multiply(tilingGens[j1]).multiply(tilingGens[j2]).multiply(tilingGens[j3]);
-
+    var digits = [];
+    var jcopy = j;
+    for (var k = 0; k < tilingDepth; k++) {
+      digits[digits.length] = jcopy % numGens;
+      jcopy = (jcopy/numGens)|0;
+    }
+    // console.log(digits);
+    var newTsfm = new THREE.Matrix4();
+    for (var l = 0; l < tilingDepth; l++) {
+      newTsfm = newTsfm.multiply(tilingGens[digits[l]]);
+    }
 
     if ( !isMatrixInArray(newTsfm, tsfms) ) {
       tsfms[tsfms.length] = newTsfm;
@@ -88,8 +76,6 @@ function init() {
   
   // materialBase.side = THREE.DoubleSide;
 
-
-
   // one material per object, since they have a different positions
   for (var i = 0; i < bigMatArray.length; i++) {
     bigMatArray[i] = materialBase.clone();
@@ -98,7 +84,9 @@ function init() {
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader(manager);
 
-  loader.load('media/monkey_15k_tris.obj', function (object) {
+  // loader.load('media/monkey_15k_tris.obj', function (object) {
+  // loader.load('media/monkey_500_tris.obj', function (object) {
+  loader.load('media/monkey_250_tris.obj', function (object) {
     for (var i = 0; i < numTiles; i++) {
       var newObject = object.clone();
       newObject.children[0].material = bigMatArray[(i)];

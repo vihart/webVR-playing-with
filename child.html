@@ -85,7 +85,7 @@
 
 		//particles
 		var particles = new THREE.Geometry();
-		var partCount = 1000;
+		var partCount = 1500;
 
 		for (var p = 0; p<partCount; p++){
 			var part = (new THREE.Vector3(
@@ -173,10 +173,18 @@
 
 		camera.position.y=-250;
 
+		var t = 0;
+
 		/*
 		Request animation frame loop function
 		*/
 		function animate() {
+
+			t += .01;
+			light.position.x += Math.sin(t);
+			light.position.z += Math.cos(t);
+			light2.position.x += Math.sin(t)*3;
+			light2.position.z += Math.cos(t)*3;
 	
 			for (var p = 0; p<partCount; p++) {
 
@@ -184,8 +192,8 @@
 			    var particle =  particles.vertices[p];
 
 			    // check if we need to reset
-			    if (particle.y < -310) {
-			      particle.y = 500;
+			    if (particle.y < (camera.position.y - 100)) {
+			      particle.y = camera.position.y + 700;
 			      particle.x = 1200*Math.random() - 800;
 			      particle.z = 1200*Math.random() - 800;
 			      particle.velocity.y = -Math.random();

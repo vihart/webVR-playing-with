@@ -88,7 +88,7 @@ function init() {
   });
 
     loader.load('media/monkey_250_tris.obj', function (object) {
-    for (var i = cumulativeNumTsfms[2]; i < numTiles; i++) {
+    for (var i = cumulativeNumTsfms[2]; i < cumulativeNumTsfms[3]; i++) {
       var newObject = object.clone();
       newObject.children[0].material = bigMatArray[(i)];
       // newObject.children[0].frustumCulled = false;
@@ -96,7 +96,14 @@ function init() {
     }
   });
 
-
+    loader.load('media/monkey_150_tris.obj', function (object) {
+    for (var i = cumulativeNumTsfms[3]; i < numTiles; i++) {
+      var newObject = object.clone();
+      newObject.children[0].material = bigMatArray[(i)];
+      // newObject.children[0].frustumCulled = false;
+      scene.add(newObject);
+    }
+  });
 
 
   ////// create info overlay

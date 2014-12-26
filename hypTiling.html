@@ -67,6 +67,60 @@
       return vec3(r*0.5 + 0.5,g*0.5 + 0.5,b*0.5 + 0.5);
     }
 
+    // Quaternion Multiplication
+    vec4 quatMult( in vec4 p, in vec4 q ) 
+    {
+        vec4 r;    
+        r.w = + p.w*q.w - p.x*q.x - p.y*q.y - p.z*q.z;
+        r.x = + p.w*q.x + p.x*q.w + p.y*q.z - p.z*q.y;
+        r.y = + p.w*q.y - p.x*q.z + p.y*q.w + p.z*q.x;
+        r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;    
+        return r;
+    }
+
+    vec4 quatInv( in vec4 p )
+    {
+        vec4 r;
+        r.x = -p.x;
+        r.y = -p.y;
+        r.z = -p.z;
+        r.w = p.w;
+        return r;
+    }
+
+    // Project the vector p to the 3-space perpendicular to q
+    vec4 projVecPerp( in vec4 p, in vec4 q )
+    {
+        vec4 r;
+        float pDotq = p.w*q.w + p.x*q.x + p.y*q.y + p.z*q.z;
+        float qDotq = q.w*q.w + q.x*q.x + q.y*q.y + q.z*q.z;
+        float foo = pDotq / qDotq;
+        r.x = p.x - foo * q.x;
+        r.y = p.y - foo * q.y;
+        r.z = p.z - foo * q.z;
+        r.w = p.w - foo * q.w;
+        return r;
+    }
+
+    // Hopf fibration coloring
+    // returns a color based on the 4D normal
+    vec3 HopfColor( in vec4 nBase )
+    {    
+        vec4 n = quatMult( nBase, vec4(0,1,0,0) );  //makes hypTiling monkeys have nicer colours
+
+      // compute the color
+        float y = n.x;
+        float u = n.y;
+        float v = n.z;
+        float x = n.w;
+
+        float r = 2. * (u*x + v*y);
+        float g = 2. * (u*y - v*x);
+        float b = x*x + y*y - u*u - v*v;
+
+        return vec3(r*0.5 + 0.5,g*0.5 + 0.5,b*0.5 + 0.5);
+    }
+
     // output
     varying vec3 vColor; // this shader computes the color of each vertex
 
@@ -83,6 +137,13 @@
 
     void main()
     {
+      //use S^3 quaternion pullback to get consistent texturing
+      vec4 p3sphere = normalize( vec4(position.zyx, 1.0) );
+      vec4 n3sphere = vec4( normal.zyx, 0.0);
+      n3sphere = projVecPerp(  n3sphere, p3sphere ); 
+      n3sphere = quatMult( n3sphere, quatInv( p3sphere ) );
+      n3sphere = normalize(n3sphere);
+      vColor = HopfColor(n3sphere);
       // base position
       vec4 p = projectToHyperboloid( vec4(position.zyx * 0.57735, 1.0) ); //0.57735 = tanh(arccosh(sqrt(3/2)))
       // scale cube of rad 1 so it maps to correct cube in Klein model on w=1, 
@@ -90,7 +151,7 @@
       p = boost * translation * p;
 
       // compute the color from the normal
-      vColor = ChooseColor(-normal.zyx);
+      // vColor = ChooseColor(-normal.zyx);
 
       // take the final 3D position and project it onto the screen
 

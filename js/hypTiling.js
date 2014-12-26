@@ -14,8 +14,13 @@ var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 var fixOutside = true; //moves you back inside the central cell if you leave it
 
-var decoration = "monkey";  
+// var decoration = "monkey";  
 // var decoration = "cubeDual";
+var decoration = "truncatedCube";
+// var decoration = "truncatedCubeBdry";
+// var decoration = "truncatedCubeMinimal";
+// var doubleSided = true;
+var doubleSided = false;
 
 var numObjects = 1; //number of obj files to load
 var numGens = tilingGens.length;
@@ -62,7 +67,9 @@ function init() {
     fragmentShader: document.getElementById('fragmentShader').textContent
   });
   
-  // materialBase.side = THREE.DoubleSide;
+  if (doubleSided) {
+    materialBase.side = THREE.DoubleSide;
+  }
 
   // one material per object, since they have a different positions
   for (var i = 0; i < bigMatArray.length; i++) {
@@ -111,9 +118,9 @@ function init() {
     });
   }
 
-  else if (decoration == "cubeDual") {
+  else {
 
-      loader.load('media/cube_dual.obj', function (object) {
+      loader.load('media/'.concat(decoration, '.obj'), function (object) {
       for (var i = 0; i < numTiles; i++) {
         var newObject = object.clone();
         newObject.children[0].material = bigMatArray[(i)];
@@ -122,7 +129,6 @@ function init() {
       }
     });
   }
-
 
   ////// create info overlay
   var infoText = THREE.ImageUtils.loadTexture( "media/twelve-ui.png" ); 

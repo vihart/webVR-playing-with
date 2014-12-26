@@ -18,24 +18,9 @@ var numObjects = 1; //number of obj files to load
 var numGens = tilingGens.length;
 var tilingDepth = 5; 
 
-var tsfms = [];
-for (var j = 0; j < Math.pow(numGens, tilingDepth); j++) {
-    var digits = [];
-    var jcopy = j;
-    for (var k = 0; k < tilingDepth; k++) {
-      digits[digits.length] = jcopy % numGens;
-      jcopy = (jcopy/numGens)|0;
-    }
-    // console.log(digits);
-    var newTsfm = new THREE.Matrix4();
-    for (var l = 0; l < tilingDepth; l++) {
-      newTsfm = newTsfm.multiply(tilingGens[digits[l]]);
-    }
-
-    if ( !isMatrixInArray(newTsfm, tsfms) ) {
-      tsfms[tsfms.length] = newTsfm;
-    }
-}
+var unpackPair = makeTsfmsList( tilingGens, tilingDepth );
+var tsfms = unpackPair[0];
+var cumulativeNumTsfms = unpackPair[1];
 
 var numTiles = tsfms.length;
 var bigMatArray = new Array(numObjects * numTiles); 
@@ -84,25 +69,34 @@ function init() {
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader(manager);
 
-  // loader.load('media/monkey_15k_tris.obj', function (object) {
-  // loader.load('media/monkey_500_tris.obj', function (object) {
-  loader.load('media/monkey_250_tris.obj', function (object) {
-    for (var i = 0; i < numTiles; i++) {
+  loader.load('media/monkey_7.5k_tris.obj', function (object) {
+    for (var i = 0; i < cumulativeNumTsfms[1]; i++) {
       var newObject = object.clone();
       newObject.children[0].material = bigMatArray[(i)];
-      newObject.children[0].frustumCulled = false;
+      // newObject.children[0].frustumCulled = false;
       scene.add(newObject);
     }
   });
 
-  // loader.load('media/12_days_of_xmas_dodec_2.obj', function (object) {
-  //   for (var i = 0; i < numTiles; i++) {
-  //     var newObject = object.clone();
-  //     newObject.children[0].material = bigMatArray[(i + 1*numTiles)];
-  //     newObject.children[0].frustumCulled = false;
-  //     scene.add(newObject);
-  //   }
-  // });
+    loader.load('media/monkey_3k_tris.obj', function (object) {
+    for (var i = cumulativeNumTsfms[1]; i < cumulativeNumTsfms[2]; i++) {
+      var newObject = object.clone();
+      newObject.children[0].material = bigMatArray[(i)];
+      // newObject.children[0].frustumCulled = false;
+      scene.add(newObject);
+    }
+  });
+
+    loader.load('media/monkey_250_tris.obj', function (object) {
+    for (var i = cumulativeNumTsfms[2]; i < numTiles; i++) {
+      var newObject = object.clone();
+      newObject.children[0].material = bigMatArray[(i)];
+      // newObject.children[0].frustumCulled = false;
+      scene.add(newObject);
+    }
+  });
+
+
 
 
   ////// create info overlay

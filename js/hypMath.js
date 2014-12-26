@@ -30,6 +30,53 @@ function isMatrixInArray(mat, matArray) {
 // 	return Math.atanh(Math.sqrt((v.x*v.x + v.y*v.y + v.z*v.z) / (v.w*v.w)));
 // }  //dont need this for calculating nearest point to origin - atanh is increasing function
 
+function digitsDepth( digits ) {
+	numZeros = 0;
+	for (var i = 0; i < digits.length; i++) {
+		if ( digits[i] == 0 ) {
+			numZeros += 1;
+		} 
+	}
+	return digits.length - numZeros;
+}
+
+function makeTsfmsList( tilingGens, tilingDepth ) {
+	var numTsfmsEachDepth = [];
+	var cumulativeNumTsfms = [];
+	for (var l = 0; l < tilingDepth + 1; l++) {  //initialise array to zeros
+		numTsfmsEachDepth[numTsfmsEachDepth.length] = 0;
+		cumulativeNumTsfms[cumulativeNumTsfms.length] = 0;
+	}
+	var numGens = tilingGens.length;
+	var tsfms = [];
+	for (var j = 0; j < Math.pow(numGens, tilingDepth); j++) {
+	    var digits = [];
+	    var jcopy = j;
+	    for (var k = 0; k < tilingDepth; k++) {
+	      digits[digits.length] = jcopy % numGens;
+	      jcopy = (jcopy/numGens)|0;
+	    }
+	    // console.log(digits);
+	    var newTsfm = new THREE.Matrix4();
+	    for (var l = 0; l < tilingDepth; l++) {
+	      newTsfm = newTsfm.multiply(tilingGens[digits[l]]);
+	    }
+
+	    if ( !isMatrixInArray(newTsfm, tsfms) ) {
+	      tsfms[tsfms.length] = newTsfm;
+	      numTsfmsEachDepth[digitsDepth(digits)] += 1;
+	    }
+	}
+	
+	for (var i = 0; i < tilingDepth; i++){
+		cumulativeNumTsfms[i] = numTsfmsEachDepth[i];
+		if (i>0){
+			cumulativeNumTsfms[i] += cumulativeNumTsfms[i-1];
+		}
+	}
+	return [tsfms, cumulativeNumTsfms];
+}
+
 function translateByVector(v) {
   var dx = v.x;
   var dy = v.y;

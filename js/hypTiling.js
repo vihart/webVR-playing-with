@@ -14,6 +14,9 @@ var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 var fixOutside = true; //moves you back inside the central cell if you leave it
 
+var decoration = "monkey";  
+// var decoration = "cubeDual";
+
 var numObjects = 1; //number of obj files to load
 var numGens = tilingGens.length;
 var tilingDepth = 5; 
@@ -69,41 +72,56 @@ function init() {
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader(manager);
 
-  loader.load('media/monkey_7.5k_tris.obj', function (object) {
-    for (var i = 0; i < cumulativeNumTsfms[1]; i++) {
-      var newObject = object.clone();
-      newObject.children[0].material = bigMatArray[(i)];
-      // newObject.children[0].frustumCulled = false;
-      scene.add(newObject);
-    }
-  });
+  if (decoration == "monkey"){
 
-    loader.load('media/monkey_3k_tris.obj', function (object) {
-    for (var i = cumulativeNumTsfms[1]; i < cumulativeNumTsfms[2]; i++) {
-      var newObject = object.clone();
-      newObject.children[0].material = bigMatArray[(i)];
-      // newObject.children[0].frustumCulled = false;
-      scene.add(newObject);
-    }
-  });
+    loader.load('media/monkey_7.5k_tris.obj', function (object) {
+      for (var i = 0; i < cumulativeNumTsfms[1]; i++) {
+        var newObject = object.clone();
+        newObject.children[0].material = bigMatArray[(i)];
+        // newObject.children[0].frustumCulled = false;
+        scene.add(newObject);
+      }
+    });
 
-    loader.load('media/monkey_250_tris.obj', function (object) {
-    for (var i = cumulativeNumTsfms[2]; i < cumulativeNumTsfms[3]; i++) {
-      var newObject = object.clone();
-      newObject.children[0].material = bigMatArray[(i)];
-      // newObject.children[0].frustumCulled = false;
-      scene.add(newObject);
-    }
-  });
+      loader.load('media/monkey_3k_tris.obj', function (object) {
+      for (var i = cumulativeNumTsfms[1]; i < cumulativeNumTsfms[2]; i++) {
+        var newObject = object.clone();
+        newObject.children[0].material = bigMatArray[(i)];
+        // newObject.children[0].frustumCulled = false;
+        scene.add(newObject);
+      }
+    });
 
-    loader.load('media/monkey_150_tris.obj', function (object) {
-    for (var i = cumulativeNumTsfms[3]; i < numTiles; i++) {
-      var newObject = object.clone();
-      newObject.children[0].material = bigMatArray[(i)];
-      // newObject.children[0].frustumCulled = false;
-      scene.add(newObject);
-    }
-  });
+      loader.load('media/monkey_250_tris.obj', function (object) {
+      for (var i = cumulativeNumTsfms[2]; i < cumulativeNumTsfms[3]; i++) {
+        var newObject = object.clone();
+        newObject.children[0].material = bigMatArray[(i)];
+        // newObject.children[0].frustumCulled = false;
+        scene.add(newObject);
+      }
+    });
+
+      loader.load('media/monkey_150_tris.obj', function (object) {
+      for (var i = cumulativeNumTsfms[3]; i < numTiles; i++) {
+        var newObject = object.clone();
+        newObject.children[0].material = bigMatArray[(i)];
+        // newObject.children[0].frustumCulled = false;
+        scene.add(newObject);
+      }
+    });
+  }
+
+  else if (decoration == "cubeDual") {
+
+      loader.load('media/cube_dual.obj', function (object) {
+      for (var i = 0; i < numTiles; i++) {
+        var newObject = object.clone();
+        newObject.children[0].material = bigMatArray[(i)];
+        // newObject.children[0].frustumCulled = false;
+        scene.add(newObject);
+      }
+    });
+  }
 
 
   ////// create info overlay

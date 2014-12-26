@@ -2,7 +2,7 @@
 
 <html lang="en">
 	<head>
-		<title>What Child is This?</title>
+		<title>Child</title>
 
 		<!-- 
 		A Christmas Musical for VR
@@ -24,7 +24,7 @@
 	</head>
 
 	<body>
-		<!-- <audio id='music' src="media/pizzajohn.ogg" autoplay=true loop=true/>  -->
+		<audio id='music' src="media/child.ogg" autoplay=true loop=true/> 
 	</body>
 
 	<!--
@@ -133,13 +133,13 @@
 
 		//sign
 
-		var infoText = THREE.ImageUtils.loadTexture( "media/arrows.jpg" ); 
+		var infoText = THREE.ImageUtils.loadTexture( "media/arrows-sound.png" ); 
 		var signMat = new THREE.MeshLambertMaterial({map: infoText, color: 0xffffff});
 		var sign = new THREE.Mesh(dodecGeom, signMat);
 
 		sign.position.x = -8;
-		sign.position.z = -12;
-		sign.position.y = -265;
+		sign.position.z = -14;
+		sign.position.y = -262;
 		sign.rotation.y = 2;
 		scene.add(sign);
 
@@ -245,7 +245,9 @@
 	    	controls.zeroSensor(); //zero rotation
 	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
 	    	effect.setFullScreen(true) //fullscreen else if (event.keyCode == 80) {//p
-	  		var music = document.querySelector('#music');
+	  		
+	  	} else if (event.keyCode == 32 || event.keyCode == 80) { //space or p
+	  		var music = document.querySelector('#music');	
 	  		if (music.paused){
 	  			music.play();
 	  		} else{

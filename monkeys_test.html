@@ -115,7 +115,7 @@ uniform vec2 mousePos;
 // returns a color based on the 4D normal
 vec3 HopfColor( in vec4 nBase )
 {    
-    vec4 n = nBase;
+    vec4 n = quatMult( nBase, vec4(0,1,0,0) );  //makes hypTiling monkeys have nicer colours
 
 	// compute the color
     float y = n.x;

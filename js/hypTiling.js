@@ -14,12 +14,20 @@ var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 var fixOutside = true; //moves you back inside the central cell if you leave it
 
-// var decoration = "monkey";  
-// var decoration = "cubeDual";
+var decorationArray = [
+  'monkey', 
+  'cubeDual', 
+  'truncatedCube', 
+  'truncatedCubeBdry', 
+  'truncatedCubeMinimal',
+  'screen2Cube',
+  'monkey',
+  'monkey',
+  'monkey'
+  ];
+
 var decoration = "truncatedCube";
-// var decoration = "truncatedCubeBdry";
-// var decoration = "truncatedCubeMinimal";
-// var doubleSided = true;
+
 var doubleSided = false;
 
 var numObjects = 1; //number of obj files to load
@@ -31,54 +39,13 @@ var tsfms = unpackPair[0];
 var cumulativeNumTsfms = unpackPair[1];
 
 var numTiles = tsfms.length;
-var bigMatArray = new Array(numObjects * numTiles); 
+var bigMatArray = new Array(numObjects * numTiles);
 
-function init() {
-  start = Date.now();
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.x = 0;
-  camera.position.z = 0;
-
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  document.body.appendChild(renderer.domElement);
-
-  controls = new THREE.VRControls(camera);
-
-  effect = new THREE.VREffect(renderer);
-  effect.setSize(window.innerWidth, window.innerHeight);
-
-  materialBase = new THREE.ShaderMaterial({
-    uniforms: { // these are the parameters for the shader
-      time: { // global time
-        type: "f",
-        value: 0.0
-      },
-      translation: { // quaternion that moves shifts the object, set once per object
-        type: "m4",
-        value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-      },
-      boost: {
-        type: "m4",
-        value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-      }
-    },
-    vertexShader: document.getElementById('vertexShader').textContent,
-    fragmentShader: document.getElementById('fragmentShader').textContent
-  });
+function loadStuff(){ 
   
-  if (doubleSided) {
-    materialBase.side = THREE.DoubleSide;
-  }
-
-  // one material per object, since they have a different positions
-  for (var i = 0; i < bigMatArray.length; i++) {
-    bigMatArray[i] = materialBase.clone();
-  }
-
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader(manager);
-
+  
   if (decoration == "monkey"){
 
     loader.load('media/monkey_7.5k_tris.obj', function (object) {
@@ -129,17 +96,64 @@ function init() {
       }
     });
   }
+} 
+
+
+function init() {
+  start = Date.now();
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.x = 0;
+  camera.position.z = 0;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  document.body.appendChild(renderer.domElement);
+
+  controls = new THREE.VRControls(camera);
+
+  effect = new THREE.VREffect(renderer);
+  effect.setSize(window.innerWidth, window.innerHeight);
+
+  materialBase = new THREE.ShaderMaterial({
+    uniforms: { // these are the parameters for the shader
+      time: { // global time
+        type: "f",
+        value: 0.0
+      },
+      translation: { // quaternion that moves shifts the object, set once per object
+        type: "m4",
+        value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+      },
+      boost: {
+        type: "m4",
+        value: new THREE.Matrix4().set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+      }
+    },
+    vertexShader: document.getElementById('vertexShader').textContent,
+    fragmentShader: document.getElementById('fragmentShader').textContent
+  });
+  
+  if (doubleSided) {
+    materialBase.side = THREE.DoubleSide;
+  }
+
+  // one material per object, since they have a different positions
+  for (var i = 0; i < bigMatArray.length; i++) {
+    bigMatArray[i] = materialBase.clone();
+  }
+
+  loadStuff();
 
   ////// create info overlay
-  var infoText = THREE.ImageUtils.loadTexture( "media/twelve-ui.png" ); 
-  var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, wireframe: false, color: 0x777777 }); 
-  var infoBox = new THREE.BoxGeometry(2,1,1);
-  infoSprite = new THREE.Mesh( infoBox, infoMaterial );
-  infoSprite.position.z = -2;
-  infoSprite.position.x = -.5;
-  infoSprite.position.y = -1;
-  infoSprite.rotation.x = -.3;
-  scene.add( infoSprite );
+  // var infoText = THREE.ImageUtils.loadTexture( "media/twelve-ui.png" ); 
+  // var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, wireframe: false, color: 0x777777 }); 
+  // var infoBox = new THREE.BoxGeometry(2,1,1);
+  // infoSprite = new THREE.Mesh( infoBox, infoMaterial );
+  // infoSprite.position.z = -2;
+  // infoSprite.position.x = -.5;
+  // infoSprite.position.y = -1;
+  // infoSprite.rotation.x = -.3;
+  // scene.add( infoSprite );
 
   effect.render(scene, camera);
 }
@@ -160,6 +174,24 @@ function animate() {
   effect.render(scene, camera);
   requestAnimationFrame(animate);
 }
+
+document.addEventListener('keydown', function(event) { selectShape(event); }, false);
+
+function selectShape(event) {
+
+  var keySelect = event.keyCode - 48; //1 is 49
+
+  if (keySelect > 0 && keySelect < 10){
+     if (scene) {
+       while (scene.children.length > 0) {
+           scene.remove(scene.children[scene.children.length - 1]);
+       }
+    decoration = decorationArray[(keySelect-1)];
+    loadStuff();
+    }
+  }
+}
+
 
 init();
 animate();

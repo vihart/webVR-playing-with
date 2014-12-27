@@ -101,7 +101,7 @@ function translateByVector(v) {
   return result;
 }
 
-function parabolicBy2DVector(v) {  
+function parabolicBy2DVector(v) {  ///  something is wrong here we think...
   var dx = v.x; /// first make parabolic fixing point at infinity in pos z direction
   var dy = v.y;
   var m = new THREE.Matrix4().set(
@@ -114,7 +114,7 @@ function parabolicBy2DVector(v) {
   var result = new THREE.Matrix4().identity();
   result.add(m);
   result.add(m2);
-  //now conjugate to get based on camera orientation
+  //now conjugate to get based on camera orientation  
   var cameraM = new THREE.Matrix4();
   cameraM.makeRotationFromQuaternion(camera.quaternion);
   var cameraMinv = new THREE.Matrix4().getInverse(cameraM);
@@ -134,7 +134,7 @@ function getUpVector() {
 
 // fastGramSchmidt from Jeff Week's CurvedSpaces. Causes some wobble when far from the origin...
 
-function fastGramSchmidt( mat )
+function fastGramSchmidt( m )
 {
 	//	Numerical errors can accumulate and force aMatrix "out of round",
 	//	in the sense that its rows are no longer orthonormal.
@@ -151,11 +151,10 @@ function fastGramSchmidt( mat )
 	//	because small first order changes orthogonal to a given vector affect
 	//	its length only to second order.
 
-	var m = mat.elements;
+	// var m = mat.elements;
 	var spaceLike = new Float32Array([1,1,1,-1]);
 	var timeLike = new Float32Array([-1,-1,-1,1]);
 
-	var rows = new Array();
 	//	Normalize each row to unit length.
 	for (var i = 0; i < 4; i++)
 	{
@@ -197,7 +196,34 @@ function fastGramSchmidt( mat )
 				m[4*j + k] -= innerProduct * m[4*i + k];
 		}
 	}
-	mat.elements = m;
+	return m;
+}
+
+///// better GramSchmidt...seem more stable out near infinity
+
+function lorentzDot( u, v ){
+	return u[0]*v[0] + u[1]*v[1] + u[2]*v[2] - u[3]*v[3];
+}
+
+function norm( v ){
+	return Math.sqrt(Math.abs(lorentzDot(v,v)));
+}
+
+function gramSchmidt( m ){
+	// var m = mat.elements; 
+	for (var i = 0; i<4; i++) {  ///normalise row
+		var invRowNorm = 1.0 / norm( m.subarray(4*i, 4*i+4) );
+		for (var l = 0; l<4; l++) {
+			m[4*i + l] = m[4*i + l] * invRowNorm;
+		}
+		for (var j = i+1; j<4; j++) { // subtract component of ith vector from later vectors
+			var component = lorentzDot( m.subarray(4*i, 4*i+4), m.subarray(4*j, 4*j+4) );
+			for (var l = 0; l<4; l++) {
+				m[4*j + l] -= component * m[4*i + l];
+			}
+		}
+	}
+	return m;
 }
 
 
@@ -210,15 +236,18 @@ function fakeDist( v ){  //good enough for comparison of distances on the hyperb
 function fixOutsideCentralCell( mat, gens ) {
 	//assume first in Gens is identity, should probably fix when we get a proper list of matrices
 	var cPos = new THREE.Vector4(0,0,0,1).applyMatrix4( mat ); //central
-	var cDist = fakeDist(cPos);
+	var bestDist = fakeDist(cPos);
+	var bestIndex = 0;
 	for (var i=1; i < gens.length; i++){  
 		pos = new THREE.Vector4(0,0,0,1).applyMatrix4( gens[i] ).applyMatrix4( mat );
-		if (fakeDist(pos) < cDist) {
-			// mat.multiply(gens[i].getInverse());
-			mat = mat.multiply(gens[i]);
-			break;
+		if (fakeDist(pos) < bestDist) {
+			bestDist = fakeDist(pos);
+			bestIndex = i;
 		}
 	}
+	if (bestIndex != 0){
+		mat = mat.multiply(gens[bestIndex]);
+	}			
 }
 
 

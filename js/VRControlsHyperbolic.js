@@ -106,7 +106,9 @@ THREE.VRControls = function ( camera, done ) {
 		}
 
 		//run to avoid error accumulation
-		fastGramSchmidt( currentBoost );
+
+		// currentBoost.elements = fastGramSchmidt( currentBoost.elements );
+		currentBoost.elements = gramSchmidt( currentBoost.elements ); //seems more stable near infinity
  
 
 	  var update = quat.fromValues(this.manualRotateRate[0] * 0.2 * interval,

@@ -18,11 +18,11 @@ var decorationArray = [
   'monkey', 
   'cubeDual', 
   'truncatedCube', 
+  'truncatedCubeTrisOnly',
   'truncatedCubeBdry', 
   'truncatedCubeMinimal',
   'screen2Cube',
-  'monkey',
-  'monkey',
+  'cube',
   'monkey'
   ];
 

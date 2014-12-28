@@ -169,10 +169,10 @@
       vColor = HopfColor(n3sphere);
       // base position
       // float scaling = meshScalingFactor( 0.523, 0.785 );
-      float scaling = 0.57735;  /// {4,3,6}
+      // float scaling = 0.57735;  /// {4,3,6}
       // float scaling = 0.66874;  /// {5,3,4}
       // float scaling = 0.760072; /// {5,3,5}
-      // float scaling = 0.619712;  /// {4,3,7}
+      float scaling = 0.619712;  /// {4,3,7}
       vec4 p = projectToHyperboloid( vec4(position.zyx * scaling, 1.0) ); //0.57735 = tanh(arccosh(sqrt(3/2)))
       // scale cube of (face center) rad 1 so it maps to correct cube in Klein model on w=1, 
       // Klein model euclidean dist from 0 = tanh(hyp dist from 0)
@@ -223,7 +223,7 @@
         <!--
     dodec_no_id.js stores hyperbolic translation matrices to make copies of the dodecahedron.
     -->
-    <script src="js/436.js"></script>
+    <script src="js/437.js"></script>
     <!--
     <script src="js/534Reflect.js"></script>
   -->

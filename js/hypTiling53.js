@@ -21,7 +21,8 @@ var fixOutside = true; //moves you back inside the central cell if you leave it
 // var decoration = "truncatedCubeMinimal";
 // var doubleSided = true;
 
-var decoration = "dodecahedron";
+// var decoration = "dodecahedron";
+var decoration = "dodecahedronThinner";
 
 var doubleSided = true;
 // var doubleSided = false;

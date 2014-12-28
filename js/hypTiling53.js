@@ -23,6 +23,8 @@ var fixOutside = true; //moves you back inside the central cell if you leave it
 
 // var decoration = "dodecahedron";
 var decoration = "dodecahedronThinner";
+// var decoration = "dodecDual";
+// var decoration = "giftsDodec";
 
 var doubleSided = true;
 // var doubleSided = false;

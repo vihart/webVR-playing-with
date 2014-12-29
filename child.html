@@ -279,8 +279,11 @@
 			if(camera.position.distanceTo(octFlock.position)<10){ //octfish react
 				fishy = Math.max(0, fishy - .001);
 				particleSystem.material.color.setRGB(fishy,fishy,1);
-				fishNoise.play();
-				fishNoise.volume = Math.min(1, 4/fishLight.position.distanceTo(camera.position));
+				
+				if (!music.paused){
+					fishNoise.volume = Math.min(1, 4/fishLight.position.distanceTo(camera.position));
+					fishNoise.play();
+				}
 			} else if (fishy < 1) { //go back to normal once out of range
 				fishy += .004;
 				particleSystem.material.color.setRGB(fishy,fishy,1);

@@ -26,7 +26,8 @@
 	<body>
 		<audio id='music' src="media/child1.ogg" autoplay=true loop=true/>
 		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/> 
-		<audio id='bing' src="media/bing.ogg" > 
+		<audio id='bing' src="media/bing.ogg" >
+		<audio id='fishNoise' src="media/fishNoise.ogg" >  
 	</body>
 
 	<!--
@@ -93,9 +94,11 @@
 		var music = document.querySelector('#music');
   		var music2 = document.querySelector('#music2');	
   		var bing = document.querySelector('#bing');	
+  		var fishNoise = document.querySelector('#fishNoise');
   		var wanderTime = 0;
   		var newPos = new THREE.Vector3(0,0,0);
   		var boing = 0;
+  		var fishy = 1;
 
 		camera.position.y = -30;
   		music2.volume = 0;
@@ -117,19 +120,17 @@
 			particles.vertices.push(part);
 		}
 
-		var particleSystem = new THREE.PointCloud(
-			particles,
-			new THREE.PointCloudMaterial({
-				color: 0x333366,
+		var partMat = new THREE.PointCloudMaterial({
+				color: 0xffffff,
 				size: 1.5,
 				map: THREE.ImageUtils.loadTexture("media/starflake.png"),
 				blending: THREE.AdditiveBlending,
 				transparent: true
-				}));
-
+				});
+		var particleSystem = new THREE.PointCloud(particles, partMat);
+			
 		particleSystem.sortParticles = true;
 		scene.add(particleSystem);
-
 
 		//dodecahedra
 
@@ -176,6 +177,9 @@
 				Math.random()*100 -50, 
 				Math.random()*10 -30, 
 				Math.random()*100 -50);
+			if (dodecArray[p].position.distanceTo(camera.position) < 10){
+				dodecArray[p].position.z += 20;
+			}
 			size = Math.random()*20;
 			icosArray[p].scale.set(size, size, size);
 			scene.add(icosArray[p]);
@@ -187,10 +191,39 @@
 			new THREE.MeshLambertMaterial({color: 0xff4400})
 			);
 		tet.position.set(
-			Math.random()*50 - 25,
+			Math.random()*80 - 40,
 			-30,
-			Math.random()*50 - 25);
+			Math.random()*80 - 40);
+		if (tet.position.distanceTo(camera.position) < 10){
+			tet.position.z -= 20;
+		}
 		scene.add(tet);
+
+		//flocktahedra	
+		var octFlock = new THREE.Object3D();	
+		var octArray = [];
+		var octCount = 8;
+		var octVelocity = [];
+
+		for (var i = 0; i<octCount; i++){
+			octArray[i] = new THREE.Mesh(
+				new THREE.OctahedronGeometry(Math.random()),
+				new THREE.MeshLambertMaterial({wireframe: true, wireframeLinewidth: (10*Math.random())})
+				);
+			octArray[i].material.color.setRGB(0, Math.random(), Math.random());
+			octArray[i].position.set(
+				Math.random()*2 - 1,
+				Math.random()*2 - 1,
+				Math.random()*2 - 1);
+			octVelocity[i] = Math.random();
+			octFlock.add(octArray[i]);
+			}
+		octFlock.position.set(
+			50*Math.random(),
+			camera.position.y,
+			-50*Math.random()
+			);
+		scene.add(octFlock);
 
 		//create light
 		var light = new THREE.SpotLight( 0xffffff, .8, 800);
@@ -208,6 +241,13 @@
 		light3.castShadow = true; 
 		scene.add( light3 );
 
+		var fishLight =new THREE.PointLight( 0x88ffff, .8, 5);
+		scene.add(fishLight);
+
+		var boingLight =new THREE.PointLight( 0xff0000, .6, 4);
+		boingLight.position.set(tet.position.x,tet.position.y,tet.position.z);
+		scene.add(boingLight);
+
 		var goldLight = new THREE.PointLight( 0xffdd00, .6, 10);
 		goldLight.position.set(
 				Math.random()*100 -50, 
@@ -223,19 +263,42 @@
 		Request animation frame loop function
 		*/
 		function animate() {
+			//octoFlock
+			for (var i = 0; i<octCount; i++){
+				octArray[i].position.y += Math.sin(t*5*octVelocity[i])/50;
+				octArray[i].position.x += Math.sin(t*10*octVelocity[i])/100;
+				octArray[i].position.z += Math.cos(t*10*octVelocity[i])/100;
+			}
+			octFlock.position.x += Math.sin(t)/16;
+			octFlock.position.z += Math.cos(t)/16 + Math.sin(t/3)/18;
+			fishLight.position.set(octFlock.position.x,octFlock.position.y,octFlock.position.z);
+
+
+			// particleSystem.material.color.setHex(0x0000ff);
+
+			if(camera.position.distanceTo(octFlock.position)<10){ //octfish react
+				fishy = Math.max(0, fishy - .001);
+				particleSystem.material.color.setRGB(fishy,fishy,1);
+				fishNoise.play();
+				fishNoise.volume = Math.min(1, 4/fishLight.position.distanceTo(camera.position));
+			} else if (fishy < 1) { //go back to normal once out of range
+				fishy += .004;
+				particleSystem.material.color.setRGB(fishy,fishy,1);
+			}
 
 			//boinging tetrahedron
-			if(camera.position.distanceTo(tet.position)<1.2){
+			tet.rotation.y += .005;
+
+			if(camera.position.distanceTo(tet.position)<1.5){ //boing if close
 				bing.play();
 				boing = 3;
 			}
-			tet.rotation.y += .005;
-
-			if (boing>0){
+			if (boing>0){ //boing backwards briefly
 				var boingVector = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion)
 				var boingness = boingVector.multiplyScalar(.1)
 				camera.position.sub(boingness);
-				boing -= .06;
+				boingLight.distance = boing*10 + 4
+				boing -= .05;
 			}
 
 			t += .01;
@@ -297,7 +360,7 @@
 			} else {
 				snowFloor = -35;
 			}
-	
+
 			for (var p = 0; p<partCount; p++) {
 
 			    // check if we need to reset particles
@@ -312,7 +375,6 @@
 		       	particles.vertices[p].velocity.x = Math.random()/10;
 		       	particles.vertices[p].velocity.y = -Math.random()*.2;
 		       	particles.vertices[p].velocity.z = Math.random()/10; 
-		       	particleSystem.material.color.setRGB(1,1,1);
 
 			    particles.vertices[p].y += particles.vertices[p].velocity.y;
 			    particles.vertices[p].z += particles.vertices[p].velocity.z;
@@ -368,10 +430,12 @@
 	  			music.play();
 	  			music2.play();
 	  			bing.volume = 1;
+	  			fishNoise.volume = 1;
 	  		} else{
 	  			music.pause();	
 	  			music2.pause();
 	  			bing.volume = 0;
+	  			fishNoise.volume = 0;
 	  		}
 	  	}
 

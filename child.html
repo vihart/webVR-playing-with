@@ -26,6 +26,7 @@
 	<body>
 		<audio id='music' src="media/child1.ogg" autoplay=true loop=true/>
 		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/> 
+		<audio id='bing' src="media/bing.ogg" > 
 	</body>
 
 	<!--
@@ -91,8 +92,10 @@
 		var lightPlace = new THREE.Vector3(Math.r)
 		var music = document.querySelector('#music');
   		var music2 = document.querySelector('#music2');	
+  		var bing = document.querySelector('#bing');	
   		var wanderTime = 0;
   		var newPos = new THREE.Vector3(0,0,0);
+  		var boing = 0;
 
 		camera.position.y = -30;
   		music2.volume = 0;
@@ -178,6 +181,17 @@
 			scene.add(icosArray[p]);
 		}
 
+		//tetrahedron
+		var tet = new THREE.Mesh(
+			new THREE.TetrahedronGeometry(1),
+			new THREE.MeshLambertMaterial({color: 0xff4400})
+			);
+		tet.position.set(
+			Math.random()*50 - 25,
+			-30,
+			Math.random()*50 - 25);
+		scene.add(tet);
+
 		//create light
 		var light = new THREE.SpotLight( 0xffffff, .8, 800);
 		light.position.set( -50,20,.1);
@@ -209,6 +223,20 @@
 		Request animation frame loop function
 		*/
 		function animate() {
+
+			//boinging tetrahedron
+			if(camera.position.distanceTo(tet.position)<1.2){
+				bing.play();
+				boing = 3;
+			}
+			tet.rotation.y += .005;
+
+			if (boing>0){
+				var boingVector = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion)
+				var boingness = boingVector.multiplyScalar(.1)
+				camera.position.sub(boingness);
+				boing -= .06;
+			}
 
 			t += .01;
 
@@ -339,9 +367,11 @@
 	  		if (music.paused){
 	  			music.play();
 	  			music2.play();
+	  			bing.volume = 1;
 	  		} else{
 	  			music.pause();	
 	  			music2.pause();
+	  			bing.volume = 0;
 	  		}
 	  	}
 

@@ -78,9 +78,9 @@ THREE.VRControls = function ( camera, done ) {
 	  ///do translation 
 		var offset = new THREE.Vector3();
 		if (this.manualMoveRate[0] != 0 || this.manualMoveRate[1] != 0 || this.manualMoveRate[2] != 0){
-		    offset = getFwdVector().multiplyScalar(20 * interval * this.manualMoveRate[0]).add(
-		      		   getRightVector().multiplyScalar(20 * interval * this.manualMoveRate[1])).add(
-		      		   getUpVector().multiplyScalar(20 * interval * this.manualMoveRate[2]));
+		    offset = getFwdVector().multiplyScalar(4 * interval * this.manualMoveRate[0]).add(
+		      		   getRightVector().multiplyScalar(4 * interval * this.manualMoveRate[1])).add(
+		      		   getUpVector().multiplyScalar(4 * interval * this.manualMoveRate[2]));
 		    }
 
 		camera.position = camera.position.add(offset);

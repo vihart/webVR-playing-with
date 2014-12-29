@@ -24,7 +24,8 @@
 	</head>
 
 	<body>
-		<audio id='music' src="media/child.ogg" autoplay=true loop=true/> 
+		<audio id='music' src="media/child1.ogg" autoplay=true loop=true/>
+		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/> 
 	</body>
 
 	<!--
@@ -83,19 +84,33 @@
 		var mouseX = 1;
 		var clicky = 0;
 
-		//particles
+
+		var t = 0;
+		var snowFloor = -40;
+		var foundLight = 0;
+		var lightPlace = new THREE.Vector3(Math.r)
+		var music = document.querySelector('#music');
+  		var music2 = document.querySelector('#music2');	
+  		var wanderTime = 0;
+  		var newPos = new THREE.Vector3(0,0,0);
+
+		camera.position.y = -30;
+  		music2.volume = 0;
+  		
+		//make particles
 		var particles = new THREE.Geometry();
 		var partCount = 1500;
 
 		for (var p = 0; p<partCount; p++){
-			var part = (new THREE.Vector3(
-				1200*Math.random() - 800, 
-				Math.random()*800 - 400,
-				1200*Math.random() - 800));
+			var part = new THREE.Vector3(
+		      	120*Math.random() - 80,
+		      	95*Math.random() + snowFloor,
+		      	120*Math.random() - 80
+				);
 			part.velocity = new THREE.Vector3(
-				Math.random(),
-				-Math.random()*2,
-				Math.random()/9);
+				Math.random()/10,
+				-Math.random()*0.2,
+				Math.random()*.09);
 			particles.vertices.push(part);
 		}
 
@@ -103,7 +118,7 @@
 			particles,
 			new THREE.PointCloudMaterial({
 				color: 0x333366,
-				size: 20,
+				size: 1.5,
 				map: THREE.ImageUtils.loadTexture("media/starflake.png"),
 				blending: THREE.AdditiveBlending,
 				transparent: true
@@ -116,64 +131,79 @@
 		//dodecahedra
 
 		var dodecArray = [];
-		var dodecCount = 100;
-		var dodecGeom = new THREE.DodecahedronGeometry(10);
+		var dodecCount = 120;
+		var dodecGeom = new THREE.DodecahedronGeometry(1);
 		var dodecMat = new THREE.MeshLambertMaterial();
 		var size = 0;
 
 		for (var p = 0; p<dodecCount; p++){
 			dodecArray[p] = new THREE.Mesh(dodecGeom, dodecMat);
-			dodecArray[p].position.x = Math.random()*1000 -500;
-			dodecArray[p].position.z = Math.random()*1000 -500;
-			dodecArray[p].position.y = Math.random()*100 -400;
-			size = Math.random()*8;
+			dodecArray[p].position.set(
+				Math.random()*100 -50, 
+				Math.random()*18 -44,
+				Math.random()*100 -50);
+			if (dodecArray[p].position.distanceTo(camera.position) < 10){
+				dodecArray[p].position.z += 20;
+			}
+			size = Math.random()*7;
 			dodecArray[p].scale.set(size, size, size);
 			scene.add(dodecArray[p]);
 		}
 
 		//sign
 
-		var infoText = THREE.ImageUtils.loadTexture( "media/arrows-sound.png" ); 
+		var infoText = THREE.ImageUtils.loadTexture( "media/arrows-sound.png" );
 		var signMat = new THREE.MeshLambertMaterial({map: infoText, color: 0xffffff});
 		var sign = new THREE.Mesh(dodecGeom, signMat);
 
-		sign.position.x = -8;
-		sign.position.z = -14;
-		sign.position.y = -262;
+		sign.position.set(-0.2, -31, -1.5);
 		sign.rotation.y = 2;
 		scene.add(sign);
 
 		//icosahedra
 
 		var icosArray = [];
-		var icosCount = 100;
-		var icosGeom = new THREE.IcosahedronGeometry(10);
+		var icosCount = 20;
+		var icosGeom = new THREE.IcosahedronGeometry(1);
 		var icosMat = new THREE.MeshLambertMaterial({wireframe:true});
 
 		for (var p = 0; p<icosCount; p++){
 			icosArray[p] = new THREE.Mesh(icosGeom, icosMat);
-			icosArray[p].position.x = Math.random()*1000 -500;
-			icosArray[p].position.z = Math.random()*1000 -500;
-			icosArray[p].position.y = Math.random()*100 -300;
-			size = Math.random()*10;
+			icosArray[p].position.set(
+				Math.random()*100 -50, 
+				Math.random()*10 -30, 
+				Math.random()*100 -50);
+			size = Math.random()*20;
 			icosArray[p].scale.set(size, size, size);
 			scene.add(icosArray[p]);
 		}
 
 		//create light
-		var light = new THREE.SpotLight( 0xffffff, 2, 6000);
-		light.position.set( -500,250,1);
+		var light = new THREE.SpotLight( 0xffffff, .8, 800);
+		light.position.set( -50,20,.1);
 		light.castShadow = true; 
 		scene.add( light );
 
-		var light2 = new THREE.SpotLight( 0xffffff, 1, 5000);
-		light2.position.set( 300,150,400);
+		var light2 = new THREE.SpotLight( 0xffffff, .4, 600);
+		light2.position.set( 30,10,40);
 		light2.castShadow = true; 
 		scene.add( light2 );
 
-		camera.position.y=-250;
+		var light3 = new THREE.SpotLight( 0xffffff, .2, 500);
+		light3.position.set( -10,15,20);
+		light3.castShadow = true; 
+		scene.add( light3 );
 
-		var t = 0;
+		var goldLight = new THREE.PointLight( 0xffff00, .6, 10);
+		goldLight.position.set(
+				Math.random()*100 -50, 
+				Math.random()*18 -44,
+				Math.random()*100 -50);
+			if (goldLight.position.distanceTo(camera.position) < 10){
+				goldLight.position.z += 20;
+			}
+		goldLight.castShadow = false; 
+		scene.add( goldLight );	
 
 		/*
 		Request animation frame loop function
@@ -181,33 +211,85 @@
 		function animate() {
 
 			t += .01;
-			light.position.x += Math.sin(t);
+
+			light.position.x += Math.sin(t); //roving white lights
 			light.position.z += Math.cos(t);
-			light2.position.x += Math.sin(t)*3;
-			light2.position.z += Math.cos(t)*3;
+			light2.position.x += Math.sin(t)*1.5;
+			light2.position.z += Math.cos(t)*1.5;
+			light3.position.x += Math.sin(t)*2.5;
+			light3.position.z += Math.cos(t)*2.5;
+			
+			//light gamification
+			if ( foundLight == 0){ //haven't found the gold light
+				goldLight.intensity += Math.sin(t)/200;
+				goldLight.distance += .001;
+				music2.volume = (99*music2.volume + .00001)/100;
+				music.volume = (99*music.volume + .999)/100;
+				if ( goldLight.position.distanceTo(camera.position) < goldLight.distance
+					){
+					foundLight = 1;
+				}
+			} else if (foundLight == 1){ //found the light, make it glow
+				music.volume = (99*music.volume + .000001)/100;
+				music2.volume = (99*music2.volume + .999)/100;
+				goldLight.intensity += .005;
+				goldLight.distance += .5;
+				if (goldLight.intensity > 2){
+					goldLight.distance = (19 * goldLight.distance + 12) / 20;
+					if (goldLight.intensity > 3){
+						newPos.set(
+							Math.random()*100 -50, 
+							Math.random()*18 -44,
+							Math.random()*100 -50);
+						foundLight = 2;
+					}
+				}
+			} else if (foundLight == 2){ //light starts wandering
+				goldLight.distance = 12;
+				goldLight.position.x += Math.sin(t/2)*Math.random()/4;
+				goldLight.position.z += Math.cos(t/2)*Math.random()/4;
+				music2.volume = Math.min(1, goldLight.position.distanceTo(camera.position));
+				wanderTime += .01
+				if (wanderTime > 10){//light settles into new random place
+					goldLight.position.x = (999*goldLight.position.x + newPos.x)/1000;
+					goldLight.position.z = (999*goldLight.position.z + newPos.z)/1000;
+					if (goldLight.position.distanceTo(camera.position) < 10){
+						goldLight.position.z += 20;
+					}
+				}
+				if (wanderTime > 15){//reset light
+					goldLight.distance = 10;
+					goldLight.intensity = .6;
+					foundLight = 0;
+					wanderTime = 0;
+				}
+			}
+
+			if (camera.position.y < -25){
+				snowFloor = camera.position.y - 10;
+			} else {
+				snowFloor = -35;
+			}
 	
 			for (var p = 0; p<partCount; p++) {
 
-			    // get the particle
-			    var particle =  particles.vertices[p];
-
-			    // check if we need to reset
-			    if (particle.y < (camera.position.y - 100)) {
-			      particle.y = camera.position.y + 700;
-			      particle.x = 1200*Math.random() - 800;
-			      particle.z = 1200*Math.random() - 800;
-			      particle.velocity.y = -Math.random();
+			    // check if we need to reset particles
+			    if (particles.vertices[p].y < snowFloor) {
+			      particles.vertices[p].set(
+			      	120*Math.random() - 80,
+			      	snowFloor + 95,
+			      	120*Math.random() - 80);
+			      particles.vertices[p].velocity.y = -Math.random();
 			    } 
 
-		       	particle.velocity.x = Math.random();
-		       	particle.velocity.y = -Math.random()*2;
-		       	particle.velocity.z = Math.random(); 
+		       	particles.vertices[p].velocity.x = Math.random()/10;
+		       	particles.vertices[p].velocity.y = -Math.random()*.2;
+		       	particles.vertices[p].velocity.z = Math.random()/10; 
 		       	particleSystem.material.color.setRGB(1,1,1);
 
-			    particle.y += particle.velocity.y;
-			    particle.z += particle.velocity.z;
-			    particle.x += particle.velocity.x;
-
+			    particles.vertices[p].y += particles.vertices[p].velocity.y;
+			    particles.vertices[p].z += particles.vertices[p].velocity.z;
+			    particles.vertices[p].x += particles.vertices[p].velocity.x;
 		 	 }
 
 			/*
@@ -255,11 +337,12 @@
 	    	effect.setFullScreen(true) //fullscreen else if (event.keyCode == 80) {//p
 	  		
 	  	} else if (event.keyCode == 32 || event.keyCode == 80) { //space or p
-	  		var music = document.querySelector('#music');	
 	  		if (music.paused){
 	  			music.play();
+	  			music2.play();
 	  		} else{
 	  			music.pause();	
+	  			music2.pause();
 	  		}
 	  	}
 

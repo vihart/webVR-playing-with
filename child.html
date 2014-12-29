@@ -131,7 +131,7 @@
 		//dodecahedra
 
 		var dodecArray = [];
-		var dodecCount = 120;
+		var dodecCount = 140;
 		var dodecGeom = new THREE.DodecahedronGeometry(1);
 		var dodecMat = new THREE.MeshLambertMaterial();
 		var size = 0;
@@ -145,7 +145,7 @@
 			if (dodecArray[p].position.distanceTo(camera.position) < 10){
 				dodecArray[p].position.z += 20;
 			}
-			size = Math.random()*7;
+			size = Math.random()*8;
 			dodecArray[p].scale.set(size, size, size);
 			scene.add(dodecArray[p]);
 		}
@@ -163,7 +163,7 @@
 		//icosahedra
 
 		var icosArray = [];
-		var icosCount = 20;
+		var icosCount = 30;
 		var icosGeom = new THREE.IcosahedronGeometry(1);
 		var icosMat = new THREE.MeshLambertMaterial({wireframe:true});
 
@@ -194,7 +194,7 @@
 		light3.castShadow = true; 
 		scene.add( light3 );
 
-		var goldLight = new THREE.PointLight( 0xffff00, .6, 10);
+		var goldLight = new THREE.PointLight( 0xffdd00, .6, 10);
 		goldLight.position.set(
 				Math.random()*100 -50, 
 				Math.random()*18 -44,
@@ -248,14 +248,13 @@
 				goldLight.distance = 12;
 				goldLight.position.x += Math.sin(t/2)*Math.random()/4;
 				goldLight.position.z += Math.cos(t/2)*Math.random()/4;
-				music2.volume = Math.min(1, goldLight.position.distanceTo(camera.position));
+				music2.volume = Math.min(1, 10/goldLight.position.distanceTo(camera.position));
 				wanderTime += .01
 				if (wanderTime > 10){//light settles into new random place
-					goldLight.position.x = (999*goldLight.position.x + newPos.x)/1000;
-					goldLight.position.z = (999*goldLight.position.z + newPos.z)/1000;
-					if (goldLight.position.distanceTo(camera.position) < 10){
-						goldLight.position.z += 20;
-					}
+					goldLight.position.x = (199*goldLight.position.x + newPos.x)/200;
+					goldLight.position.z = (199*goldLight.position.z + newPos.z)/200;
+					goldLight.distance -= .005;
+					goldLight.intensity -= .004;
 				}
 				if (wanderTime > 15){//reset light
 					goldLight.distance = 10;

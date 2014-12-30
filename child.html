@@ -25,7 +25,8 @@
 
 	<body>
 		<audio id='music' src="media/child1.ogg" autoplay=true loop=true/>
-		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/> 
+		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/>
+		<audio id='child3' src="media/child3.ogg" > 
 		<audio id='bing' src="media/bing.ogg" >
 		<audio id='fishNoise' src="media/fishNoise.ogg" > 
 		<audio id='cube1' src="media/cube1.ogg" > 
@@ -117,6 +118,7 @@
 		var lightPlace = new THREE.Vector3(Math.r)
 		var music = document.querySelector('#music');
   		var music2 = document.querySelector('#music2');	
+  		var child3 = document.querySelector('#child3');	
   		var bing = document.querySelector('#bing');	
   		var fishNoise = document.querySelector('#fishNoise');
   		var cubeSfx = [
@@ -184,6 +186,54 @@
 
 		//dodecahedra
 
+		//special dodecahome
+		var dodecahome = new THREE.Mesh(
+			new THREE.DodecahedronGeometry(12),
+			new THREE.MeshLambertMaterial());
+		dodecahome.position.y = camera.position.y;
+		while (dodecahome.position.distanceTo(camera.position) < 20){
+			dodecahome.position.set(
+					Math.random()*100 -50, 
+					camera.position.y,
+					Math.random()*100 -50);
+		}
+		dodecahome.material.side = THREE.DoubleSide;
+		scene.add(dodecahome);
+
+		//make dodecahome particles
+		var particles2 = new THREE.Geometry();
+		var partCount2 = 20;
+
+		for (var p = 0; p<partCount2; p++){
+			var part = new THREE.Vector3(
+		      	7*Math.random() - 3.5,
+		      	camera.position.y + Math.random()*4 - 3,
+		      	7*Math.random() - 3.5
+				);
+			part.velocity = new THREE.Vector3(
+				0,
+				-Math.random()*0.2,
+				0);
+			particles2.vertices.push(part);
+		}
+
+		var partMat2 = new THREE.PointCloudMaterial({
+				color: 0xffffff,
+				size: 10,
+				map: THREE.ImageUtils.loadTexture("media/tallParticle.png"),
+				blending: THREE.AdditiveBlending,
+				transparent: true
+				});
+		var particleSystem2 = new THREE.PointCloud(particles2, partMat2);
+
+
+		particleSystem2.sortParticles = true;
+		scene.add(particleSystem2);
+
+		particleSystem2.position.x = dodecahome.position.x;
+		particleSystem2.position.z = dodecahome.position.z;
+		
+		//other dodecahedra
 		var dodecArray = [];
 		var dodecCount = 140;
 		var dodecGeom = new THREE.DodecahedronGeometry(1);
@@ -196,13 +246,14 @@
 				Math.random()*100 -50, 
 				Math.random()*18 -44,
 				Math.random()*100 -50);
-			if (dodecArray[p].position.distanceTo(camera.position) < 10){
+			if (dodecArray[p].position.distanceTo(camera.position) < 10 || dodecArray[p].position.distanceTo(dodecahome.position) < 7){
 				dodecArray[p].position.z += 20;
 			}
 			size = Math.random()*8;
 			dodecArray[p].scale.set(size, size, size);
 			scene.add(dodecArray[p]);
 		}
+
 
 		//sign
 
@@ -234,7 +285,7 @@
 
 		//cubes
 		var cubeSpot = new THREE.Vector3();
-		while (cubeSpot.distanceTo(camera.position) < 50){
+		while (cubeSpot.distanceTo(camera.position) < 50 || cubeSpot.distanceTo(dodecahome.position) < 20){
 			cubeSpot = new THREE.Vector3(
 			Math.random()*120 - 60, 
 			camera.position.y, 
@@ -264,12 +315,12 @@
 			new THREE.TetrahedronGeometry(1),
 			new THREE.MeshLambertMaterial({color: 0xff4400})
 			);
-		tet.position.set(
-			Math.random()*80 - 40,
-			-30,
-			Math.random()*80 - 40);
-		while (tet.position.distanceTo(camera.position) < 10 || tet.position.distanceTo(cubeSpot)<10){
-			tet.position.z += 20;
+		tet.position.y = camera.position.y;
+		while (tet.position.distanceTo(camera.position) < 10 || tet.position.distanceTo(cubeSpot)<10 || tet.position.distanceTo(dodecahome.position) < 14){
+			tet.position.set(
+				Math.random()*80 - 40,
+				-30,
+				Math.random()*80 - 40);
 		}
 		scene.add(tet);
 
@@ -318,19 +369,29 @@
 		var fishLight =new THREE.PointLight( 0x88ffff, .8, 5);
 		scene.add(fishLight);
 
-		var cubeLight =new THREE.PointLight( 0xffddff, .9, 35);
+		var cubeLight =new THREE.PointLight( 0xffaaee, .9, 35);
 		cubeLight.position.x = cubeSpot.x + 12;
 		cubeLight.position.y = cubeSpot.y;
 		cubeLight.position.z = cubeSpot.z + 12;
 		scene.add(cubeLight);
 
-		var boingLight =new THREE.PointLight( 0xff0000, .6, 4);
+		var boingLight =new THREE.PointLight( 0xff0000, .6, 10);
 		boingLight.position.set(tet.position.x,tet.position.y,tet.position.z);
 		scene.add(boingLight);
 
+		var dodecLight =new THREE.PointLight( 0x0000ff, .25, 13);
+		dodecLight.position.set(dodecahome.position.x, dodecahome.position.y+2, dodecahome.position.z-2);
+		light3.castShadow = true;
+		scene.add(dodecLight);
+
+		var dodecLight2 =new THREE.PointLight( 0xff0000, .3, 13);
+		dodecLight2.position.set(dodecahome.position.x, dodecahome.position.y-2, dodecahome.position.z+2);
+		light3.castShadow = true;
+		scene.add(dodecLight2);			
+
 		var goldLight = new THREE.PointLight( 0xffdd00, .6, 10);
 		goldLight.position.y = camera.position.y;
-		while (goldLight.position.distanceTo(camera.position) < 10 || goldLight.position.distanceTo(tet.position) < 10 || goldLight.position.distanceTo(cubeSpot) < 10){
+		while (goldLight.position.distanceTo(camera.position) < 15 || goldLight.position.distanceTo(tet.position) < 10 || goldLight.position.distanceTo(cubeSpot) < 10 || goldLight.position.distanceTo(dodecahome.position) < 14){
 			goldLight.position.set(
 			Math.random()*100 -50, 
 			Math.random()*18 -44,
@@ -338,6 +399,9 @@
 		}
 		goldLight.castShadow = false; 
 		scene.add( goldLight );	
+
+		var partVector = new THREE.Vector3;
+		var boingVector = new THREE.Vector3;
 
 		/*
 		Request animation frame loop function
@@ -371,12 +435,18 @@
 			fishLight.position.set(octFlock.position.x,octFlock.position.y,octFlock.position.z);
 
 			if(camera.position.distanceTo(octFlock.position)<10){ //octfish react
-				fishy = Math.max(0, fishy - .001);
+				fishy = Math.max(0, fishy - .001); //fishy starts at 1 and goes to 0
 				particleSystem.material.color.setRGB(fishy,fishy,1);
+				particleSystem.rotation.y += .02 * (1-fishy);
 				fishNoise.play();
 			} else if (fishy < 1) { //go back to normal once out of range
 				fishy += .004;
 				particleSystem.material.color.setRGB(fishy,fishy,1);
+				particleSystem.rotation.y += .05 * (1-fishy);
+			}
+			if (octFlock.position.distanceTo(dodecahome.position)<12.5){
+					octFlock.position.x += 12;
+					octFlock.position.z += 12;
 			}
 
 			//boinging tetrahedron
@@ -402,7 +472,7 @@
 			light2.position.z += Math.cos(t)*1.5;
 			light3.position.x += Math.sin(t)*2.5;
 			light3.position.z += Math.cos(t)*2.5;
-			
+
 			//light gamification
 			if ( foundLight == 0){ //haven't found the gold light
 				goldLight.intensity += Math.sin(t)/200;
@@ -436,13 +506,13 @@
 				music2.volume = Math.min(1, 10/goldLight.position.distanceTo(camera.position));
 				particleSystem.material.color.setRGB(1,1,1-music2.volume);
 				wanderTime += .01
-				if (wanderTime > 10){//light settles into new random place
+				if (wanderTime > 8){//light settles into new random place
 					goldLight.position.x = (199*goldLight.position.x + newPos.x)/200;
 					goldLight.position.z = (199*goldLight.position.z + newPos.z)/200;
 					goldLight.distance -= .005;
 					goldLight.intensity -= .004;
 				}
-				if (wanderTime > 15){//reset light
+				if (wanderTime > 12){//reset light
 					particleSystem.material.color.setRGB(1,1,1);
 					goldLight.distance = 10;
 					goldLight.intensity = .6;
@@ -457,8 +527,8 @@
 				snowFloor = -35;
 			}
 
+			//animate snow particles
 			for (var p = 0; p<partCount; p++) {
-
 			    // check if we need to reset particles
 			    if (particles.vertices[p].y < snowFloor) {
 			      particles.vertices[p].set(
@@ -468,14 +538,45 @@
 			      particles.vertices[p].velocity.y = -Math.random();
 			    } 
 
-		       	particles.vertices[p].velocity.x = Math.random()/10;
-		       	particles.vertices[p].velocity.y = -Math.random()*.2;
-		       	particles.vertices[p].velocity.z = Math.random()/10; 
+			    if (foundLight == 0 ){
+		       		particles.vertices[p].velocity.x = Math.random()/10;
+		       		particles.vertices[p].velocity.y = -Math.random()*.2;
+		       		particles.vertices[p].velocity.z = Math.random()/10; 
+		    	}
+
+		       	if (boing>0 && particles.vertices[p].distanceTo(tet.position) < 20){ //boing back
+		       		partVector = new THREE.Vector3(
+		       				particles.vertices[p].x, 
+		       				particles.vertices[p].y, 
+		       				particles.vertices[p].z);
+					particles.vertices[p].x += boing*partVector.sub(tet.position).x/400;
+					particles.vertices[p].y += boing*partVector.sub(tet.position).y/400;
+					particles.vertices[p].z += boing*partVector.sub(tet.position).z/400;
+				}
+
+				if (particles.vertices[p].distanceTo(dodecahome.position)<12.5){//avoid dodecahome
+					particles.vertices[p].velocity.y = 0;
+					particles.vertices[p].y += .2;
+				}
 
 			    particles.vertices[p].y += particles.vertices[p].velocity.y;
 			    particles.vertices[p].z += particles.vertices[p].velocity.z;
 			    particles.vertices[p].x += particles.vertices[p].velocity.x;
 		 	 }
+			
+			//dodecahome particles
+		 	particleSystem2.rotation.y += .005;
+		 	 for (var p = 0; p<partCount2; p++) { 
+			    particles2.vertices[p].y +=  Math.sin(2*t+10*particles2.vertices[p].velocity.y)/23;
+			    particles2.vertices[p].z += Math.sin(2*t+40*particles2.vertices[p].velocity.y)/33;
+			    particles2.vertices[p].x += Math.cos(2*t+40*particles2.vertices[p].velocity.y)/33;
+		 	 }
+
+		 	if ( camera.position.distanceTo(dodecahome.position) < 14) {
+		 		music.volume = (9*music.volume + .000001)/10;
+		 		child3.play();
+		 	}
+		 	child3.volume = Math.min(1, 2/camera.position.distanceTo(dodecahome.position));
 
 			/*
 			Update VR headset position and apply to camera.
@@ -525,6 +626,7 @@
 	  		if (music.paused){
 	  			music.play();
 	  			music2.play();
+	  			child3.muted = false;
 	  			bing.muted = false;
 	  			cubeUp1.muted = false;
 	  			fishNoise.muted = false;
@@ -534,6 +636,7 @@
 	  		} else{
 	  			music.pause();	
 	  			music2.pause();
+	  			child3.muted = true;
 	  			bing.muted = true;
 	  			cubeUp1.muted = true;
 	  			fishNoise.muted = true;

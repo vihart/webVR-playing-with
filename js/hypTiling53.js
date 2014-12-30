@@ -22,12 +22,13 @@ var fixOutside = true; //moves you back inside the central cell if you leave it
 // var doubleSided = true;
 
 // var decoration = "dodecahedron";
-var decoration = "dodecahedronThinner";
+// var decoration = "dodecahedronThinner";
 // var decoration = "dodecDual";
 // var decoration = "giftsDodec";
+var decoration = "SeifertWeberMonkeyLowRes";
 
-var doubleSided = true;
-// var doubleSided = false;
+// var doubleSided = true;
+var doubleSided = false;
 
 var numObjects = 1; //number of obj files to load
 var numGens = tilingGens.length;

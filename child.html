@@ -27,7 +27,31 @@
 		<audio id='music' src="media/child1.ogg" autoplay=true loop=true/>
 		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/> 
 		<audio id='bing' src="media/bing.ogg" >
-		<audio id='fishNoise' src="media/fishNoise.ogg" >  
+		<audio id='fishNoise' src="media/fishNoise.ogg" > 
+		<audio id='cube1' src="media/cube1.ogg" > 
+		<audio id='cube2' src="media/cube2.ogg" > 
+		<audio id='cube3' src="media/cube3.ogg" > 
+		<audio id='cube4' src="media/cube4.ogg" > 
+		<audio id='cube5' src="media/cube5.ogg" > 
+		<audio id='cube6' src="media/cube6.ogg" > 
+		<audio id='cube7' src="media/cube7.ogg" > 
+		<audio id='cube8' src="media/cube8.ogg" > 
+		<audio id='cube9' src="media/cube9.ogg" > 
+		<audio id='cube10' src="media/cube10.ogg" > 
+		<audio id='cube11' src="media/cube11.ogg" > 
+		<audio id='cube12' src="media/cube12.ogg" > 
+		<audio id='cubeUp1' src="media/cubeUp1.ogg" >
+		<audio id='cubeUp2' src="media/cubeUp2.ogg" >
+		<audio id='cubeUp3' src="media/cubeUp3.ogg" >
+		<audio id='cubeUp4' src="media/cubeUp4.ogg" >
+		<audio id='cubeUp5' src="media/cubeUp5.ogg" >
+		<audio id='cubeUp6' src="media/cubeUp6.ogg" >
+		<audio id='cubeUp7' src="media/cubeUp7.ogg" >
+		<audio id='cubeUp8' src="media/cubeUp8.ogg" >
+		<audio id='cubeUp9' src="media/cubeUp9.ogg" >
+		<audio id='cubeUp10' src="media/cubeUp10.ogg" >
+		<audio id='cubeUp11' src="media/cubeUp11.ogg" >
+		<audio id='cubeUp12' src="media/cubeUp12.ogg" >  
 	</body>
 
 	<!--
@@ -95,6 +119,32 @@
   		var music2 = document.querySelector('#music2');	
   		var bing = document.querySelector('#bing');	
   		var fishNoise = document.querySelector('#fishNoise');
+  		var cubeSfx = [
+  			document.querySelector('#cube1'),
+  			document.querySelector('#cube2'),
+  			document.querySelector('#cube3'),
+  			document.querySelector('#cube4'),
+  			document.querySelector('#cube5'),
+  			document.querySelector('#cube6'),
+  			document.querySelector('#cube7'),
+  			document.querySelector('#cube8'),
+  			document.querySelector('#cube9'),
+  			document.querySelector('#cube10'),
+  			document.querySelector('#cube11'),
+  			document.querySelector('#cube12'),
+  			document.querySelector('#cubeUp1'),
+  			document.querySelector('#cubeUp2'),
+  			document.querySelector('#cubeUp3'),
+  			document.querySelector('#cubeUp4'),
+  			document.querySelector('#cubeUp5'),
+  			document.querySelector('#cubeUp6'),
+  			document.querySelector('#cubeUp7'),
+  			document.querySelector('#cubeUp8'),
+  			document.querySelector('#cubeUp9'),
+  			document.querySelector('#cubeUp10'),
+  			document.querySelector('#cubeUp11'),
+  			document.querySelector('#cubeUp12'),]
+
   		var wanderTime = 0;
   		var newPos = new THREE.Vector3(0,0,0);
   		var boing = 0;
@@ -174,15 +224,39 @@
 		for (var p = 0; p<icosCount; p++){
 			icosArray[p] = new THREE.Mesh(icosGeom, icosMat);
 			icosArray[p].position.set(
-				Math.random()*100 -50, 
+				Math.random()*120 -60, 
 				Math.random()*10 -30, 
-				Math.random()*100 -50);
-			if (dodecArray[p].position.distanceTo(camera.position) < 10){
-				dodecArray[p].position.z += 20;
-			}
+				Math.random()*120 -60);
 			size = Math.random()*20;
 			icosArray[p].scale.set(size, size, size);
 			scene.add(icosArray[p]);
+		}
+
+		//cubes
+		var cubeSpot = new THREE.Vector3();
+		while (cubeSpot.distanceTo(camera.position) < 50){
+			cubeSpot = new THREE.Vector3(
+			Math.random()*120 - 60, 
+			camera.position.y, 
+			Math.random()*120 - 60);
+		}	
+
+		var cubeArray = [];
+		var cubeCount = 12;
+
+		for (var p = 0; p<cubeCount; p++){
+			cubeArray[p] = new THREE.Mesh(
+				new THREE.BoxGeometry(4,4,4,4,6+Math.floor(Math.random()*90),4), 
+				new THREE.MeshLambertMaterial({wireframe:true}));
+			cubeArray[p].material.color.setRGB(Math.random()+.5, Math.random()/2 + .2, Math.random()+.3);
+			cubeArray[p].position.y = cubeSpot.y;
+			cubeArray[p].position.x = cubeSpot.x + 4*Math.floor(Math.random()*4);
+			cubeArray[p].position.z = cubeSpot.z + 4*Math.floor(Math.random()*4);
+			if (Math.random() < .16){
+				cubeArray[p].position.x *= -1;
+				cubeArray[p].position.z *= -1;
+			}
+			scene.add(cubeArray[p]);
 		}
 
 		//tetrahedron
@@ -194,8 +268,8 @@
 			Math.random()*80 - 40,
 			-30,
 			Math.random()*80 - 40);
-		if (tet.position.distanceTo(camera.position) < 10){
-			tet.position.z -= 20;
+		while (tet.position.distanceTo(camera.position) < 10 || tet.position.distanceTo(cubeSpot)<10){
+			tet.position.z += 20;
 		}
 		scene.add(tet);
 
@@ -244,18 +318,24 @@
 		var fishLight =new THREE.PointLight( 0x88ffff, .8, 5);
 		scene.add(fishLight);
 
+		var cubeLight =new THREE.PointLight( 0xffddff, .9, 35);
+		cubeLight.position.x = cubeSpot.x + 12;
+		cubeLight.position.y = cubeSpot.y;
+		cubeLight.position.z = cubeSpot.z + 12;
+		scene.add(cubeLight);
+
 		var boingLight =new THREE.PointLight( 0xff0000, .6, 4);
 		boingLight.position.set(tet.position.x,tet.position.y,tet.position.z);
 		scene.add(boingLight);
 
 		var goldLight = new THREE.PointLight( 0xffdd00, .6, 10);
-		goldLight.position.set(
-				Math.random()*100 -50, 
-				Math.random()*18 -44,
-				Math.random()*100 -50);
-			if (goldLight.position.distanceTo(camera.position) < 10){
-				goldLight.position.z += 20;
-			}
+		goldLight.position.y = camera.position.y;
+		while (goldLight.position.distanceTo(camera.position) < 10 || goldLight.position.distanceTo(tet.position) < 10 || goldLight.position.distanceTo(cubeSpot) < 10){
+			goldLight.position.set(
+			Math.random()*100 -50, 
+			Math.random()*18 -44,
+			Math.random()*100 -50);
+		}
 		goldLight.castShadow = false; 
 		scene.add( goldLight );	
 
@@ -263,6 +343,23 @@
 		Request animation frame loop function
 		*/
 		function animate() {
+
+			//cube stretch stuff
+			for (var i = 0; i<cubeCount; i++){
+				if ( camera.position.distanceTo(cubeArray[i].position) < 2){
+					if ( cubeArray[i].geometry.heightSegments/4 > cubeArray[i].scale.y){
+						cubeSfx[i+cubeCount].play();
+						cubeArray[i].scale.y += .05;
+					}
+				} else {
+					if ( cubeArray[i].scale.y > 1){
+						cubeSfx[i].volume = Math.min(1, 2/cubeArray[i].position.distanceTo(camera.position));
+						cubeSfx[i].play();
+						cubeArray[i].scale.y -= .004;
+					}
+				}
+			}
+
 			//octoFlock
 			for (var i = 0; i<octCount; i++){
 				octArray[i].position.y += Math.sin(t*5*octVelocity[i])/50;
@@ -273,17 +370,10 @@
 			octFlock.position.z += Math.cos(t)/16 + Math.sin(t/3)/18;
 			fishLight.position.set(octFlock.position.x,octFlock.position.y,octFlock.position.z);
 
-
-			// particleSystem.material.color.setHex(0x0000ff);
-
 			if(camera.position.distanceTo(octFlock.position)<10){ //octfish react
 				fishy = Math.max(0, fishy - .001);
 				particleSystem.material.color.setRGB(fishy,fishy,1);
-				
-				if (!music.paused){
-					fishNoise.volume = Math.min(1, 4/fishLight.position.distanceTo(camera.position));
-					fishNoise.play();
-				}
+				fishNoise.play();
 			} else if (fishy < 1) { //go back to normal once out of range
 				fishy += .004;
 				particleSystem.material.color.setRGB(fishy,fishy,1);
@@ -326,11 +416,12 @@
 			} else if (foundLight == 1){ //found the light, make it glow
 				music.volume = (99*music.volume + .000001)/100;
 				music2.volume = (99*music2.volume + .999)/100;
+				particleSystem.material.color.setRGB(1,1,1.6-goldLight.intensity);
 				goldLight.intensity += .005;
-				goldLight.distance += .5;
-				if (goldLight.intensity > 2){
+				goldLight.distance += .7;
+				if (goldLight.intensity > 2.5){
 					goldLight.distance = (19 * goldLight.distance + 12) / 20;
-					if (goldLight.intensity > 3){
+					if (goldLight.intensity > 4){
 						newPos.set(
 							Math.random()*100 -50, 
 							Math.random()*18 -44,
@@ -343,6 +434,7 @@
 				goldLight.position.x += Math.sin(t/2)*Math.random()/4;
 				goldLight.position.z += Math.cos(t/2)*Math.random()/4;
 				music2.volume = Math.min(1, 10/goldLight.position.distanceTo(camera.position));
+				particleSystem.material.color.setRGB(1,1,1-music2.volume);
 				wanderTime += .01
 				if (wanderTime > 10){//light settles into new random place
 					goldLight.position.x = (199*goldLight.position.x + newPos.x)/200;
@@ -351,6 +443,7 @@
 					goldLight.intensity -= .004;
 				}
 				if (wanderTime > 15){//reset light
+					particleSystem.material.color.setRGB(1,1,1);
 					goldLight.distance = 10;
 					goldLight.intensity = .6;
 					foundLight = 0;
@@ -432,13 +525,21 @@
 	  		if (music.paused){
 	  			music.play();
 	  			music2.play();
-	  			bing.volume = 1;
-	  			fishNoise.volume = 1;
+	  			bing.muted = false;
+	  			cubeUp1.muted = false;
+	  			fishNoise.muted = false;
+	  			for (var i=0; i<cubeSfx.length; i++){
+	  				cubeSfx[i].muted = false;
+	  			}
 	  		} else{
 	  			music.pause();	
 	  			music2.pause();
-	  			bing.volume = 0;
-	  			fishNoise.volume = 0;
+	  			bing.muted = true;
+	  			cubeUp1.muted = true;
+	  			fishNoise.muted = true;
+	  			for (var i=0; i<cubeSfx.length; i++){
+	  				cubeSfx[i].muted = true;
+	  			}
 	  		}
 	  	}
 

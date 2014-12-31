@@ -26,6 +26,7 @@ var fixOutside = true; //moves you back inside the central cell if you leave it
 // var decoration = "dodecDual";
 // var decoration = "giftsDodec";
 var decoration = "SeifertWeberMonkeyLowRes";
+// var decoration = "DodecNonMonkeyDirections";
 
 // var doubleSided = true;
 var doubleSided = false;

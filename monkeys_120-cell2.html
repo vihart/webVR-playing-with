@@ -146,6 +146,43 @@ vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
     return vec3(newCol.x*0.5 + 0.5,newCol.y*0.5 + 0.5,newCol.z*0.5 + 0.5);
 }
 
+vec3 HopfColor2( in vec4 nBase )
+{    
+    // vec4 n = nBase;
+    // first rotate the 4D normal to a space aligned with the 120-cell
+    float cosx = sqrt( 0.1*(5.+sqrt(5.)) );
+    float sinx = sqrt( 0.1*(5.-sqrt(5.)) );
+    // mat4 mat = mat4( vec4(1.,0.,0.,0.), vec4(0.,cosx,-sinx,0.), vec4(0.,sinx,cosx,0.),  vec4(0.,0.,0.,1.) ); //hand tail
+    mat4 mat = mat4( vec4(1.,0.,0.,0.), vec4(0.,sinx,0.,cosx),  vec4(0.,0.,1.,0.), vec4(0.,cosx,0.,-sinx) );
+
+    vec4 n = mat * nBase;
+    // compute the color
+
+    float x = n.x;
+    float y = n.y;
+    float v = n.z;
+    float u = n.w;
+
+    float r = 2. * (u*x + v*y);
+    float g = 2. * (u*y - v*x);
+    float b = x*x + y*y - u*u - v*v;
+
+    /// first two coords are 2*z*conj(w), where z = x+iy, w = u+iv
+
+    //now rotate so that (0,0,1) becomes (-1,-1,-1)/sqrt(3)
+    vec3 newCol = vec3(r,g,b);
+    float cosx1 = -1./sqrt(3.);
+    float sinx1 = sqrt(2./3.);
+    mat3 M1 = mat3( vec3(1.,0.,0.), vec3(0.,cosx1,sinx1), vec3(0.,-sinx1,cosx1) );
+    newCol = M1 * newCol; 
+    float cosx2 = 1./sqrt(2.);
+    float sinx2 = 1./sqrt(2.);
+    mat3 M2 = mat3( vec3(cosx2,sinx2,0.), vec3(-sinx2,cosx2,0.), vec3(0.,0.,1.) );
+    newCol = M2 * newCol;
+
+    return vec3(newCol.x*0.5 + 0.5,newCol.y*0.5 + 0.5,newCol.z*0.5 + 0.5);
+}
+
 // output
 varying vec3 vColor; // this shader computes the color of each vertex
 
@@ -185,9 +222,9 @@ void main()
     // vColor = HopfColor(n);
     // vColor = HopfColor(p);
 	
-    vec3 nColor = HopfColor(nt0);
-    vec3 pColor = HopfColor(pt0);
-    vColor = -0.5*(nColor-vec3(0.5,0.5,0.5)) + 01.0*(pColor-vec3(0.5,0.5,0.5)) + vec3(0.5,0.5,0.5);
+    vec3 nColor = HopfColor2(nt0);
+    vec3 pColor = HopfColor2(pt0);
+    vColor = -0.5*(nColor-vec3(0.5,0.5,0.5)) + 1.0*(pColor);
     // vColor = pColor;
 
 	// take the final 3D position and project it onto the screen
@@ -275,7 +312,8 @@ var quatPerMonkeyArray = centers_120_cell;
 var numMonkeys = quatPerMonkeyArray.length;
 var matArray = new Array(numMonkeys);
 
-var travelDir = centers_120_cell[7];  //good for HopfColor
+// var travelDir = centers_120_cell[7];  //good for HopfColor
+var travelDir = centers_120_cell[1];
 
 init();
 animate();

@@ -15,24 +15,19 @@ var currentBoost = new THREE.Matrix4().set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 var fixOutside = true; //moves you back inside the central cell if you leave it
 
 var decorationArray = [
-  'monkey', 
-  'cubeDual', 
-  'truncatedCube', 
-  'truncatedCubeTrisOnly',
-  'truncatedCubeBdry', 
-  'truncatedCubeMinimal',
-  'screen2Cube',
-  'cube',
-  'rhombicDodec'
+  'rhombicDodec', 
+  'rhombicDodecThinner2',
+  'rhombicDodecVerts'  
   ];
 
-var decoration = "truncatedCube";
+var decoration = "rhombicDodecThinner2";
 
-var doubleSided = false;
+// var doubleSided = false;
+var doubleSided = true;
 
 var numObjects = 1; //number of obj files to load
 var numGens = tilingGens.length;
-var tilingDepth = 4; 
+var tilingDepth = 3; 
 
 var unpackPair = makeTsfmsList( tilingGens, tilingDepth );
 var tsfms = unpackPair[0];

@@ -4,13 +4,26 @@ THREE.Matrix4.prototype.add = function (m) {
   this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
 };
 
-function areSameMatrix(mat1, mat2) {
-	delta = 0.0001;
-	for (var coord=0; coord<16; coord++) {
+// function areSameMatrix(mat1, mat2) {
+// 	var delta = 0.0001;
+// 	for (var coord=0; coord<16; coord++) {
+// 		if (Math.abs(mat1.elements[coord] - mat2.elements[coord]) > delta) {
+// 			return false;
+// 		}
+// 	}
+// 	return true;
+// }
+
+function areSameMatrix(mat1, mat2) {  //look only at last column - center of cell
+	var delta = 0.01;
+	for (var coord=3; coord<16; coord+=4) {
 		if (Math.abs(mat1.elements[coord] - mat2.elements[coord]) > delta) {
 			return false;
 		}
 	}
+	console.log('same matrix')
+	console.log(mat1.elements)
+	console.log(mat2.elements)
 	return true;
 }
 
@@ -56,7 +69,7 @@ function makeTsfmsList( tilingGens, tilingDepth ) {
 	      digits[digits.length] = jcopy % numGens;
 	      jcopy = (jcopy/numGens)|0;
 	    }
-	    // console.log(digits);
+	    console.log(digits);
 	    var newTsfm = new THREE.Matrix4();
 	    for (var l = 0; l < tilingDepth; l++) {
 	      newTsfm = newTsfm.multiply(tilingGens[digits[l]]);

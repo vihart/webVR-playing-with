@@ -116,39 +116,17 @@ vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
 {    
     /////////first rotate the 4D normal to a space aligned with the 120-cell
 
-    //rotate colourDir to lie along (0,0,z,w), fixing (0,0,0,1) 
-    //http://math.stackexchange.com/questions/293116/rotating-one-3-vector-to-another
-    
-    vec3 A = vec3(colourDir.x, colourDir.y, colourDir.z) ;
-    vec3 B = vec3(0.,0.,1.0);
-    vec3 X = normalize( cross(A,B) );
-    float theta = acos(dot(A,B)/(length(A)*length(B))); ///dont care about sign
-    mat3 foo = mat3( vec3(0.,X.z,-X.y), //input is column vectors
-                     vec3(-X.z,0.,X.x),
-                     vec3(X.y,-X.x,0.)
-                        );
-    mat3 Rot = mat3(1.0) + sin(theta)*foo + (1.-cos(theta))*foo*foo;
+    // want to rotate colourDir to lie along (0,0,z,w), 
 
-    //input is column vectors
-    mat4 mat = mat4( vec4(Rot[0][0],Rot[0][1],Rot[0][2],0.),
-                     vec4(Rot[1][0],Rot[1][1],Rot[1][2],0.),
-                     vec4(Rot[2][0],Rot[2][1],Rot[2][2],0.),
-                     vec4(0.,0.,0.,1.0)
-    );
+    float cosx = sqrt( 0.1*(5.+sqrt(5.)) );
+    float sinx = sqrt( 0.1*(5.-sqrt(5.)) );
+    // mat4 mat = mat4( vec4(1.,0.,0.,0.), vec4(0.,cosx,-sinx,0.),  vec4(0.,sinx,cosx,0.), vec4(0.,0.,0.,1.) );
+    mat4 mat = mat4( vec4(-sinx,0.,cosx,0.), vec4(0.,1.,0.,0.),  vec4(cosx,0.,sinx,0.), vec4(0.,0.,0.,1.) );
 
-    // mat4 mat = mat4( vec4(-0.525731, 0., 0.850651,0.),
-    //                  vec4(0., 1., 0.,0.),
-    //                  vec4(-0.850651, 0., -0.525731,0.),
-    //                  vec4(0.,0.,0.,1.0)
-    // );
-
-    // float cosx = sqrt( 0.1*(5.+sqrt(5.)) );
-    // float sinx = sqrt( 0.1*(5.-sqrt(5.)) );
-    // // mat4 mat = mat4( vec4(1.,0.,0.,0.), vec4(0.,cosx,-sinx,0.),  vec4(0.,sinx,cosx,0.), vec4(0.,0.,0.,1.) );
-    // mat4 mat = mat4( vec4(-sinx,0.,cosx,0.), vec4(0.,1.,0.,0.),  vec4(cosx,0.,sinx,0.), vec4(0.,0.,0.,1.) );
 
     vec4 n = mat * nBase;
 	// compute the color
+    // vec4 n = nBase;
 
     float x = n.x;
     float y = n.y;
@@ -162,7 +140,9 @@ vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
     /// first two coords are 2*z*conj(w), where z = x+iy, w = u+iv
 
     /// rotate [0,0,-1] to [-1,-1,-1]/sqrt(3)
-
+    // mat3 RotDownToDiag = mat3( vec3(0.707107, 0.408248, 0.57735), 
+    //                            vec3(-0.707107, 0.408248, 0.57735), 
+    //                            vec3(0., -0.816497, 0.57735) );
     mat3 RotDownToDiag = mat3( vec3(0.707107, -0.707107, 0.),       ///// input columns not rows?!?!?!
                                vec3(0.408248, 0.408248, -0.816497), 
                                vec3(0.57735, 0.57735, 0.57735) );
@@ -187,7 +167,7 @@ void main()
     vec4 p3sphere = normalize( vec4(-position.zyx,  3.07768) );
 	
 	// then rotate using this monkey's quaternion to place in 4D
-    vec4 pt0 = quatMult( quatPerMonkey, p3sphere ); //position at time = 0
+    vec4 pt0 = quatMult( p3sphere, quatPerMonkey ); //position at time = 0
 
 	// this is the normal to the point
 	// same concept as for the position, but we add a 0 as the w component
@@ -196,14 +176,14 @@ void main()
     // normal on the 3-sphere
     n3sphere = projVecPerp( n3sphere, p3sphere ); 
     // rotate the normal using this monkey's quaternion 
-	vec4 nt0 = quatMult(quatPerMonkey, n3sphere );
+	vec4 nt0 = quatMult( n3sphere, quatPerMonkey );
 
  //    // also rotate everything over time
-    vec4 quatOverTime = pointOnS3Geod( vec4(0,0,0,1), travelDir, 0.5*time );
-    // vec4 quatOverTime = vec4(0,0,0,1);
+    // vec4 quatOverTime = pointOnS3Geod( vec4(0,0,0,1), travelDir, 0.5*time );
+    vec4 quatOverTime = vec4(0,0,0,1);
 
-    vec4 p = quatMult( quatOverTime, pt0 );
-    vec4 n = quatMult( quatOverTime, nt0 );
+    vec4 p = quatMult( pt0, quatOverTime );
+    vec4 n = quatMult( nt0, quatOverTime );
 
     // stereographic projection from 4D to 3D
     vec3 pos3 = vec3( p.x / (-1.0-p.w), p.y / (-1.0-p.w), p.z / (-1.0-p.w) );
@@ -214,9 +194,8 @@ void main()
 	
     vec3 nColor = HopfColor(nt0);
     vec3 pColor = HopfColor(pt0);
-    vColor = -0.5*(nColor-vec3(0.5,0.5,0.5)) + 1.0*(pColor-vec3(0.5,0.5,0.5)) + vec3(0.5,0.5,0.5);
-    // vColor = pColor;
-    // vColor = nColor;
+    // vColor = -0.2*(nColor-vec3(0.5,0.5,0.5)) + 1.0*(pColor-vec3(0.5,0.5,0.5)) + vec3(0.5,0.5,0.5);
+    vColor = pColor;
 
 	// take the final 3D position and project it onto the screen
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
@@ -373,7 +352,7 @@ function init()
 	// load the monkey mesh
     var manager = new THREE.LoadingManager();
     var loader = new THREE.OBJLoader(manager);
-    loader.load('media/120-cell_monkey_lowpoly_003_left_screw.obj', function (object) {
+    loader.load('media/120-cell_monkey_lowpoly_003_flip_normals.obj', function (object) {
     // loader.load('media/dodecDualRot90.obj', function (object) {
 
 		// make numMonkeys copies of the mesh and assign them a unique material out of the numMonkeys we created previously

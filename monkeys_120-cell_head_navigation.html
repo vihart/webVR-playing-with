@@ -462,7 +462,11 @@ function animate() {
         matArray[i].uniforms['headQuat'].value = headQuat;
     }
     if(controls.getVRState() !== null){
-        headQuat = controls.getVRState().hmd.rotation;
+        headQuat = new THREE.Vector4();
+        headQuat.x = controls.getVRState().hmd.rotation[0];
+        headQuat.y = controls.getVRState().hmd.rotation[1];
+        headQuat.z = controls.getVRState().hmd.rotation[2];
+        headQuat.w = controls.getVRState().hmd.rotation[3];
     }
 
     controls.update();

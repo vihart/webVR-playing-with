@@ -188,7 +188,7 @@
 
 		//special dodecahome
 		var dodecahome = new THREE.Mesh(
-			new THREE.DodecahedronGeometry(12),
+			new THREE.DodecahedronGeometry(14),
 			new THREE.MeshLambertMaterial());
 		dodecahome.position.y = camera.position.y;
 		while (dodecahome.position.distanceTo(camera.position) < 20){
@@ -246,7 +246,7 @@
 				Math.random()*100 -50, 
 				Math.random()*18 -44,
 				Math.random()*100 -50);
-			if (dodecArray[p].position.distanceTo(camera.position) < 10 || dodecArray[p].position.distanceTo(dodecahome.position) < 7){
+			if (dodecArray[p].position.distanceTo(camera.position) < 10 || dodecArray[p].position.distanceTo(dodecahome.position) < 9){
 				dodecArray[p].position.z += 20;
 			}
 			size = Math.random()*8;
@@ -285,7 +285,7 @@
 
 		//cubes
 		var cubeSpot = new THREE.Vector3();
-		while (cubeSpot.distanceTo(camera.position) < 50 || cubeSpot.distanceTo(dodecahome.position) < 20){
+		while (cubeSpot.distanceTo(camera.position) < 50 || cubeSpot.distanceTo(dodecahome.position) < 25){
 			cubeSpot = new THREE.Vector3(
 			Math.random()*120 - 60, 
 			camera.position.y, 
@@ -316,7 +316,7 @@
 			new THREE.MeshLambertMaterial({color: 0xff4400})
 			);
 		tet.position.y = camera.position.y;
-		while (tet.position.distanceTo(camera.position) < 10 || tet.position.distanceTo(cubeSpot)<10 || tet.position.distanceTo(dodecahome.position) < 14){
+		while (tet.position.distanceTo(camera.position) < 10 || tet.position.distanceTo(cubeSpot)<10 || tet.position.distanceTo(dodecahome.position) < 15){
 			tet.position.set(
 				Math.random()*80 - 40,
 				-30,
@@ -350,6 +350,103 @@
 			);
 		scene.add(octFlock);
 
+
+		//special winning icosahedron
+
+		var win = new THREE.Object3D();
+
+		var icosign = new THREE.Mesh(
+			new THREE.IcosahedronGeometry(1),
+			new THREE.MeshLambertMaterial({wireframe:true, wireframeLinewidth: 2})
+			);
+		win.add(icosign);
+
+		//special icosahedron vertices
+
+		var icosignVertex = [];
+
+		for (var i = 0; i<12; i++){
+			icosignVertex[i] = new THREE.Mesh(
+				new THREE.BoxGeometry(.01, .01, .01),
+				new THREE.MeshLambertMaterial({color: cubeArray[i].material.color})
+				);
+			icosignVertex[i].position.set(
+				icosign.geometry.vertices[i].x, 
+				icosign.geometry.vertices[i].y, 
+				icosign.geometry.vertices[i].z
+				);
+			win.add(icosignVertex[i]);
+		}
+
+		var icosignFace = [];
+
+		for (var i = 0; i<20; i++){
+			icosignFace[i] = new THREE.Mesh(
+				new THREE.TetrahedronGeometry(.1),
+				new THREE.MeshLambertMaterial({color: 0xff3333})
+				);
+			icosignFace[i].geometry.vertices[3].set( 
+				(icosign.geometry.vertices[icosign.geometry.faces[i].a].x 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].x 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].x)/3
+				+icosign.geometry.faces[i].normal.x/3,
+
+				(icosign.geometry.vertices[icosign.geometry.faces[i].a].y 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].y 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].y)/3
+				+icosign.geometry.faces[i].normal.y/3,
+
+				(icosign.geometry.vertices[icosign.geometry.faces[i].a].z 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].z 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].z)/3
+				+icosign.geometry.faces[i].normal.z/3
+				);
+			icosignFace[i].geometry.vertices[0].set( 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].x 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].x)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].x)/2,
+
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].y 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].y)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].y)/2,
+
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].z 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].z)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].z)/2
+				);
+			icosignFace[i].geometry.vertices[1].set( 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].b].x 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].x)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].a].x)/2,
+
+				((icosign.geometry.vertices[icosign.geometry.faces[i].b].y 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].y)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].a].y)/2,
+
+				((icosign.geometry.vertices[icosign.geometry.faces[i].b].z 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].z)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].a].z)/2
+				);
+			icosignFace[i].geometry.vertices[2].set( 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].x 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].x)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].x)/2,
+
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].y 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].y)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].y)/2,
+
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].z 
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].z)/2
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].z)/2
+				);
+			icosignFace[i].material.visible = false;
+			win.add(icosignFace[i]);
+		}
+
+		win.position.set(-3, camera.position.y, -3);
+		scene.add(win);
+
 		//create light
 		var light = new THREE.SpotLight( 0xffffff, .8, 800);
 		light.position.set( -50,20,.1);
@@ -379,12 +476,12 @@
 		boingLight.position.set(tet.position.x,tet.position.y,tet.position.z);
 		scene.add(boingLight);
 
-		var dodecLight =new THREE.PointLight( 0x0000ff, .25, 13);
+		var dodecLight =new THREE.PointLight( 0x0000ff, .25, 15);
 		dodecLight.position.set(dodecahome.position.x, dodecahome.position.y+2, dodecahome.position.z-2);
 		light3.castShadow = true;
 		scene.add(dodecLight);
 
-		var dodecLight2 =new THREE.PointLight( 0xff0000, .3, 13);
+		var dodecLight2 =new THREE.PointLight( 0xff0000, .3, 15);
 		dodecLight2.position.set(dodecahome.position.x, dodecahome.position.y-2, dodecahome.position.z+2);
 		light3.castShadow = true;
 		scene.add(dodecLight2);			
@@ -403,10 +500,43 @@
 		var partVector = new THREE.Vector3;
 		var boingVector = new THREE.Vector3;
 
+		var fishyWin1 = false;
+		var fishyWin2 = false;
+		var cubeWin = false;
+		var lightWin = false;
+		var dodecWin = false;
+		var boingWin = 0;
+
 		/*
 		Request animation frame loop function
 		*/
 		function animate() {
+
+
+			//win states
+			if (fishyWin1){//find fish
+				icosign.material.wireframeLinewidth += 5*fishy;
+				icosign.material.color.set(0x88ccff);
+			}
+			if (fishyWin2){//get fishy=1
+			fishyWin1 = false;
+			icosign.material.wireframeLinewidth = 10;
+			win.rotation.y += .002;
+			icosign.material.color.set(0x0055ff);
+			}
+			if (boingWin > 0 && boingWin < 21){ //one spikey face per boing
+				icosignFace[boingWin-1].material.visible = true;
+			}
+			if (dodecWin){
+				win.rotation.y += .002;
+			}
+			if (lightWin == false && foundLight == 1){//while winning, stops when won
+				win.scale.set(goldLight.distance/2, goldLight.distance/2, goldLight.distance/2);
+				if (foundLight = 2){
+					lightWin = true;
+				}
+			}
+
 
 			//cube stretch stuff
 			for (var i = 0; i<cubeCount; i++){
@@ -414,6 +544,7 @@
 					if ( cubeArray[i].geometry.heightSegments/4 > cubeArray[i].scale.y){
 						cubeSfx[i+cubeCount].play();
 						cubeArray[i].scale.y += .05;
+						icosignVertex[i].scale.set(10,10,10);
 					}
 				} else {
 					if ( cubeArray[i].scale.y > 1){
@@ -437,14 +568,16 @@
 			if(camera.position.distanceTo(octFlock.position)<10){ //octfish react
 				fishy = Math.max(0, fishy - .001); //fishy starts at 1 and goes to 0
 				particleSystem.material.color.setRGB(fishy,fishy,1);
-				particleSystem.rotation.y += .02 * (1-fishy);
 				fishNoise.play();
+				fishyWin1 = !fishyWin2;
+				if (fishy > .99){
+					fishyWin2 = true;
+				}
 			} else if (fishy < 1) { //go back to normal once out of range
 				fishy += .004;
 				particleSystem.material.color.setRGB(fishy,fishy,1);
-				particleSystem.rotation.y += .05 * (1-fishy);
 			}
-			if (octFlock.position.distanceTo(dodecahome.position)<12.5){
+			if (octFlock.position.distanceTo(dodecahome.position)<14.5){
 					octFlock.position.x += 12;
 					octFlock.position.z += 12;
 			}
@@ -455,6 +588,7 @@
 			if(camera.position.distanceTo(tet.position)<1.5){ //boing if close
 				bing.play();
 				boing = 3;
+				boingWin += 1;
 			}
 			if (boing>0){ //boing backwards briefly
 				var boingVector = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion)
@@ -554,7 +688,12 @@
 					particles.vertices[p].z += boing*partVector.sub(tet.position).z/400;
 				}
 
-				if (particles.vertices[p].distanceTo(dodecahome.position)<12.5){//avoid dodecahome
+				if (fishy < 1){
+					particles.vertices[p].x += Math.sin(particles.vertices[p].z/10)/(15*fishy+2);
+					particles.vertices[p].z += Math.cos(particles.vertices[p].x/10)/(15*fishy+2);
+				}
+
+				if (particles.vertices[p].distanceTo(dodecahome.position)<14.5){//avoid dodecahome
 					particles.vertices[p].velocity.y = 0;
 					particles.vertices[p].y += .2;
 				}
@@ -572,9 +711,10 @@
 			    particles2.vertices[p].x += Math.cos(2*t+40*particles2.vertices[p].velocity.y)/33;
 		 	 }
 
-		 	if ( camera.position.distanceTo(dodecahome.position) < 14) {
+		 	if ( camera.position.distanceTo(dodecahome.position) < 16) {
 		 		music.volume = (9*music.volume + .000001)/10;
 		 		child3.play();
+		 		dodecWin = true;
 		 	}
 		 	child3.volume = Math.min(1, 2/camera.position.distanceTo(dodecahome.position));
 

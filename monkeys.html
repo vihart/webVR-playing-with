@@ -290,7 +290,7 @@ var HopfColorMatrix = makeHopfColorMatrix(colourDir);
 var modelScaleDict = {"8":1, "24":50, "24dual":50, "24both":50, "120":3.07768}
 var modelScale = modelScaleDict[polychoron];
 
-var modelFileNameDict = {"8":'media/monkey_15k_tris.obj', 
+var modelFileNameDict = {"8":'media/monkey_15k_tris_closed.obj', 
                         "24":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
                         "24dual":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
                         "24both":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
@@ -440,7 +440,7 @@ function selectPolychora(event) {
 
   var keySelect = event.keyCode - 48; //1 is 49
 
-  if (keySelect > 0 && keySelect < 10){
+  if (keySelect > 0 && keySelect < 6){
      if (scene) {
        while (scene.children.length > 0) {
            scene.remove(scene.children[scene.children.length - 1]);
@@ -479,7 +479,7 @@ function selectPolychora(event) {
 		//listen for click
 
 		document.body.addEventListener( 'click', function(){
-			clicky = (clicky + 1) % 4;
+			clicky = (clicky + 1) % 2;
 		})
 		/*
 		Listen for double click event to enter full-screen VR mode

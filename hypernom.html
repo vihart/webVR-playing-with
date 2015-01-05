@@ -2,17 +2,17 @@
 
 <html lang="en">
 	<head>
-		<title>Quaternion Monkeys</title>
+		<title>HYPERNOM</title>
 		
 		<!--
-		4D Monkeys
 
-		interactive webVR version (by Marc ten Bosch and Vi Hart) of a 4d monkey sculpture (by Henry Segerman and Will Segerman) inspired by work on 4 dimensional symmetry groups (by Henry Segerman and Vi Hart) inspired by work on 4d graphics (by Marc ten Bosch) and 3d modeling (by Will Segerman).
+        Nom all the cells of each 4d platonic solid, by mapping your head rotations to s^3. By Henry Segerman and Vi Hart.
+
+		Inspired by an interactive webVR version (by Marc ten Bosch and Vi Hart) of a 4d monkey sculpture (by Henry Segerman and Will Segerman) inspired by work on 4 dimensional symmetry groups (by Henry Segerman and Vi Hart) inspired by work on 4d graphics (by Marc ten Bosch)
 
 		http://www.marctenbosch.com
 		http://vihart.com
 		http://www.segerman.org/
-		http://www.willsegerman.com/
 
 
 		It has oculus support for webVR browsers (thanks Mozilla!)
@@ -20,8 +20,7 @@
 		https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate
 
 		And WASD + E/Q navigation support both in and out of VR (thanks, Andrea Hawksley!)
-		Enter to go into VR mode, S for sound,
-		Space to click links based on camera rotation
+		Enter or f to go into VR mode, space or p to enable/disable sound
 		
 		https://github.com/hawksley
 
@@ -72,12 +71,20 @@
 	-->
 	<script src="js/VREffect.js"></script>
 
-    <!-- Quaternions for the centers of the cells of the 120-cell -->
-<script src="js/centers_120_cell.js"></script>
+<script src="js/sphMath.js"></script>
+    <!-- Quaternions for the centers of the cells -->
+<script src="js/centers_600_cell.js"></script>
+    <script src="js/centers_5_cell.js"></script>
+    <script src="js/centers_8_cell.js"></script>
+    <script src="js/centers_16_cell.js"></script>
+    <script src="js/centers_24_cell.js"></script>
+    <script src="js/centers_120_cell.js"></script>
 
 <script src="js/loaders/OBJLoader.js"></script>  
 
-<script src="js/sphMath.js"></script>
+
+<!--font from http://mrdoob.github.com/three.js/examples/fonts/helvetiker_regular.typeface.js -->
+<script src="lib/helvetiker.js"></script>
  
 <script type="x-shader/x-vertex" id="vertexShader">
 // This shader moves vertices around
@@ -122,7 +129,7 @@ vec4 pointOnS3Geod( in vec4 p, in vec4 q, in float dist)
 
 // input
 uniform float time; // global time in seconds
-uniform vec4 quatPerMonkey; // quaternion that moves this monkey into 4-space, set once per monkey
+uniform vec4 quatPerCell; // quaternion that moves this monkey into 4-space, set once per monkey
 // uniform int fogType; // which type of fog to use
 uniform vec2 mousePos;
 uniform vec4 travelDir; //quaternion for which way we are rotating
@@ -186,7 +193,7 @@ vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
 // output
 varying vec3 vColor; // this shader computes the color of each vertex
 
-// this gets called once per vertex of the monkey mesh (and numMonkeys times since there are numMonkeys monkeys)
+// this gets called once per vertex of the monkey mesh (and numCells times since there are numCells monkeys)
 void main() 
 {
     // base position
@@ -194,10 +201,10 @@ void main()
 	// vec4 p3sphere = normalize( vec4(position.zyx, 1.0) );
 
     // wcoord = (1.0/4.0)*math.sqrt(50-22*math.sqrt(5)) * (7+3*math.sqrt(5))) /// = 3.07768
-    vec4 p3sphere = normalize( vec4(-position.zyx,  3.07768) );
+    vec4 p3sphere = normalize( vec4(1.0 * -position.zyx,  1.0) );
 	
 	// then rotate using this monkey's quaternion to place in 4D
-    vec4 pt0 = quatMult( quatPerMonkey, p3sphere ); //position at time = 0
+    vec4 pt0 = quatMult( quatPerCell, p3sphere ); //position at time = 0
 
 	// this is the normal to the point
 	// same concept as for the position, but we add a 0 as the w component
@@ -206,7 +213,7 @@ void main()
     // normal on the 3-sphere
     n3sphere = projVecPerp( n3sphere, p3sphere ); 
     // rotate the normal using this monkey's quaternion 
-	vec4 nt0 = quatMult(quatPerMonkey, n3sphere );
+	vec4 nt0 = quatMult(quatPerCell, n3sphere );
 
  //    // also rotate everything over time
     // vec4 quatOverTime = pointOnS3Geod( vec4(0,0,0,1), travelDir, 0.5*time );
@@ -255,7 +262,7 @@ void main()
         else 
             fogScale = fogScale / 0.1;
         // mutliply color by this value to make it go to black
-        vColor *= fogScale;
+        // vColor *= fogScale;
     // }
     // else if ( fogType == 2 )
     // {    
@@ -292,6 +299,7 @@ var camera;
 var scene;
 var renderer;
 var mesh;
+var score;
 
 var effect;
 var controls;
@@ -308,14 +316,33 @@ var noms = [
             ];
 var winNoise = document.querySelector('#win');
 var points = 0;
+var muteSound = false;
+var level = 1;
 
 
 // one quaternion per monkey
 
-var quatPerMonkeyArray = centers_120_cell;
+// var quatPerCellArray = centers_120_cell;
+// one quaternion per cell
+var polychoraList = ["5","8","16","24","120","600"];
+var polychoron = polychoraList[1];
+var quatPerCellArrayDict = {"5": centers_5_cell, "8": centers_8_cell, "16": centers_16_cell, "24": centers_24_cell_dual, "120": centers_120_cell, "600": centers_600_cell};
+
+// var quatPerCellArray = centers_24_cell_dual.concat(centers_24_cell); 
+var quatPerCellArray = quatPerCellArrayDict[polychoron]; 
+var modelFileNameDict = {"5": 'media/5-cell_tet.obj',
+                        "8":'media/8-cell_cube_subdiv.obj', 
+                        "16": 'media/16-cell_tet_subdiv.obj',
+                        "24":'media/24-cell_oct_subdiv.obj', 
+                        "120":'media/120-cell_dodec_subdiv.obj',
+                        "600": 'media/600-cell_tet.obj'};
+var nomDistanceDict = {"5": 1.7, "8": 1.1, "16": 1.2, "24": .8, "120": .6, "600": .4};
+var nomDistance = nomDistanceDict[polychoron];
+
+var modelFileName = modelFileNameDict[polychoron];
  
-var numMonkeys = quatPerMonkeyArray.length;
-var matArray = new Array(numMonkeys);
+var numCells = quatPerCellArray.length;
+var matArray = new Array(numCells);
 
 var travelDir = centers_120_cell[3];  //3 is down head/foot
 var colourDir = centers_120_cell[3];
@@ -340,6 +367,35 @@ document.body.addEventListener('dblclick', function () {
 THREE.Matrix4.prototype.add = function (m) {   //addition of matrices needs to be implemented??
   this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
 }; 
+
+function loadStuff(){ 
+
+        // one material per object, since they have a different quaternion
+    for (var i = 0; i < numCells; i++)
+    {
+        matArray[i] = materialBase.clone();
+    }
+
+    // load the mesh
+    var manager = new THREE.LoadingManager();
+    var loader = new THREE.OBJLoader(manager);
+    loader.load(modelFileName, function (object) {
+        // make numCells copies of the mesh and assign them a unique material out of the numCells we created previously
+        for (var i = 0; i < numCells; i++)
+        {
+            objectArray[i] = object.clone();
+
+            objectArray[i].traverse(function (child) {
+                if (child instanceof THREE.Mesh) {
+                    child.material = matArray[i];
+                    child.frustumCulled = false;
+                }
+            });
+
+            scene.add(objectArray[i]);
+        }
+    });
+} 
 
 function makeHopfColorMatrix( colourDir )
 {
@@ -397,7 +453,7 @@ function init()
                 value: 0.0
             },
 			// quaternion that moves this monkey into 4-space, set once per monkey
-            quatPerMonkey: {
+            quatPerCell: {
                 type: "v4",
                 value: new THREE.Vector4( 0, 0, 0, 0 )
             },
@@ -423,7 +479,7 @@ function init()
             },
             headQuat: {
                 type: "v4",
-                value: new THREE.Vector4( 0, 0, 0, 0 )
+                value: new THREE.Vector4( 0, 0, 0, 1 )
             }
         },
         vertexShader: document.getElementById('vertexShader').textContent,
@@ -431,46 +487,41 @@ function init()
     });
     materialBase.side = THREE.FrontSide;
 
-	// one material per monkey, since they have a different quaternion
-    for (var i = 0; i < numMonkeys; i++)
-    {
-        matArray[i] = materialBase.clone();
-    }
+    loadStuff();
 
-	// load the monkey mesh
-    var manager = new THREE.LoadingManager();
-    var loader = new THREE.OBJLoader(manager);
-    loader.load('media/nomDodec.obj', function (object) {
-    // loader.load('media/dodecDualRot90.obj', function (object) {
-
-		// make numMonkeys copies of the mesh and assign them a unique material out of the numMonkeys we created previously
-        for (var i = 0; i < numMonkeys; i++)
-        {
-            objectArray[i] = object.clone();
-
-            objectArray[i].traverse(function (child) {
-                if (child instanceof THREE.Mesh) {
-                    child.material = matArray[i];
-                    child.frustumCulled = false;
-                }
-            });
-
-            scene.add(objectArray[i]);
-        }
-    });
+    // score = new THREE.Mesh( 
+    //     new THREE.TextGeometry('Score'), 
+    //     new THREE.MeshNormalMaterial);
+    // score.scale.set(.001,.001,.001);
+    // score.position.x = -.3;
+    // score.position.z = -.3;
+    // score.position.y = -.3;
+    // score.lookAt(camera.position);
+    // scene.add(score);
 
     window.addEventListener('resize', onWindowResize, false);
 
     effect.render(scene, camera);
 }
 
+
+
 function animate() {
 
-    
+
+    // score.lookAt(camera.position);
+    // var camPos = new THREE.Vector3();
+    // camPos.set(camera.position.x, camera.position.y, camera.position.z);
+    // camPos.add(getFwdVector().multiplyScalar(-.2));
+    // // score.position.z -= .01;
+    // score.position.x = camPos.x; 
+    // score.position.y = camPos.y; 
+    // score.position.z = camPos.z;
+
 	// send the time every frame so that we can rotate the monkeys over time
-    for (var i = 0; i < numMonkeys; i++)
+    for (var i = 0; i < numCells; i++)
     {
-        matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
+        matArray[i].uniforms['quatPerCell'].value = quatPerCellArray[i];
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
         // matArray[i].uniforms['fogType'].value = clicky;
         // matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
@@ -480,8 +531,13 @@ function animate() {
         matArray[i].uniforms['headQuat'].value = headQuat;
     }
 
-    if(controls.getVRState() !== null){
-        headQuat = new THREE.Vector4();
+    if(controls.getVRState() !== null && 
+        (controls.getVRState().hmd.rotation[0] !== 0
+        || controls.getVRState().hmd.rotation[1] !== 0
+        || controls.getVRState().hmd.rotation[2] !== 0
+        || controls.getVRState().hmd.rotation[3] !== 0 )
+        ){
+        // headQuat = new THREE.Vector4();
         headQuat.x = controls.getVRState().hmd.rotation[0];
         headQuat.y = controls.getVRState().hmd.rotation[1];
         headQuat.z = controls.getVRState().hmd.rotation[2];
@@ -494,8 +550,8 @@ function animate() {
 
     for (var i = 0; i < objectArray.length; i++){
 
-        var distToPoint = S3dist(myPos, centers_120_cell[i]);
-        if (distToPoint < .3){        
+        var distToPoint = S3dist(myPos, quatPerCellArray[i]);
+        if (distToPoint < nomDistance){        
             if (objectArray[i].visible == true){
                 noms[i%5].play();
                 points += 1;
@@ -506,12 +562,20 @@ function animate() {
 
     }
 
-    if (points == 120){
+    if (points == numCells){
         winNoise.play();
         points = 0;
-        for (var i = 0; i < objectArray.length; i++){
+        for(var i; i < numCells; i++){
             objectArray[i].visible = true;
         }
+        if (level == 1){
+            level = 3;
+        } else if (level == 3){
+            level = 4;
+        } else  {
+            level = 1;
+        }
+        startLevel(level);
     }
 
 
@@ -520,6 +584,23 @@ function animate() {
         effect.render(scene, camera);
 
     requestAnimationFrame(animate);
+}
+
+function startLevel(level){
+    if (scene) {
+       while (scene.children.length > 0) {
+           scene.remove(scene.children[scene.children.length - 1]);
+       }
+    polychoron = polychoraList[level];
+    quatPerCellArray = quatPerCellArrayDict[polychoron]; 
+    numCells = quatPerCellArray.length;
+    matArray = new Array(numCells);
+    modelFileName = modelFileNameDict[polychoron];
+    nomDistance = nomDistanceDict[polychoron];
+    objectArray = [];
+
+    loadStuff();
+    }
 }
 
 		//links
@@ -564,16 +645,18 @@ function animate() {
 	  	}else if (event.keyCode === 73){ //i
 	  		infoSign.material.visible = !infoSign.material.visible;
 	  	}else if (event.keyCode == 80 || event.keyCode == 32) {//p
-	  		if (noms[0].muted == true){
-	  			for (i = 0; i < noms.length; i++){
-                    noms[i].muted = false;
+	  		if (muteSound == true){
+	  			for (var i = 0; i < noms.length; i++){
+                    noms[i].volume = 1;
                 }
-                winNoise.muted = false;
+                muteSound = false;
+                winNoise.volume = 1;
 	  		} else{
-                for (i = 0; i < noms.length; i++){
-                    noms[i].muted = true;
+                for (var i = 0; i < noms.length; i++){
+                    noms[i].volume = 0;
                 }
-                winNoise.muted = true;
+                muteSound = true;
+                winNoise.volume = 0;
 	  		} 
 	  	}
 

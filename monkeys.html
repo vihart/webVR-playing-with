@@ -281,7 +281,7 @@ var quatPerMonkeyArray = quatPerMonkeyArrayDict[polychoron];
 var numMonkeys = quatPerMonkeyArray.length;
 var matArray = new Array(numMonkeys);
 
-var travelDirDict = {"8": centers_8_cell[1], "24": centers_24_cell_dual[4], "24dual": centers_24_cell_dual[4], "24both": centers_24_cell_dual[4], "120": centers_120_cell[4]};
+var travelDirDict = {"8": centers_8_cell[5], "24": centers_24_cell_dual[4], "24dual": centers_24_cell_dual[4], "24both": centers_24_cell_dual[4], "120": centers_120_cell[3]};
 
 var travelDir = travelDirDict[polychoron];  //for 24-cell_dual //4 is down head/foot.  //12 is (0,0,0,1)
 var colourDir = travelDir;
@@ -290,7 +290,7 @@ var HopfColorMatrix = makeHopfColorMatrix(colourDir);
 var modelScaleDict = {"8":1, "24":50, "24dual":50, "24both":50, "120":3.07768}
 var modelScale = modelScaleDict[polychoron];
 
-var modelFileNameDict = {"8":'media/monkey_15k_tris', 
+var modelFileNameDict = {"8":'media/monkey_15k_tris.obj', 
                         "24":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
                         "24dual":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
                         "24both":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
@@ -445,7 +445,16 @@ function selectPolychora(event) {
        while (scene.children.length > 0) {
            scene.remove(scene.children[scene.children.length - 1]);
        }
-    decoration = decorationArray[(keySelect-1)];
+    polychoron = polychoraList[(keySelect-1)];
+    quatPerMonkeyArray = quatPerMonkeyArrayDict[polychoron]; 
+    numMonkeys = quatPerMonkeyArray.length;
+    matArray = new Array(numMonkeys);
+    travelDir = travelDirDict[polychoron];  //for 24-cell_dual //4 is down head/foot.  //12 is (0,0,0,1)
+    colourDir = travelDir;
+    HopfColorMatrix = makeHopfColorMatrix(colourDir);
+    modelScale = modelScaleDict[polychoron];
+    modelFileName = modelFileNameDict[polychoron];
+
     loadStuff();
     }
   }

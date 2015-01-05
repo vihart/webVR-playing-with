@@ -53,7 +53,7 @@ function makeHopfColorMatrix( colourDir )
 
 function stereoProj(p)
 {
-	var result new THREE.Vector3(p.x / (1.0-p.w), p.y / (1.0-p.w), p.z / (1.0-p.w) );
+	var result = new THREE.Vector3(p.x / (1.0-p.w), p.y / (1.0-p.w), p.z / (1.0-p.w) );
 	return result;
 }
 

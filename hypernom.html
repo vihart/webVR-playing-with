@@ -43,6 +43,13 @@
 	<body>
 	<audio id='music' src="media/monkeygif.mp3"/> 
 
+    <audio id='nom1' src="media/nom1.ogg" > 
+    <audio id='nom2' src="media/nom2.ogg" > 
+    <audio id='nom3' src="media/nom3.ogg" > 
+    <audio id='nom4' src="media/nom4.ogg" > 
+    <audio id='nom5' src="media/nom5.ogg" > 
+    <audio id='win' src="media/win.ogg" > 
+
 	</body>
 
 	<!--
@@ -116,7 +123,7 @@ vec4 pointOnS3Geod( in vec4 p, in vec4 q, in float dist)
 // input
 uniform float time; // global time in seconds
 uniform vec4 quatPerMonkey; // quaternion that moves this monkey into 4-space, set once per monkey
-uniform int fogType; // which type of fog to use
+// uniform int fogType; // which type of fog to use
 uniform vec2 mousePos;
 uniform vec4 travelDir; //quaternion for which way we are rotating
 uniform vec4 colourDir; //quaternion for which way we are colouring
@@ -210,7 +217,7 @@ void main()
     vec4 n = quatMult( quatOverTime, nt0 );
 
     // stereographic projection from 4D to 3D
-    vec3 pos3 = vec3( p.x / (-1.0-p.w), p.y / (-1.0-p.w), p.z / (-1.0-p.w) );
+    vec3 pos3 = vec3( p.x / (1.0-p.w), p.y / (1.0-p.w), p.z / (1.0-p.w) );
     
 	// compute the color from the normal
 
@@ -233,8 +240,8 @@ void main()
     gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 , 1.0 );
 
     // do fog
-    if ( fogType == 1 )
-    {
+    // if ( fogType == 1 )
+    // {
         // ramp fog
         // compute distance to camera from 0 to 1
         float zz = gl_Position.z / gl_Position.w;
@@ -249,7 +256,7 @@ void main()
             fogScale = fogScale / 0.1;
         // mutliply color by this value to make it go to black
         vColor *= fogScale;
-    }
+    // }
     // else if ( fogType == 2 )
     // {    
     //     // near fog
@@ -288,10 +295,19 @@ var mesh;
 
 var effect;
 var controls;
-var clicky = 1;
-var mouseX = 1;
-var mouseY = 1;
+// var clicky = 1;
+// var mouseX = 1;
+// var mouseY = 1;
 var objectArray = [];
+var noms = [
+            document.querySelector('#nom1'),
+            document.querySelector('#nom2'),
+            document.querySelector('#nom3'),
+            document.querySelector('#nom4'),
+            document.querySelector('#nom5')
+            ];
+var winNoise = document.querySelector('#win');
+var points = 0;
 
 
 // one quaternion per monkey
@@ -385,10 +401,10 @@ function init()
                 type: "v4",
                 value: new THREE.Vector4( 0, 0, 0, 0 )
             },
-            fogType: {
-                type: "i",
-                value: 0
-            },
+            // fogType: {
+            //     type: "i",
+            //     value: 0
+            // },
             mousePos: {
             	type: "v2",
             	value: new THREE.Vector2(0,0)
@@ -456,8 +472,8 @@ function animate() {
     {
         matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
-        matArray[i].uniforms['fogType'].value = clicky;
-        matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
+        // matArray[i].uniforms['fogType'].value = clicky;
+        // matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
         matArray[i].uniforms['travelDir'].value = travelDir;
         matArray[i].uniforms['colourDir'].value = colourDir;
         matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
@@ -474,15 +490,28 @@ function animate() {
 
 
     var myPos = invStereoProj(camera.position);
+    myPos = quatMult(quatInv(headQuat), myPos);
 
     for (var i = 0; i < objectArray.length; i++){
 
         var distToPoint = S3dist(myPos, centers_120_cell[i]);
-        if (distToPoint < 1){        
-            scene.remove(objectArray[i]);
+        if (distToPoint < .3){        
+            if (objectArray[i].visible == true){
+                noms[i%5].play();
+                points += 1;
+            }
+            // scene.remove(objectArray[i]);
+            objectArray[i].visible = false;
         }
 
-        // nom.play();
+    }
+
+    if (points == 120){
+        winNoise.play();
+        points = 0;
+        for (var i = 0; i < objectArray.length; i++){
+            objectArray[i].visible = true;
+        }
     }
 
 
@@ -495,25 +524,25 @@ function animate() {
 
 		//links
 
-		function link(){
+		// function link(){
 
-				window.location="http://vihart.github.io/webVR-playing-with/index.html";
+		// 		window.location="http://vihart.github.io/webVR-playing-with/index.html";
 			
 
-		}
+		// }
 
 		//listen for mouse movement to get mouseX and mouseY
 
-		document.body.addEventListener( 'mousemove', function (event) {
-		 	mouseY = event.clientY;
-		 	mouseX = event.clientX;
-		});
+		// document.body.addEventListener( 'mousemove', function (event) {
+		//  	mouseY = event.clientY;
+		//  	mouseX = event.clientX;
+		// });
 
 		//listen for click
 
-		document.body.addEventListener( 'click', function(){
-			clicky = (clicky + 1) % 2;
-		})
+		// document.body.addEventListener( 'click', function(){
+		// 	clicky = (clicky + 1) % 2;
+		// })
 		/*
 		Listen for double click event to enter full-screen VR mode
 		*/
@@ -530,16 +559,21 @@ function animate() {
 	    	controls.zeroSensor(); //zero rotation
 	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
 	    	effect.setFullScreen(true) //fullscreen
-	    } else if (event.keyCode == 32) {//space
-	  		link();
+	    // } else if (event.keyCode == 32) {//space
+	  		// link();
 	  	}else if (event.keyCode === 73){ //i
 	  		infoSign.material.visible = !infoSign.material.visible;
-	  	}else if (event.keyCode == 80) {//p
-	  		var music = document.querySelector('#music');
-	  		if (music.paused){
-	  			music.play();
+	  	}else if (event.keyCode == 80 || event.keyCode == 32) {//p
+	  		if (noms[0].muted == true){
+	  			for (i = 0; i < noms.length; i++){
+                    noms[i].muted = false;
+                }
+                winNoise.muted = false;
 	  		} else{
-	  			music.pause();	
+                for (i = 0; i < noms.length; i++){
+                    noms[i].muted = true;
+                }
+                winNoise.muted = true;
 	  		} 
 	  	}
 

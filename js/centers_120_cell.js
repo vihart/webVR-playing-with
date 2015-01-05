@@ -36,6 +36,7 @@ new THREE.Vector4(-GoldenRatio,-1,(-1/GoldenRatio),0), new THREE.Vector4(-Golden
 
 for (var i=0;i<120;i++){
 	centers_120_cell[i].multiplyScalar(0.5);
+	// console.log(centers_120_cell[i].length());
 }
 
 

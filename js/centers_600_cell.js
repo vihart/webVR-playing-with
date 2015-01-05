@@ -1,7 +1,7 @@
-var GoldenRatio = (1.0 + Math.sqrt(5))*0.5;
+var GoldenRatio = (1.0 + Math.sqrt(5.0))*0.5;
 var GoldenRatioSq = GoldenRatio*GoldenRatio;
 
-var centers_600_cell = [
+var centers_600_cell_vert_centered = [
 new THREE.Vector4(-2.0, -2.0, 0, 0), new THREE.Vector4(-2.0, 0, -2.0, 0), new THREE.Vector4(-2.0, 0, 0, -2.0),
    new THREE.Vector4(-2.0, 0, 0, 2.0), new THREE.Vector4(-2.0, 0, 2.0, 0), new THREE.Vector4(-2.0, 2.0, 0, 0), new THREE.Vector4(0, -2.0, -2.0, 0), new THREE.Vector4(0,
    -2.0, 0, -2.0), new THREE.Vector4(0, -2.0, 0, 2.0), new THREE.Vector4(0, -2.0, 2.0, 0), new THREE.Vector4(0, 0, -2.0, -2.0), new THREE.Vector4(0, 0,
@@ -432,15 +432,17 @@ new THREE.Vector4(-2.0, -2.0, 0, 0), new THREE.Vector4(-2.0, 0, -2.0, 0), new TH
    ];
 
 for (var i=0;i<600;i++){
-	centers_600_cell[i].multiplyScalar(1.0/Math.sqrt(8.0));
-	// var temp = centers_600_cell[i];
-	// centers_600_cell[i].x = temp.y;
-	// centers_600_cell[i].y = temp.x; //make it dual to 120-cell (we dont care if we are centering it)
+	centers_600_cell_vert_centered[i].multiplyScalar(1.0/Math.sqrt(8.0));
+	// console.log(centers_600_cell_vert_centered[i].length());
+	var temp = new THREE.Vector4().copy( centers_600_cell_vert_centered[i] );
+	centers_600_cell_vert_centered[i].x = temp.y;
+	centers_600_cell_vert_centered[i].y = temp.x; //make it dual to 120-cell (we dont care if we are centering it)
 }
 
-///move one cell to (0,0,0,1)  (makes it no longer dual to 8-cell)
+var centers_600_cell = [];
+//////move one cell to (0,0,0,1)  (makes it no longer dual to 8-cell)
 var offset = new THREE.Vector4(1.0/Math.sqrt(2.0),1.0/Math.sqrt(2.0),0.0,0.0);
 for (var i=0;i<600;i++){
-  centers_600_cell[i] = quatMult(offset, centers_600_cell[i]);
+  centers_600_cell[i] = quatMult(offset, centers_600_cell_vert_centered[i]);
 }
 

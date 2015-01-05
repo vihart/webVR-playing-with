@@ -76,6 +76,7 @@ function invStereoProj(v)
 
 function S3dist(p,q)
 {
+    // console.log(p);
 	var d = p.dot(q);
 	if (d>1.0){
 		return 0.0;
@@ -88,7 +89,62 @@ function S3dist(p,q)
 	}
 }
 
+function closePoints(p, listOfPoints, dist){
+    var out = [];
+    for(var i=0; i<listOfPoints.length; i++){
+        if ( Math.abs(S3dist(p, listOfPoints[i]) - dist) < 0.001 ){
+            out[out.length] = listOfPoints[i];
+        } 
+    }
+    // console.log(out);
+    return out;
+}
 
+function makeRotMatrix(points){ //make frame which we will use to rotate tet to right orientation for 5, 16, 600 cells
+    //should be four things in points
+    var p0 = new THREE.Vector3(points[0].x,points[0].y,points[0].z);
+    var p1 = new THREE.Vector3(points[1].x,points[1].y,points[1].z);
+    var p2 = new THREE.Vector3(points[2].x,points[2].y,points[2].z);
+    var p3 = new THREE.Vector3(points[3].x,points[3].y,points[3].z);
 
+    var fwd = new THREE.Vector3().copy(p0).add(p1).sub(p2).sub(p3);
+    var up = new THREE.Vector3().copy(p0).add(p2).sub(p1).sub(p3);
+    fwd.normalize();
+    up.normalize();
+    var right = new THREE.Vector3().copy(fwd).cross(up);
+    if (p0.dot(fwd) * p0.dot(up) * p0.dot(right) > 0.0){
+        var temp = new THREE.Vector3().copy(right);
+        right.copy(up);
+        up.copy(temp);
+        right.negate(); //rotate 90 degrees
+    }
+    // var Rot = new THREE.Matrix3().set(fwd.x,fwd.y,fwd.z,
+    //                                   up.x, up.y, up.z,
+    //                                   right.x,right.y,right.z);
+    var Rot = new THREE.Matrix3().set(fwd.x,up.x,right.x,
+                                      fwd.y,up.y,right.y,
+                                      fwd.z,up.z,right.z);
+    // console.log(points);
+    // console.log(Rot);
+    return Rot;
+}
+
+function makeRotMatrixArray(cell_centers, vertices, dist){
+    var out = [];
+    // console.log('num verts');
+    // console.log(vertices.length);
+    for (var i=0;i<cell_centers.length;i++){
+        // console.log(cell_centers);
+        points = closePoints(cell_centers[i], vertices, dist);
+
+        // console.log(points);
+        for (var j=0; j<points.length; j++){
+            points[j] = quatMult(quatInv(cell_centers[i]), points[j]); //pull back to vicinity of (0,0,0,1)
+        }
+        out[out.length] = makeRotMatrix(points);
+    }
+    // console.log(out);
+    return out;
+}
 
 

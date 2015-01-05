@@ -12,5 +12,5 @@ for (var i=0;i<5;i++){
 
 var centers_5_cell_dual = [];
 for (var i=0;i<5;i++){
-  centers_5_cell_dual[i] = -centers_5_cell[i];
+  centers_5_cell_dual[i] = new THREE.Vector4().copy(centers_5_cell[i]).negate();
 }

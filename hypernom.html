@@ -299,7 +299,7 @@ var noms = [
 var winNoise = document.querySelector('#win');
 var gamePoints = 0;
 var muteSound = false;
-var level = 1;
+var level = 0;
 
 
 // one quaternion per monkey
@@ -606,6 +606,7 @@ function startLevel(level){
     matArray = new Array(numCells);
     modelFileName = modelFileNameDict[polychoron];
     nomDistance = nomDistanceDict[polychoron];
+    rotMatrixArray = rotMatrixArrayDict[polychoron]
     objectArray = [];
 
     loadStuff();

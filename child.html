@@ -501,7 +501,7 @@
 		var cubeWin = 0;
 		var lightWin = false;
 		var dodecWin = false;
-		var boingWin = 0;
+		var boingWin = false;
 		var winAll = false;
 		var winTimer = 0;
 		var theEnd = false;
@@ -518,8 +518,10 @@
 			icosign.material.wireframeLinewidth = 10;
 			icosign.material.color.set(0x0055ff);
 			}
-			if (boingWin > 0 && boingWin < 21){ //one spikey face per boing
-				icosignFace[boingWin-1].material.visible = true;
+			if (boingWin == true){ //one spikey face per boing
+				for (var i = 0; i < 20; i++){
+					icosignFace[i].material.visible = true;
+				}
 			}
 			if (dodecWin && !winAll){
 				win.scale.set(5, 5, 5);
@@ -530,7 +532,7 @@
 					lightWin = true;
 				}
 			}
-			if (fishyWin2 == true && boingWin > 19 && dodecWin == true && lightWin == true && cubeWin > 11 ){
+			if (fishyWin2 == true && boingWin == true && dodecWin == true && lightWin == true && cubeWin > 11 ){
 				winAll = true;
 			}
 			if (winAll == true && camera.position.distanceTo(win.position)<2){
@@ -605,7 +607,7 @@
 				particleSystem.material.color.setRGB(fishy,fishy,1);
 				fishNoise.play();
 				fishyWin1 = !fishyWin2;
-				if (fishy < .1){
+				if (fishy < .4){
 					fishyWin2 = true;
 				}
 			} else if (fishy < 1) { //go back to normal once out of range
@@ -623,7 +625,7 @@
 			if(camera.position.distanceTo(tet.position)<1.5){ //boing if close
 				bing.play();
 				boing = 3;
-				boingWin += 1;
+				boingWin =true;
 			}
 			if (boing>0){ //boing backwards briefly
 				var boingVector = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion)

@@ -271,7 +271,8 @@ var mouseY = 1;
 
 
 // one quaternion per monkey
-var polychoron = "24";
+var polychoraList = ["8","24","24dual","24both","120"];
+var polychoron = polychoraList[0];
 var quatPerMonkeyArrayDict = { "8": centers_8_cell, "24": centers_24_cell, "24dual": centers_24_cell_dual, "24both": centers_24_cell_dual.concat(centers_24_cell), "120": centers_120_cell};
 
 // var quatPerMonkeyArray = centers_24_cell_dual.concat(centers_24_cell); 
@@ -310,6 +311,34 @@ window.addEventListener("keydown", onkey, true);
 document.body.addEventListener('dblclick', function () {
     effect.setFullScreen(true);
 });
+
+function loadStuff(){ 
+    // one material per monkey, since they have a different quaternion
+    for (var i = 0; i < numMonkeys; i++)
+    {
+        matArray[i] = materialBase.clone();
+    }
+
+    // load the monkey mesh
+    var manager = new THREE.LoadingManager();
+    var loader = new THREE.OBJLoader(manager);
+    loader.load(modelFileName, function (object) {
+    // loader.load('media/dodecDualRot90.obj', function (object) {
+
+        // make numMonkeys copies of the mesh and assign them a unique material out of the numMonkeys we created previously
+        for (var i = 0; i < numMonkeys; i++)
+        {
+            var newObject = object.clone();
+            newObject.traverse(function (child) {
+                if (child instanceof THREE.Mesh) {
+                    child.material = matArray[i];
+                    child.frustumCulled = false;
+                }
+            });
+            scene.add(newObject);
+        }
+    });
+} 
 
 function init()
 {
@@ -374,33 +403,7 @@ function init()
     });
     materialBase.side = THREE.FrontSide;
 
-	// one material per monkey, since they have a different quaternion
-    for (var i = 0; i < numMonkeys; i++)
-    {
-        matArray[i] = materialBase.clone();
-    }
-
-	// load the monkey mesh
-    var manager = new THREE.LoadingManager();
-    var loader = new THREE.OBJLoader(manager);
-    loader.load(modelFileName, function (object) {
-    // loader.load('media/dodecDualRot90.obj', function (object) {
-
-		// make numMonkeys copies of the mesh and assign them a unique material out of the numMonkeys we created previously
-        for (var i = 0; i < numMonkeys; i++)
-        {
-            var newObject = object.clone();
-
-            newObject.traverse(function (child) {
-                if (child instanceof THREE.Mesh) {
-                    child.material = matArray[i];
-                    child.frustumCulled = false;
-                }
-            });
-
-            scene.add(newObject);
-        }
-    });
+    loadStuff();
 
     window.addEventListener('resize', onWindowResize, false);
 
@@ -429,6 +432,23 @@ function animate() {
         effect.render(scene, camera);
 
     requestAnimationFrame(animate);
+}
+
+document.addEventListener('keydown', function(event) { selectPolychora(event); }, false);
+
+function selectPolychora(event) {
+
+  var keySelect = event.keyCode - 48; //1 is 49
+
+  if (keySelect > 0 && keySelect < 10){
+     if (scene) {
+       while (scene.children.length > 0) {
+           scene.remove(scene.children[scene.children.length - 1]);
+       }
+    decoration = decorationArray[(keySelect-1)];
+    loadStuff();
+    }
+  }
 }
 
 		//links

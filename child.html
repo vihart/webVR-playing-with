@@ -5,7 +5,7 @@
 		<title>Child</title>
 
 		<!-- 
-		A Christmas Musical for VR
+		music video game for VR, by Vi Hart
 
 		uses three.js, Mozilla's webVR basics, and Andrea Hawksley's webVR navigation.
 		 -->
@@ -27,6 +27,7 @@
 		<audio id='music' src="media/child1.ogg" autoplay=true loop=true/>
 		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/>
 		<audio id='child3' src="media/child3.ogg" > 
+		<audio id='teeth' src="media/teeth_and_clicks.ogg" > 
 		<audio id='bing' src="media/bing.ogg" >
 		<audio id='fishNoise' src="media/fishNoise.ogg" > 
 		<audio id='cube1' src="media/cube1.ogg" > 
@@ -66,7 +67,7 @@
 	<script src="lib/gl-matrix.js"></script>
 
 	<!--
-	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object. VRControlsPlus adds rotation and movement controls that move and rotate the world relative to the camera, using arrow keys, WASD, plus interaction controls.
+	VRControlsPlus adds rotation and movement controls that move and rotate the world relative to the camera, using arrow keys, WASD, plus interaction controls.
 	 -->
 	<script src="js/VRControlsPlus.js"></script>
 
@@ -77,9 +78,6 @@
 
 
 	<script>
-		/*
-		Setup three.js WebGL renderer
-		*/
 		var renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setClearColor( 0x000000, 1 );
 		/*
@@ -104,14 +102,6 @@
 		var effect = new THREE.VREffect( renderer );
 		effect.setSize( window.innerWidth, window.innerHeight );
 
-		/*
-		define interaction variables
-		*/
-		var mouseY = 1;
-		var mouseX = 1;
-		var clicky = 0;
-
-
 		var t = 0;
 		var snowFloor = -40;
 		var foundLight = 0;
@@ -119,6 +109,7 @@
 		var music = document.querySelector('#music');
   		var music2 = document.querySelector('#music2');	
   		var child3 = document.querySelector('#child3');	
+  		var teeth = document.querySelector('#teeth');	
   		var bing = document.querySelector('#bing');	
   		var fishNoise = document.querySelector('#fishNoise');
   		var cubeSfx = [
@@ -313,7 +304,7 @@
 		//tetrahedron
 		var tet = new THREE.Mesh(
 			new THREE.TetrahedronGeometry(1),
-			new THREE.MeshLambertMaterial({color: 0xff4400})
+			new THREE.MeshLambertMaterial({color: 0xff0000})
 			);
 		tet.position.y = camera.position.y;
 		while (tet.position.distanceTo(camera.position) < 10 || tet.position.distanceTo(cubeSpot)<10 || tet.position.distanceTo(dodecahome.position) < 15){
@@ -441,6 +432,7 @@
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].z)/2
 				);
 			icosignFace[i].material.visible = false;
+			icosignFace[i].frustumCulled = false;
 			win.add(icosignFace[i]);
 		}
 
@@ -472,18 +464,18 @@
 		cubeLight.position.z = cubeSpot.z + 12;
 		scene.add(cubeLight);
 
-		var boingLight =new THREE.PointLight( 0xff0000, .6, 10);
+		var boingLight =new THREE.PointLight( 0xff4400, .6, 10);
 		boingLight.position.set(tet.position.x,tet.position.y,tet.position.z);
 		scene.add(boingLight);
 
 		var dodecLight =new THREE.PointLight( 0x0000ff, .25, 15);
 		dodecLight.position.set(dodecahome.position.x, dodecahome.position.y+2, dodecahome.position.z-2);
-		light3.castShadow = true;
+		dodecLight.castShadow = true;
 		scene.add(dodecLight);
 
 		var dodecLight2 =new THREE.PointLight( 0xff0000, .3, 15);
 		dodecLight2.position.set(dodecahome.position.x, dodecahome.position.y-2, dodecahome.position.z+2);
-		light3.castShadow = true;
+		dodecLight2.castShadow = true;
 		scene.add(dodecLight2);			
 
 		var goldLight = new THREE.PointLight( 0xffdd00, .6, 10);
@@ -497,44 +489,83 @@
 		goldLight.castShadow = false; 
 		scene.add( goldLight );	
 
+		var winLight = new THREE.PointLight( 0xffffdd, .5, 25);
+		winLight.position.set(win.position.x, win.position.y, win.position.z);
+		scene.add(winLight);	
+
 		var partVector = new THREE.Vector3;
 		var boingVector = new THREE.Vector3;
 
 		var fishyWin1 = false;
 		var fishyWin2 = false;
-		var cubeWin = false;
+		var cubeWin = 0;
 		var lightWin = false;
 		var dodecWin = false;
 		var boingWin = 0;
+		var winAll = false;
+		var winTimer = 0;
+		var theEnd = false;
 
-		/*
-		Request animation frame loop function
-		*/
 		function animate() {
 
-
+			win.rotation.y += .002;
 			//win states
 			if (fishyWin1){//find fish
-				icosign.material.wireframeLinewidth += 5*fishy;
+				icosign.material.wireframeLinewidth = 5;
 				icosign.material.color.set(0x88ccff);
 			}
 			if (fishyWin2){//get fishy=1
-			fishyWin1 = false;
 			icosign.material.wireframeLinewidth = 10;
-			win.rotation.y += .002;
 			icosign.material.color.set(0x0055ff);
 			}
 			if (boingWin > 0 && boingWin < 21){ //one spikey face per boing
 				icosignFace[boingWin-1].material.visible = true;
 			}
-			if (dodecWin){
-				win.rotation.y += .002;
+			if (dodecWin && !winAll){
+				win.scale.set(5, 5, 5);
+				winLight.distance = 35;
 			}
 			if (lightWin == false && foundLight == 1){//while winning, stops when won
-				win.scale.set(goldLight.distance/2, goldLight.distance/2, goldLight.distance/2);
 				if (foundLight = 2){
 					lightWin = true;
 				}
+			}
+			if (fishyWin2 == true && boingWin > 19 && dodecWin == true && lightWin == true && cubeWin > 11 ){
+				winAll = true;
+			}
+			if (winAll == true && camera.position.distanceTo(win.position)<2){
+				theEnd = true;
+			}
+			if(theEnd == true && winTimer < 6){
+				winTimer += .0005;
+				win.scale.set(2*winTimer+5, 2*winTimer+5, 2*winTimer+5);
+				win.position.y += winTimer/500;
+				light.distance += 2;
+				light2.distance += 2;
+				light3.distance += 2;
+				var dimmer = Math.max(.2, 1 - winTimer*8)
+				particleSystem.material.color.setRGB(dimmer,dimmer,dimmer);
+				light3.intensity = dimmer;
+				light2.intensity = dimmer;
+				light.intensity = dimmer;
+				teeth.play();
+				music.muted = true;
+				music2.muted = true;
+				child3.muted = true;
+				fishNoise.muted = true;
+				bing.muted = true;
+			}
+			if(theEnd == true){
+				for (var i = 0; i<dodecArray.length; i++){
+					dodecArray[i].position.x += dodecArray[i].position.x * .00015;
+					dodecArray[i].position.z += dodecArray[i].position.z * .00015;
+				}
+				for (var i=0; i<icosArray.length; i++){
+					icosArray[i].position.x += icosArray[i].position.x * .0002;
+					icosArray[i].position.z += icosArray[i].position.z * .0002;
+					icosArray[i].position.y += icosArray[i].position.y * .0002;
+				}
+				sign.position.y -= .003;
 			}
 
 
@@ -544,7 +575,10 @@
 					if ( cubeArray[i].geometry.heightSegments/4 > cubeArray[i].scale.y){
 						cubeSfx[i+cubeCount].play();
 						cubeArray[i].scale.y += .05;
-						icosignVertex[i].scale.set(10,10,10);
+						if (icosignVertex[i].scale.x = .01){
+							icosignVertex[i].scale.set(10,10,10);
+							cubeWin += 1;
+						}
 					}
 				} else {
 					if ( cubeArray[i].scale.y > 1){
@@ -570,7 +604,7 @@
 				particleSystem.material.color.setRGB(fishy,fishy,1);
 				fishNoise.play();
 				fishyWin1 = !fishyWin2;
-				if (fishy > .99){
+				if (fishy < .01){
 					fishyWin2 = true;
 				}
 			} else if (fishy < 1) { //go back to normal once out of range
@@ -698,6 +732,14 @@
 					particles.vertices[p].y += .2;
 				}
 
+				if (lightWin){
+					if (particles.vertices[p].distanceTo(win.position) < (2*win.scale.x - 1)){
+						particles.vertices[p].x = (9*particles.vertices[p].x + win.position.x )/10 + Math.sin(particles.vertices[p].x/20)/(20) - .05;
+						particles.vertices[p].y = (9*particles.vertices[p].y + win.position.y + 1) / 10;
+						particles.vertices[p].z = (9*particles.vertices[p].z + win.position.z -	.4) / 10;
+					}
+				}
+
 			    particles.vertices[p].y += particles.vertices[p].velocity.y;
 			    particles.vertices[p].z += particles.vertices[p].velocity.z;
 			    particles.vertices[p].x += particles.vertices[p].velocity.x;
@@ -714,46 +756,27 @@
 		 	if ( camera.position.distanceTo(dodecahome.position) < 16) {
 		 		music.volume = (9*music.volume + .000001)/10;
 		 		child3.play();
-		 		dodecWin = true;
+		 		if (camera.position.distanceTo(dodecahome.position) < 12){
+		 			dodecWin = true;
+		 		}
 		 	}
-		 	child3.volume = Math.min(1, 2/camera.position.distanceTo(dodecahome.position));
+		 	if (!winAll){
+			 	child3.volume = Math.min(1, 2/camera.position.distanceTo(dodecahome.position));
+			 }
 
-			/*
-			Update VR headset position and apply to camera.
-			*/
 			controls.update();
-			/*
-			Render the scene through the VREffect.
-			*/
 			effect.render( scene, camera );
 			requestAnimationFrame( animate );
 		}
-		/*
-		Kick off animation loop
-		*/
+
+
 		animate();
 
-		//listen for mouse movement to get mouseX and mouseY
 
-		document.body.addEventListener( 'mousemove', function (event) {
-		 	mouseY = event.clientY;
-		 	mouseX = event.clientX;
-		});
-
-		//listen for click
-
-		document.body.addEventListener( 'click', function(){
-			clicky = (clicky + 1) % 6;
-		})
-		/*
-		Listen for double click event to enter full-screen VR mode
-		*/
 		document.body.addEventListener( 'dblclick', function() {
 			effect.setFullScreen( true );
 		});
-		/*
-		Listen for keyboard events 
-		*/
+
 		function onkey(event) {
 	    event.preventDefault();
 
@@ -764,15 +787,18 @@
 	  		
 	  	} else if (event.keyCode == 32 || event.keyCode == 80) { //space or p
 	  		if (music.paused){
-	  			music.play();
-	  			music2.play();
-	  			child3.muted = false;
-	  			bing.muted = false;
-	  			cubeUp1.muted = false;
-	  			fishNoise.muted = false;
-	  			for (var i=0; i<cubeSfx.length; i++){
-	  				cubeSfx[i].muted = false;
-	  			}
+		  			music.play();
+		  			music2.play();
+		  			teeth.muted = false;
+	  			if (!theEnd){
+		  			child3.muted = false;
+		  			bing.muted = false;
+		  			cubeUp1.muted = false;
+		  			fishNoise.muted = false;
+		  			for (var i=0; i<cubeSfx.length; i++){
+		  				cubeSfx[i].muted = false;
+		  			}
+		  		}
 	  		} else{
 	  			music.pause();	
 	  			music2.pause();
@@ -780,6 +806,7 @@
 	  			bing.muted = true;
 	  			cubeUp1.muted = true;
 	  			fishNoise.muted = true;
+	  			teeth.muted = true;
 	  			for (var i=0; i<cubeSfx.length; i++){
 	  				cubeSfx[i].muted = true;
 	  			}
@@ -793,9 +820,6 @@
 		document.addEventListener('keydown', function(event) { key(event, 1); }, false);
 		document.addEventListener('keyup', function(event) { key(event, -1); }, false);
 
-		/*
-		Handle window resizes
-		*/
 		function onWindowResize() {
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();

@@ -297,7 +297,7 @@ var noms = [
             document.querySelector('#nom5')
             ];
 var winNoise = document.querySelector('#win');
-var points = 0;
+var gamePoints = 0;
 var muteSound = false;
 var level = 1;
 
@@ -307,7 +307,7 @@ var level = 1;
 // var quatPerCellArray = centers_120_cell;
 // one quaternion per cell
 var polychoraList = ["5","8","16","24","120","600"];
-var polychoron = polychoraList[5];
+var polychoron = polychoraList[0];
 var quatPerCellArrayDict = {"5": centers_5_cell_dual, "8": centers_8_cell, "16": centers_16_cell, "24": centers_24_cell_dual, "120": centers_120_cell, "600": centers_600_cell};
 
 // var quatPerCellArray = centers_24_cell_dual.concat(centers_24_cell); 
@@ -562,7 +562,7 @@ function animate() {
         if (distToPoint < nomDistance){        
             if (objectArray[i].visible == true){
                 noms[i%5].play();
-                points += 1;
+                gamePoints += 1;
             }
             // scene.remove(objectArray[i]);
             objectArray[i].visible = false;
@@ -570,19 +570,20 @@ function animate() {
 
     }
 
-    if (points == numCells){
+    if (gamePoints == numCells){
         winNoise.play();
-        points = 0;
+        gamePoints = 0;
         for(var i; i < numCells; i++){
             objectArray[i].visible = true;
         }
-        if (level == 1){
-            level = 3;
-        } else if (level == 3){
-            level = 4;
-        } else  {
-            level = 1;
-        }
+        level = (level+1)%6;
+        // if (level == 1){
+        //     level = 3;
+        // } else if (level == 3){
+        //     level = 4;
+        // } else  {
+        //     level = 1;
+        // }
         startLevel(level);
     }
 

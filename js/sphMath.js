@@ -135,7 +135,7 @@ function makeRotMatrixArray(cell_centers, vertices, dist){
     // console.log(vertices.length);
     for (var i=0;i<cell_centers.length;i++){
         // console.log(cell_centers);
-        points = closePoints(cell_centers[i], vertices, dist);
+        var points = closePoints(cell_centers[i], vertices, dist);
 
         // console.log(points);
         for (var j=0; j<points.length; j++){

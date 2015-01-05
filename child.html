@@ -543,6 +543,7 @@
 				light.distance += 2;
 				light2.distance += 2;
 				light3.distance += 2;
+				winLight.position.set(win.position.x, win.position.y, win.position.z);
 				var dimmer = Math.max(.2, 1 - winTimer*8)
 				particleSystem.material.color.setRGB(dimmer,dimmer,dimmer);
 				light3.intensity = dimmer;
@@ -599,12 +600,12 @@
 			octFlock.position.z += Math.cos(t)/16 + Math.sin(t/3)/18;
 			fishLight.position.set(octFlock.position.x,octFlock.position.y,octFlock.position.z);
 
-			if(camera.position.distanceTo(octFlock.position)<10){ //octfish react
+			if(camera.position.distanceTo(octFlock.position)<10 && !winAll){ //octfish react
 				fishy = Math.max(0, fishy - .001); //fishy starts at 1 and goes to 0
 				particleSystem.material.color.setRGB(fishy,fishy,1);
 				fishNoise.play();
 				fishyWin1 = !fishyWin2;
-				if (fishy < .01){
+				if (fishy < .1){
 					fishyWin2 = true;
 				}
 			} else if (fishy < 1) { //go back to normal once out of range
@@ -648,7 +649,7 @@
 				music2.volume = (99*music2.volume + .00001)/100;
 				music.volume = (99*music.volume + .999)/100;
 				if ( goldLight.position.distanceTo(camera.position) < goldLight.distance
-					){
+					&& !winAll){
 					foundLight = 1;
 				}
 			} else if (foundLight == 1){ //found the light, make it glow

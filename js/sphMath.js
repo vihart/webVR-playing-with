@@ -24,6 +24,16 @@ function quatMult( p , q )
     return r;
 }
 
+function quatInv( p ) ///assuming unit quaternion
+{
+    var r = new THREE.Vector4();    
+    r.x = -p.x;
+    r.y = -p.y;
+    r.z = -p.z;
+    r.w = p.w;
+    return r;   
+}
+
 function makeHopfColorMatrix( colourDir )
 {
     //rotate colourDir to lie along (0,0,z,w), fixing (0,0,0,1) 

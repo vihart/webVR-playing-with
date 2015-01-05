@@ -50,3 +50,35 @@ function makeHopfColorMatrix( colourDir )
 
     return Rot;
 }
+
+function stereoProj(p)
+{
+	var result new THREE.Vector3(p.x / (1.0-p.w), p.y / (1.0-p.w), p.z / (1.0-p.w) );
+	return result;
+}
+
+function invStereoProj(v)
+{
+	var denom = 1 + v.x*v.x + v.y*v.y + v.z*v.z;
+	var result = new THREE.Vector4(2*v.x/denom, 2*v.y/denom, 2*v.z/denom, (denom-2)/denom);
+	return result;
+}
+
+function S3dist(p,q)
+{
+	var d = p.dot(q);
+	if (d>1.0){
+		return 0.0;
+	}
+	else if (d<-1.0){
+		return Math.pi * 0.5;
+	}
+	else{
+		return Math.acos(d);
+	}
+}
+
+
+
+
+

@@ -58,25 +58,19 @@
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControlsMonkeys.js"></script>
+	<script src="js/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
 	<script src="js/VREffect.js"></script>
-    <!-- spherical math functions -->
-    <script src="js/sphMath.js"></script>
-        <!-- Quaternions for the centers of the cells of the different polychora -->
-    <script src="js/centers_8_cell.js"></script>
-    <script src="js/centers_24_cell.js"></script>
-    <script src="js/centers_120_cell.js"></script>
 
-    <script src="js/loaders/OBJLoader.js"></script>  
-     
-    <script type="x-shader/x-vertex" id="vertexShader">
+<script src="js/loaders/OBJLoader.js"></script>  
+ 
+<script type="x-shader/x-vertex" id="vertexShader">
 // This shader moves vertices around
 
-// glsl Quaternion Multiplication
+// Quaternion Multiplication
 vec4 quatMult( in vec4 p, in vec4 q ) 
 {
     vec4 r;    
@@ -86,32 +80,19 @@ vec4 quatMult( in vec4 p, in vec4 q )
     r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;    
     return r;
 }
-vec4 quatInv( in vec4 p )
-{
-    vec4 r;
-    r.x = -p.x;
-    r.y = -p.y;
-    r.z = -p.z;
-    r.w = p.w;
-    return r;
-}
 
 // Project the vector p to the 3-space perpendicular to q
 vec4 projVecPerp( in vec4 p, in vec4 q )
 {
     vec4 r;
-    float pDotq = dot(p,q);
-    float qDotq = dot(q,q);
+    float pDotq = p.w*q.w + p.x*q.x + p.y*q.y + p.z*q.z;
+    float qDotq = q.w*q.w + q.x*q.x + q.y*q.y + q.z*q.z;
     float foo = pDotq / qDotq;
-    r = p - foo*q;
+    r.x = p.x - foo * q.x;
+    r.y = p.y - foo * q.y;
+    r.z = p.z - foo * q.z;
+    r.w = p.w - foo * q.w;
     return r;
-}
-
-// point on geod in S3 from p in direction of q going distance dist
-vec4 pointOnS3Geod( in vec4 p, in vec4 q, in float dist)
-{
-    vec4 Q = normalize( q - dot(p,q) * p );
-    return cos(dist)*p + sin(dist)*Q;
 }
 
 // input
@@ -119,56 +100,38 @@ uniform float time; // global time in seconds
 uniform vec4 quatPerMonkey; // quaternion that moves this monkey into 4-space, set once per monkey
 uniform int fogType; // which type of fog to use
 uniform vec2 mousePos;
-uniform vec4 travelDir; //quaternion for which way we are rotating
-uniform vec4 colourDir; //quaternion for which way we are colouring
-uniform mat4 HopfColorMatrix; //rotates colourDir to lie along (0,0,z,w)
-uniform float modelScale; //p3sphere = normalize( vec4(-position.zyx, modelScale ) );
 
 // Hopf fibration coloring
 // returns a color based on the 4D normal
-vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
+vec3 HopfColor( in vec4 nBase )
 {    
-    /////////first rotate the 4D normal to a space aligned with the 120-cell
+    vec4 n = nBase;
 
-    vec4 n = HopfColorMatrix * nBase;
 	// compute the color
-
-    float x = n.x;
-    float y = n.y;
-    float u = n.z;
-    float v = n.w;
+    float y = n.x;
+    float u = n.y;
+    float v = n.z;
+    float x = n.w;
 
     float r = 2. * (u*x + v*y);
     float g = 2. * (u*y - v*x);
     float b = x*x + y*y - u*u - v*v;
 
-    /// first two coords are 2*z*conj(w), where z = x+iy, w = u+iv
-
-    /// rotate [0,0,-1] to [-1,-1,-1]/sqrt(3)
-
-    mat3 RotDownToDiag = mat3( vec3(0.707107, -0.707107, 0.),       ///// input columns not rows?!?!?!
-                               vec3(0.408248, 0.408248, -0.816497), 
-                               vec3(0.57735, 0.57735, 0.57735) );
-    vec3 newCol = vec3(r,g,b);
-
-    newCol = RotDownToDiag * newCol;
-
-    return vec3(newCol.x*0.5 + 0.5,newCol.y*0.5 + 0.5,newCol.z*0.5 + 0.5);
+    return vec3(r*0.5 + 0.5,g*0.5 + 0.5,b*0.5 + 0.5);
 }
 
 // output
 varying vec3 vColor; // this shader computes the color of each vertex
 
-// this gets called once per vertex of the monkey mesh (and numMonkeys times since there are numMonkeys monkeys)
+// this gets called once per vertex of the monkey mesh (and 8 times since there are 8 monkeys)
 void main() 
 {
     // base position
 	// turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing to get onto the unit 3-sphere
-
-    vec4 p3sphere = normalize( vec4(-position.zyx, modelScale ) );
+	vec4 p3sphere = normalize( vec4(position.zyx, 1.0) );
 	
 	// then rotate using this monkey's quaternion to place in 4D
-    vec4 pt0 = quatMult( quatPerMonkey, p3sphere ); //position at time = 0
+    vec4 p = quatMult( p3sphere, quatPerMonkey );
 
 	// this is the normal to the point
 	// same concept as for the position, but we add a 0 as the w component
@@ -177,38 +140,22 @@ void main()
     // normal on the 3-sphere
     n3sphere = projVecPerp( n3sphere, p3sphere ); 
     // rotate the normal using this monkey's quaternion 
-	vec4 nt0 = quatMult(quatPerMonkey, n3sphere );
+	vec4 n = quatMult( n3sphere, quatPerMonkey );
 
- //    // also rotate everything over time
-    vec4 quatOverTime = pointOnS3Geod( vec4(0,0,0,1), travelDir, 0.5*time );
-    // vec4 quatOverTime = vec4(0,0,0,1);
-
-    vec4 p = quatMult( quatOverTime, pt0 );
-    vec4 n = quatMult( quatOverTime, nt0 );
+    // also rotate everything over time
+    vec4 quatOverTime = normalize (vec4(clamp((mousePos.x/1000.0),0.0,1.0), sin(time), clamp((mousePos.y/1000.0),0.0,1.0), cos(time)));
+    p = quatMult( p, quatOverTime );
+    n = quatMult( n, quatOverTime );
 
     // stereographic projection from 4D to 3D
-    vec3 pos3 = vec3( p.x / (1.0-p.w), p.y / (1.0-p.w), p.z / (1.0-p.w) );
+    vec3 pos3 = vec3( p.x / (1.0-p.w), -p.y / (1.0-p.w), p.z / (1.0-p.w) );
     
 	// compute the color from the normal
-
-    //// using HopfColor again...
-    vec3 nColor = HopfColor(nt0);
-
-    //// or the transported back to 1 normal 
-    // vec4 nTransported = quatMult(quatInv(pt0), nt0);
-    // vec3 nColor = vec3(0.5,0.5,0.5) + 0.5*normalize( vec3( nTransported.x, nTransported.y, nTransported.z) );
-
-
-    vec3 pColor = HopfColor(pt0);
-    vColor = -0.5*(nColor-vec3(0.5,0.5,0.5)) + 1.0*(pColor-vec3(0.5,0.5,0.5)) + vec3(0.5,0.5,0.5);
-    // vColor = pColor;
-    // vColor = nColor;
-
+    vColor = HopfColor(n);
+	
 	// take the final 3D position and project it onto the screen
-    // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
-    // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.7,-2.3), 1.0 );
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 , 1.0 );
-
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
+    
     // do fog
     if ( fogType == 1 )
     {
@@ -262,39 +209,27 @@ var camera;
 var scene;
 var renderer;
 var mesh;
-
+var matArray = new Array(8);
 var effect;
 var controls;
 var clicky = 1;
 var mouseX = 1;
 var mouseY = 1;
 
-
 // one quaternion per monkey
-var polychoron = "24";
-var quatPerMonkeyArrayDict = { "8": centers_8_cell, "24": centers_24_cell, "24dual": centers_24_cell_dual, "24both": centers_24_cell_dual.concat(centers_24_cell), "120": centers_120_cell};
+// these are just the 8 sides of the hypercube
+var quatPerMonkeyArray = [
+    new THREE.Vector4(1, 0, 0, 0),
+    new THREE.Vector4(0, 1, 0, 0),
+    new THREE.Vector4(0, 0, 1, 0),
+    new THREE.Vector4(0, 0, 0, 1),
 
-// var quatPerMonkeyArray = centers_24_cell_dual.concat(centers_24_cell); 
-var quatPerMonkeyArray = quatPerMonkeyArrayDict[polychoron]; 
-
-var numMonkeys = quatPerMonkeyArray.length;
-var matArray = new Array(numMonkeys);
-
-var travelDirDict = {"8": centers_8_cell[1], "24": centers_24_cell_dual[4], "24dual": centers_24_cell_dual[4], "24both": centers_24_cell_dual[4], "120": centers_120_cell[4]};
-
-var travelDir = travelDirDict[polychoron];  //for 24-cell_dual //4 is down head/foot.  //12 is (0,0,0,1)
-var colourDir = travelDir;
-var HopfColorMatrix = makeHopfColorMatrix(colourDir);
-
-var modelScaleDict = {"8":1, "24":50, "24dual":50, "24both":50, "120":3.07768}
-var modelScale = modelScaleDict[polychoron];
-
-var modelFileNameDict = {"8":'media/monkey_15k_tris', 
-                        "24":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
-                        "24dual":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
-                        "24both":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
-                        "120":'media/120-cell_monkey_lowpoly_003_left_screw.obj'};
-var modelFileName = modelFileNameDict[polychoron];
+    new THREE.Vector4(-1, 0, 0, 0),
+    new THREE.Vector4(0, -1, 0, 0),
+    new THREE.Vector4(0, 0, -1, 0),
+    new THREE.Vector4(0, 0, 0, -1)
+];
+ 
 
 init();
 animate();
@@ -351,22 +286,6 @@ function init()
             mousePos: {
             	type: "v2",
             	value: new THREE.Vector2(0,0)
-            },
-            travelDir: {
-                type: "v4",
-                value: new THREE.Vector4( 0, 0, 0, 0 )
-            },
-            colourDir: {
-                type: "v4",
-                value: new THREE.Vector4( 0, 0, 0, 0 )
-            },
-                HopfColorMatrix: {
-                type: "m4",
-                value: new THREE.Matrix4().set( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
-            },
-            modelScale: {
-                type: "f",
-                value: 1.0
             }
         },
         vertexShader: document.getElementById('vertexShader').textContent,
@@ -375,7 +294,7 @@ function init()
     materialBase.side = THREE.FrontSide;
 
 	// one material per monkey, since they have a different quaternion
-    for (var i = 0; i < numMonkeys; i++)
+    for (var i = 0; i < 8; i++)
     {
         matArray[i] = materialBase.clone();
     }
@@ -383,18 +302,16 @@ function init()
 	// load the monkey mesh
     var manager = new THREE.LoadingManager();
     var loader = new THREE.OBJLoader(manager);
-    loader.load(modelFileName, function (object) {
-    // loader.load('media/dodecDualRot90.obj', function (object) {
+    loader.load('media/monkey.obj', function (object) {
 
-		// make numMonkeys copies of the mesh and assign them a unique material out of the numMonkeys we created previously
-        for (var i = 0; i < numMonkeys; i++)
+		// make 8 copies of the mesh and assign them a unique material out of the 8 we created previously
+        for (var i = 0; i < 8; i++)
         {
             var newObject = object.clone();
 
             newObject.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
                     child.material = matArray[i];
-                    child.frustumCulled = false;
                 }
             });
 
@@ -411,16 +328,12 @@ function animate() {
 
     
 	// send the time every frame so that we can rotate the monkeys over time
-    for (var i = 0; i < numMonkeys; i++)
+    for (var i = 0; i < 8; i++)
     {
         matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
         matArray[i].uniforms['fogType'].value = clicky;
         matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
-        matArray[i].uniforms['travelDir'].value = travelDir;
-        matArray[i].uniforms['colourDir'].value = colourDir;
-        matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
-        matArray[i].uniforms['modelScale'].value = modelScale;
     }
 
 
@@ -486,15 +399,15 @@ function animate() {
 	  window.addEventListener("keydown", onkey, true);
 
 	  	  //hold down keys to do rotations and stuff
-		// function key(event, sign) {
-		//   var control = controls.manualControls[String.fromCharCode(event.keyCode).toLowerCase()];
-		//   if (!control)
-		//     return;
-		//   if (sign === 1 && control.active || sign === -1 && !control.active)
-		//     return;
-		//   control.active = (sign === 1);
-		//   controls.manualRotateRate[control.index] += sign * control.sign;
-		// }
+		function key(event, sign) {
+		  var control = controls.manualControls[String.fromCharCode(event.keyCode).toLowerCase()];
+		  if (!control)
+		    return;
+		  if (sign === 1 && control.active || sign === -1 && !control.active)
+		    return;
+		  control.active = (sign === 1);
+		  controls.manualRotateRate[control.index] += sign * control.sign;
+		}
 		document.addEventListener('keydown', function(event) { key(event, 1); }, false);
 		document.addEventListener('keyup', function(event) { key(event, -1); }, false);
 

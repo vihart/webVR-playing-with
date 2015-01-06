@@ -460,15 +460,6 @@ function selectPolychora(event) {
   }
 }
 
-		//links
-
-		function link(){
-
-				window.location="http://vihart.github.io/webVR-playing-with/index.html";
-			
-
-		}
-
 		//listen for mouse movement to get mouseX and mouseY
 
 		document.body.addEventListener( 'mousemove', function (event) {
@@ -497,8 +488,6 @@ function selectPolychora(event) {
 	    	controls.zeroSensor(); //zero rotation
 	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
 	    	effect.setFullScreen(true) //fullscreen
-	    } else if (event.keyCode == 32) {//space
-	  		link();
 	  	}else if (event.keyCode === 73){ //i
 	  		infoSign.material.visible = !infoSign.material.visible;
 	  	}else if (event.keyCode == 80) {//p

@@ -299,7 +299,7 @@ var noms = [
 var winNoise = document.querySelector('#win');
 var gamePoints = 0;
 var muteSound = false;
-var level = 0;
+var level = 3;
 
 
 // one quaternion per monkey
@@ -488,7 +488,7 @@ function init()
     });
     materialBase.side = THREE.FrontSide;
 
-    loadStuff();
+    startLevel(level);
 
     // score = new THREE.Mesh( 
     //     new THREE.TextGeometry('Score'), 
@@ -509,34 +509,23 @@ function init()
 
 function animate() {
 
-
-    // score.lookAt(camera.position);
-    // var camPos = new THREE.Vector3();
-    // camPos.set(camera.position.x, camera.position.y, camera.position.z);
-    // camPos.add(getFwdVector().multiplyScalar(-.2));
-    // // score.position.z -= .01;
-    // score.position.x = camPos.x; 
-    // score.position.y = camPos.y; 
-    // score.position.z = camPos.z;
-
-	// send the time every frame so that we can rotate the monkeys over time
     for (var i = 0; i < numCells; i++)
     {
-        matArray[i].uniforms['quatPerCell'].value = quatPerCellArray[i];
+        // matArray[i].uniforms['quatPerCell'].value = quatPerCellArray[i];
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
         // matArray[i].uniforms['fogType'].value = clicky;
         // matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
-        matArray[i].uniforms['travelDir'].value = travelDir;
-        matArray[i].uniforms['colourDir'].value = colourDir;
-        matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
+        // matArray[i].uniforms['travelDir'].value = travelDir;
+        // matArray[i].uniforms['colourDir'].value = colourDir;
+        // matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
         matArray[i].uniforms['headQuat'].value = headQuat;
-        if (rotMatrixArray == "None"){
-            matArray[i].uniforms['rotMatrix'].value = new THREE.Matrix3();
-        }
-        else {
-            matArray[i].uniforms['rotMatrix'].value = rotMatrixArray[i];
-        }
-        matArray[i].uniforms['modelScale'].value = modelScale;
+        // if (rotMatrixArray == "None"){
+            // matArray[i].uniforms['rotMatrix'].value = new THREE.Matrix3();
+        // }
+        // else {
+    //         matArray[i].uniforms['rotMatrix'].value = rotMatrixArray[i];
+    //     }
+    //     matArray[i].uniforms['modelScale'].value = modelScale;
     }
 
     if(controls.getVRState() !== null && 
@@ -610,6 +599,23 @@ function startLevel(level){
     objectArray = [];
 
     loadStuff();
+
+    for (var i = 0; i < numCells; i++)
+    {
+        matArray[i].uniforms['quatPerCell'].value = quatPerCellArray[i];
+        matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
+        matArray[i].uniforms['travelDir'].value = travelDir;
+        matArray[i].uniforms['colourDir'].value = colourDir;
+        matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
+        matArray[i].uniforms['headQuat'].value = headQuat;
+        if (rotMatrixArray == "None"){
+            matArray[i].uniforms['rotMatrix'].value = new THREE.Matrix3();
+        }
+        else {
+            matArray[i].uniforms['rotMatrix'].value = rotMatrixArray[i];
+        }
+        matArray[i].uniforms['modelScale'].value = modelScale;
+    }
     }
 }
 

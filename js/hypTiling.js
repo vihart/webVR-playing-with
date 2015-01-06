@@ -96,7 +96,19 @@ function loadStuff(){
       }
     });
   }
+  for (var k = 0; k < numObjects; k++) {
+    for (var j = 0; j < numTiles; j++) {
+      var i = j + numTiles*k;
+      bigMatArray[i].uniforms['translation'].value = tsfms[j];
+      // bigMatArray[i].uniforms['boost'].value = currentBoost;
+
+    // bigMatArray[i].visible = phraseOnOffMaps[currentPhrase][k];
+    }
+  }
+
+
 } 
+
 
 
 function init() {
@@ -163,7 +175,7 @@ function animate() {
   for (var k = 0; k < numObjects; k++) {
     for (var j = 0; j < numTiles; j++) {
       var i = j + numTiles*k;
-      bigMatArray[i].uniforms['translation'].value = tsfms[j];
+      // bigMatArray[i].uniforms['translation'].value = tsfms[j];
       bigMatArray[i].uniforms['boost'].value = currentBoost;
 
     // bigMatArray[i].visible = phraseOnOffMaps[currentPhrase][k];

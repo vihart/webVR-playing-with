@@ -4,6 +4,21 @@ THREE.Matrix4.prototype.add = function (m) {
   this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
 };
 
+
+function areSameVector(v1, v2) {
+ var delta = 0.001;
+ return v1.dot(v2) < delta;
+}
+
+function isVectorInArray(mat, vecArray) {
+    for (var i=0; i<vecArray.length; i++) {
+        if (areSameVector(mat, vecArray[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function getFwdVector() {
   return new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
 }

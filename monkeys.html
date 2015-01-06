@@ -338,6 +338,19 @@ function loadStuff(){
             scene.add(newObject);
         }
     });
+
+    for (var i = 0; i < numMonkeys; i++)
+    {
+        matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
+        matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
+        matArray[i].uniforms['fogType'].value = clicky;
+        matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
+        matArray[i].uniforms['travelDir'].value = travelDir;
+        matArray[i].uniforms['colourDir'].value = colourDir;
+        matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
+        matArray[i].uniforms['modelScale'].value = modelScale;
+    }
+
 } 
 
 function init()
@@ -416,14 +429,14 @@ function animate() {
 	// send the time every frame so that we can rotate the monkeys over time
     for (var i = 0; i < numMonkeys; i++)
     {
-        matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
+        // matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
         matArray[i].uniforms['fogType'].value = clicky;
         matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
-        matArray[i].uniforms['travelDir'].value = travelDir;
-        matArray[i].uniforms['colourDir'].value = colourDir;
-        matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
-        matArray[i].uniforms['modelScale'].value = modelScale;
+        // matArray[i].uniforms['travelDir'].value = travelDir;
+        // matArray[i].uniforms['colourDir'].value = colourDir;
+        // matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
+        // matArray[i].uniforms['modelScale'].value = modelScale;
     }
 
 

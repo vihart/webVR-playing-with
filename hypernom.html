@@ -58,17 +58,18 @@
 	-->
 	<script src="lib/gl-matrix.js"></script>
 
+<script src="js/sphMath.js"></script>
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControlsMonkeys.js"></script>
+	<script src="js/VRControlsHyperNom.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
 	<script src="js/VREffect.js"></script>
 
-<script src="js/sphMath.js"></script>
+
     <!-- Quaternions for the centers of the cells -->
 <script src="js/centers_600_cell.js"></script>
     <script src="js/centers_5_cell.js"></script>
@@ -132,7 +133,7 @@ uniform vec2 mousePos;
 uniform vec4 travelDir; //quaternion for which way we are rotating
 uniform vec4 colourDir; //quaternion for which way we are colouring
 uniform mat4 HopfColorMatrix; //rotates colourDir to lie along (0,0,z,w)
-uniform vec4 headQuat; //quaternion for head
+uniform vec4 moveQuat; //quaternion for head
 uniform mat3 rotMatrix; //rotate tetrahedral cells into correct orientation
 uniform float modelScale; //scale model by this
 
@@ -197,7 +198,7 @@ void main()
  //    // also rotate everything over time
     // vec4 quatOverTime = pointOnS3Geod( vec4(0,0,0,1), travelDir, 0.5*time );
     // vec4 quatOverTime = vec4(0,0,0,1);
-    vec4 quatOverTime = headQuat;
+    vec4 quatOverTime = moveQuat;
 
     vec4 p = quatMult( quatOverTime, pt0 );
     vec4 n = quatMult( quatOverTime, nt0 );
@@ -327,6 +328,8 @@ var travelDir = centers_120_cell[3];
 var colourDir = centers_120_cell[3];
 var HopfColorMatrix = makeHopfColorMatrix(colourDir);
 var headQuat = new THREE.Vector4().set(0,0,0,1);
+var controlsQuat = new THREE.Vector4().set(0,0,0,1);
+var moveQuat = new THREE.Vector4().set(0,0,0,1);
 
 var rotMatrixArrayDict = {"5": makeRotMatrixArray(centers_5_cell, centers_5_cell_dual, 1.31812),   
                           "8": "None",
@@ -467,7 +470,7 @@ function init()
                 type: "m4",
                 value: new THREE.Matrix4().set( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
             },
-            headQuat: {
+            moveQuat: {
                 type: "v4",
                 value: new THREE.Vector4( 0, 0, 0, 1 )
             },
@@ -515,7 +518,8 @@ function animate() {
         // matArray[i].uniforms['travelDir'].value = travelDir;
         // matArray[i].uniforms['colourDir'].value = colourDir;
         // matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
-        matArray[i].uniforms['headQuat'].value = headQuat;
+        moveQuat = quatMult(headQuat, controlsQuat)
+        matArray[i].uniforms['moveQuat'].value = moveQuat;
         // if (rotMatrixArray == "None"){
             // matArray[i].uniforms['rotMatrix'].value = new THREE.Matrix3();
         // }
@@ -540,7 +544,7 @@ function animate() {
 
 
     var myPos = invStereoProj(camera.position);
-    myPos = quatMult(quatInv(headQuat), myPos);
+    myPos = quatMult(quatInv(moveQuat), myPos);
 
     for (var i = 0; i < objectArray.length; i++){
 
@@ -604,7 +608,7 @@ function startLevel(level){
         matArray[i].uniforms['travelDir'].value = travelDir;
         matArray[i].uniforms['colourDir'].value = colourDir;
         matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
-        matArray[i].uniforms['headQuat'].value = headQuat;
+        matArray[i].uniforms['moveQuat'].value = moveQuat;
         if (rotMatrixArray == "None"){
             matArray[i].uniforms['rotMatrix'].value = new THREE.Matrix3();
         }

@@ -5,19 +5,19 @@ THREE.Matrix4.prototype.add = function (m) {
 };
 
 
-function areSameVector(v1, v2) {
- var delta = 0.001;
- return v1.dot(v2) < delta;
-}
+// function areSameVector(v1, v2) {
+//  var delta = 0.001;
+//  return v1.dot(v2) < delta;
+// }
 
-function isVectorInArray(mat, vecArray) {
-    for (var i=0; i<vecArray.length; i++) {
-        if (areSameVector(mat, vecArray[i])) {
-            return true;
-        }
-    }
-    return false;
-}
+// function isVectorInArray(mat, vecArray) {
+//     for (var i=0; i<vecArray.length; i++) {
+//         if (areSameVector(mat, vecArray[i])) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 function getFwdVector() {
   return new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
@@ -74,6 +74,16 @@ function makeHopfColorMatrix( colourDir )
     Rot.add(m2);
 
     return Rot;
+}
+
+// point on geod in S3 from p in direction of q going distance dist
+function pointOnS3Geod( p, q, dist )
+{
+    var P = new THREE.Vector4().copy(p);
+    var Q = new THREE.Vector4().copy(q).sub(p.multiplyScalar( p.dot(q) )).normalize();
+    //  normalize( q - dot(p,q) * p );
+    Q.multiplyScalar(Math.sin(dist)).add(P.multiplyScalar(Math.cos(dist)));
+    return Q;
 }
 
 function stereoProj(p)

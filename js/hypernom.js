@@ -130,7 +130,7 @@ function init()
   start = Date.now();
   scene = new THREE.Scene();
   overlayScene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, .1, 50);
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, .2, 25);
   camera.position.x = 0;
   camera.position.z = 0;
 
@@ -193,13 +193,20 @@ function init()
 
   startLevel(level);
 
-  scoreTexture = new THREEx.DynamicTexture(512,256).clear().drawText("Time: ", undefined, 64, "#ffffff", "normal 90px Helvetica");
+  scoreTexture = new THREEx.DynamicTexture(512,256).clear().drawText("", undefined, 64, "#ffffff", "normal 90px Helvetica");
 
-  scoreMesh = new THREE.Mesh(new THREE.PlaneGeometry( 0.2, 0.1),
+  scoreMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.1),
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: scoreTexture.texture, side: THREE.DoubleSide} ));
-  scoreMesh.position.z = -0.25;
-  scoreMesh.position.x = -.1;
-  scoreMesh.position.y = -.1;
+  scoreMesh.position.z = -0.3;
+  // position score mesh differently if there is an hmd
+  if(typeof navigator.getVRDevices !== "undefined"){
+    scoreMesh.position.x = -0.2;
+    scoreMesh.position.y = -0.4;
+  } else {
+    scoreMesh.position.x = -0.3;
+    scoreMesh.position.y = -0.2;
+  }
+
   camera.add(scoreMesh);
   scene.add(camera);
 
@@ -211,7 +218,7 @@ function init()
 
 
 function animate() {
-  scoreTexture.clear().drawText("Time: "+ Math.round((Date.now() - start)/100)/10, undefined, 64, "#ffffff", "normal 90px Helvetica");
+  scoreTexture.clear().drawText(""+ Math.round((Date.now() - start)/1000), undefined, 64, "#ffffff", "normal 90px Helvetica");
 
   for (var i = 0; i < numCells; i++) {
     matArray[i].uniforms['time'].value = 0.00025 * (Date.now() - start);

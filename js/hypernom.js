@@ -1,4 +1,4 @@
-var camera, scene, overlayScene, renderer, mesh, effect, controls, scoreTexture, scoreMesh;
+var camera, scene, overlayScene, renderer, mesh, effect, controls, levelTexture, levelMesh, scoreTexture, scoreMesh;
 var objectArray = [];
 var noms = [
   document.querySelector('#nom1'),
@@ -10,7 +10,7 @@ var noms = [
 var winNoise = document.querySelector('#win');
 var gamePoints = 0;
 var muteSound = false;
-var level = 0;
+var level = -1;
 
 // one quaternion per cell
 var polychoraList = ["5","8","16","24","120","600"];
@@ -50,6 +50,11 @@ var rotMatrixArrayDict = {"5": makeRotMatrixArray(centers_5_cell, centers_5_cell
 var rotMatrixArray = rotMatrixArrayDict[polychoron];
 var modelScale = 0.9;
 
+var timing = {
+  start: [Date.now(),0,0,0,0,0],
+  end: [0,0,0,0,0,0]
+};
+
 init();
 animate();
 
@@ -69,11 +74,9 @@ THREE.Matrix4.prototype.add = function (m) {   //addition of matrices needs to b
   this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
 };
 
-function loadStuff(){
-
-  // one material per object, since they have a different quaternion
-  for (var i = 0; i < numCells; i++)
-  {
+function loadStuff() {
+  // one material per object, since they have different quaternions
+  for (var i = 0; i < numCells; i++) {
     matArray[i] = materialBase.clone();
   }
 
@@ -82,8 +85,7 @@ function loadStuff(){
   var loader = new THREE.OBJLoader(manager);
   loader.load(modelFileName, function (object) {
     // make numCells copies of the mesh and assign them a unique material out of the numCells we created previously
-    for (var i = 0; i < numCells; i++)
-    {
+    for (var i = 0; i < numCells; i++) {
       objectArray[i] = object.clone();
 
       objectArray[i].traverse(function (child) {
@@ -98,26 +100,25 @@ function loadStuff(){
   });
 }
 
-function makeHopfColorMatrix( colourDir )
-{
+function makeHopfColorMatrix( colourDir ) {
   //rotate colourDir to lie along (0,0,z,w), fixing (0,0,0,1)
   //http://math.stackexchange.com/questions/293116/rotating-one-3-vector-to-another
 
   var A = new THREE.Vector3(colourDir.x, colourDir.y, colourDir.z);
-  var B = new THREE.Vector3(0.,0.,1.0);
+  var B = new THREE.Vector3(0.0,0.0,1.0);
   var X = new THREE.Vector3();
   X.crossVectors(A,B);
   X.normalize();
   var theta = Math.acos( A.dot(B)/(A.length()*B.length())); ///dont care about sign
-  var m = new THREE.Matrix4().set(  0.,-X.z, X.y, 0., //input is row vectors
-    X.z,  0.,-X.x, 0.,
-    -X.y, X.x,  0., 0.,
-    0.,  0.,  0., 0.
+  var m = new THREE.Matrix4().set(  0.0,-X.z, X.y, 0.0, //input is row vectors
+    X.z,  0.0,-X.x, 0.0,
+    -X.y, X.x,  0.0, 0.0,
+    0.0,  0.0,  0.0, 0.0
   );
 
   var m2 = new THREE.Matrix4().copy(m).multiply(m);
   m.multiplyScalar(Math.sin(theta));
-  m2.multiplyScalar(1.-Math.cos(theta));
+  m2.multiplyScalar(1.0-Math.cos(theta));
   var Rot = new THREE.Matrix4();
   Rot.add(m);
   Rot.add(m2);
@@ -125,12 +126,10 @@ function makeHopfColorMatrix( colourDir )
   return Rot;
 }
 
-function init()
-{
-  start = Date.now();
+function init() {
   scene = new THREE.Scene();
   overlayScene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, .2, 25);
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.2, 25);
   camera.position.x = 0;
   camera.position.z = 0;
 
@@ -191,11 +190,14 @@ function init()
   });
   materialBase.side = THREE.FrontSide;
 
-  startLevel(level);
-
+  levelTexture = new THREEx.DynamicTexture(1024,512).clear().drawText("Level 1", undefined, 64, "#00ffff", "normal 100px Helvetica")
+                    .drawText("NOM all the cells", undefined, 192, "#ffffff", "normal 60px Helvetica")
+                    .drawText("Press Space to Start", undefined, 256, "#ffffff", "normal 50px Helvetica");
+  levelMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, .5),
+                    new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: levelTexture.texture, side: THREE.DoubleSide} ));
+  levelMesh.position.z = -0.3;
   scoreTexture = new THREEx.DynamicTexture(512,256).clear().drawText("", undefined, 64, "#ffffff", "normal 90px Helvetica");
-
-  scoreMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.1),
+  scoreMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.3, 0.1),
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: scoreTexture.texture, side: THREE.DoubleSide} ));
   scoreMesh.position.z = -0.3;
   // position score mesh differently if there is an hmd
@@ -207,6 +209,7 @@ function init()
     scoreMesh.position.y = -0.2;
   }
 
+  camera.add(levelMesh);
   camera.add(scoreMesh);
   scene.add(camera);
 
@@ -215,51 +218,55 @@ function init()
   effect.render(scene, camera);
 }
 
-
-
 function animate() {
-  scoreTexture.clear().drawText(""+ Math.round((Date.now() - start)/1000), undefined, 64, "#ffffff", "normal 90px Helvetica");
+  if (level >= 0) {
+    scoreTexture.clear().drawText(""+ Math.round((Date.now() - timing.start[level])/1000), undefined, 64, "#ffffff", "normal 90px Helvetica");
 
-  for (var i = 0; i < numCells; i++) {
-    matArray[i].uniforms['time'].value = 0.00025 * (Date.now() - start);
-    moveQuat = quatMult(headQuat, controlsQuat)
-    matArray[i].uniforms['moveQuat'].value = moveQuat;
-  }
+    for (var i = 0; i < numCells; i++) {
+      matArray[i].uniforms.time.value = 0.00025 * (Date.now() - timing.start[0]);
+      moveQuat = quatMult(headQuat, controlsQuat);
+      matArray[i].uniforms.moveQuat.value = moveQuat;
+    }
 
-  if(controls.getVRState() !== null &&
-      (controls.getVRState().hmd.rotation[0] !== 0
-      || controls.getVRState().hmd.rotation[1] !== 0
-      || controls.getVRState().hmd.rotation[2] !== 0
-      || controls.getVRState().hmd.rotation[3] !== 0 )){
-    // headQuat = new THREE.Vector4();
-    headQuat.x = controls.getVRState().hmd.rotation[0];
-    headQuat.y = controls.getVRState().hmd.rotation[1];
-    headQuat.z = controls.getVRState().hmd.rotation[2];
-    headQuat.w = controls.getVRState().hmd.rotation[3];
-  }
+    if(controls.getVRState() !== null &&
+        (controls.getVRState().hmd.rotation[0] !== 0 ||
+        controls.getVRState().hmd.rotation[1] !== 0 ||
+        controls.getVRState().hmd.rotation[2] !== 0 ||
+        controls.getVRState().hmd.rotation[3] !== 0 )){
+      // headQuat = new THREE.Vector4();
+      headQuat.x = controls.getVRState().hmd.rotation[0];
+      headQuat.y = controls.getVRState().hmd.rotation[1];
+      headQuat.z = controls.getVRState().hmd.rotation[2];
+      headQuat.w = controls.getVRState().hmd.rotation[3];
+    }
 
-  var myPos = invStereoProj(camera.position);
-  myPos = quatMult(quatInv(moveQuat), myPos);
+    var myPos = invStereoProj(camera.position);
+    myPos = quatMult(quatInv(moveQuat), myPos);
 
-  for (var i = 0; i < objectArray.length; i++) {
-    var distToPoint = S3dist(myPos, quatPerCellArray[i]);
-    if (distToPoint < nomDistance){
-      if (objectArray[i].visible == true){
-        noms[i%5].play();
-        gamePoints += 1;
+    for (var i = 0; i < objectArray.length; i++) {
+      var distToPoint = S3dist(myPos, quatPerCellArray[i]);
+      if (distToPoint < nomDistance){
+        if (objectArray[i].visible === true){
+          noms[i%5].play();
+          gamePoints += 1;
+        }
+        objectArray[i].visible = false;
       }
-      objectArray[i].visible = false;
     }
-  }
 
-  if (gamePoints == numCells) {
-    winNoise.play();
-    gamePoints = 0;
-    for(var i; i < numCells; i++){
-      objectArray[i].visible = true;
+    if (gamePoints == numCells) {
+      timing.end[level] = Date.now();
+      winNoise.play();
+      gamePoints = 0;
+      levelTexture.clear().drawText("Level " + (level+1) + "Score: ", undefined, 80, "#00ffff", "normal 100px Helvetica")
+      .drawText("" + Math.round((timing.end[level] - timing.start[level])/1000), undefined, 200, "#ffffff", "normal 60px Helvetica")
+      .drawText("Press Space for Level " + (level+2), undefined, 260, "#ffffff", "normal 50px Helvetica");
+      camera.add(levelMesh);
+      camera.remove(scoreMesh);
+      for(var i; i < numCells; i++){
+        objectArray[i].visible = true;
+      }
     }
-    level = (level+1)%6;
-    startLevel(level);
   }
 
   controls.update();
@@ -270,7 +277,10 @@ function animate() {
 }
 
 function startLevel(level){
+  camera.remove(levelMesh);
   if (scene) {
+    timing.start[level] = Date.now();
+    camera.add(scoreMesh);
     while (scene.children.length > 1) {
       scene.remove(scene.children[scene.children.length - 1]);
     }
@@ -280,26 +290,24 @@ function startLevel(level){
     matArray = new Array(numCells);
     modelFileName = modelFileNameDict[polychoron];
     nomDistance = nomDistanceDict[polychoron];
-    rotMatrixArray = rotMatrixArrayDict[polychoron]
+    rotMatrixArray = rotMatrixArrayDict[polychoron];
     objectArray = [];
 
     loadStuff();
 
-    for (var i = 0; i < numCells; i++)
-    {
-      matArray[i].uniforms['quatPerCell'].value = quatPerCellArray[i];
-      matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
-      matArray[i].uniforms['travelDir'].value = travelDir;
-      matArray[i].uniforms['colourDir'].value = colourDir;
-      matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
-      matArray[i].uniforms['moveQuat'].value = moveQuat;
-      if (rotMatrixArray == "None"){
-        matArray[i].uniforms['rotMatrix'].value = new THREE.Matrix3();
+    for (var i = 0; i < numCells; i++) {
+      matArray[i].uniforms.quatPerCell.value = quatPerCellArray[i];
+      matArray[i].uniforms.time.value = 0.00025 * (Date.now() - timing.start);
+      matArray[i].uniforms.travelDir.value = travelDir;
+      matArray[i].uniforms.colourDir.value = colourDir;
+      matArray[i].uniforms.HopfColorMatrix.value = HopfColorMatrix;
+      matArray[i].uniforms.moveQuat.value = moveQuat;
+      if (rotMatrixArray == "None") {
+        matArray[i].uniforms.rotMatrix.value = new THREE.Matrix3();
+      } else {
+        matArray[i].uniforms.rotMatrix.value = rotMatrixArray[i];
       }
-      else {
-        matArray[i].uniforms['rotMatrix'].value = rotMatrixArray[i];
-      }
-      matArray[i].uniforms['modelScale'].value = modelScale;
+      matArray[i].uniforms.modelScale.value = modelScale;
     }
   }
 }
@@ -316,25 +324,28 @@ function onkey(event) {
   if (event.keyCode == 90) { // z
     controls.zeroSensor(); //zero rotation
   } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
-    effect.setFullScreen(true) //fullscreen
-  }else if (event.keyCode === 73){ //i
+    effect.setFullScreen(true); //fullscreen
+  } else if (event.keyCode === 73){ //i
     infoSign.material.visible = !infoSign.material.visible;
-  }else if (event.keyCode == 80 || event.keyCode == 32) {//p
-    if (muteSound == true){
+  } else if (event.keyCode == 80) {//p
+    if (muteSound === true){
       for (var i = 0; i < noms.length; i++){
         noms[i].volume = 1;
       }
       muteSound = false;
       winNoise.volume = 1;
-    } else{
-      for (var i = 0; i < noms.length; i++){
+    } else {
+      for (var i = 0; i < noms.length; i++) {
         noms[i].volume = 0;
       }
       muteSound = true;
       winNoise.volume = 0;
     }
+  } else if (event.keyCode == 32) { // space
+    level = (level+1)%6;
+    startLevel(level);
   }
-};
+}
 window.addEventListener("keydown", onkey, true);
 
 //hold down keys to do rotations and stuff

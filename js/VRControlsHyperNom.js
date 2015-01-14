@@ -84,7 +84,7 @@ THREE.VRControls = function ( camera, done ) {
 
 	  // camera.position = camera.position.add(getFwdVector());
 
-	  ///do translation 
+	  ///do translation
 		var offset = new THREE.Vector3();
 		if (this.manualMoveRate[0] != 0 || this.manualMoveRate[1] != 0 || this.manualMoveRate[2] != 0){
 		    offset = getFwdVector().multiplyScalar( interval * this.manualMoveRate[0]).add(
@@ -180,39 +180,11 @@ function getUpVector() {
   return new THREE.Vector3(0,-1,0).applyQuaternion(camera.quaternion);
 }
 
-// THREE.Matrix4.prototype.add = function (m) {
-//   this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
-// };
-
-// function sphericalMoveByVector(v) {
-//   var dx = v.x;
-//   var dy = v.y;
-//   var dz = v.z;
-//   var len = Math.sqrt(dx*dx + dy*dy + dz*dz);
-//   dx /= len;
-//   dy /= len;
-//   dz /= len;
-//   var m = new THREE.Matrix4().set(
-//     0, 0, 0, -dx,
-//     0, 0, 0, -dy,
-//     0, 0, 0, -dz,
-//     dx,dy,dz, 0);
-//   var m2 = new THREE.Matrix4().copy(m).multiply(m);
-//   var c1 = Math.sin(len);
-//   var c2 = 1.0 - Math.cos(len);
-//   m.multiplyScalar(c1);
-//   m2.multiplyScalar(c2);
-//   var result = new THREE.Matrix4().identity();
-//   result.add(m);
-//   result.add(m2);
-//   return result;
-// }
-
 //hold down keys to do rotations and stuff
 function key(event, sign) {
   var control = controls.manualControls[event.keyCode];
 
-  if (sign === 1 && control.active || sign === -1 && !control.active) {
+  if (typeof control === 'undefined' || sign === 1 && control.active || sign === -1 && !control.active) {
     return;
   }
 

@@ -1,4 +1,4 @@
-var camera, scene, overlayScene, renderer, mesh, effect, controls, levelTexture, levelMesh, scoreTexture, scoreMesh;
+var camera, scene, overlayScene, renderer, mesh, effect, controls, levelTexture, levelMesh, scoreTexture, scoreMesh, polychoron, numCells, matArray;
 var objectArray = [];
 var noms = [
   document.querySelector('#nom1'),
@@ -13,24 +13,43 @@ var muteSound = false;
 var level = -1;
 
 // one quaternion per cell
-var polychoraList = ["5","8","16","24","120","600"];
-var polychoron = polychoraList[0];
-var quatPerCellArrayDict = {"5": centers_5_cell_dual, "8": centers_8_cell, "16": centers_16_cell, "24": centers_24_cell_dual, "120": centers_120_cell, "600": centers_600_cell};
 
-var quatPerCellArray = quatPerCellArrayDict[polychoron];
-var modelFileNameDict = {"5": 'media/5-cell_tet_subdiv_flip_norm.obj',
-"8":'media/8-cell_cube_subdiv_flip_norm.obj',
-"16": 'media/16-cell_tet_subdiv_flip_norm.obj',
-"24":'media/24-cell_oct_subdiv_flip_norm.obj',
-"120":'media/120-cell_dodec_subdiv_flip_norm.obj',
-"600": 'media/600-cell_tet_subdiv_flip_norm.obj'};
-var nomDistanceDict = {"5": 1.7, "8": 1.1, "16": 1.2, "24": .8, "120": .6, "600": .4};
-var nomDistance = nomDistanceDict[polychoron];
 
-var modelFileName = modelFileNameDict[polychoron];
-
-var numCells = quatPerCellArray.length;
-var matArray = new Array(numCells);
+var polychora = [
+  { // 5 Cell (Simplex)
+    quatPerCellArray: centers_5_cell_dual,
+    modelFileName: 'media/5-cell_tet_subdiv_flip_norm.obj',
+    rotMatrixArray: makeRotMatrixArray(centers_5_cell, centers_5_cell_dual, 1.31812),
+    nomDistance: 1.7
+  },
+  { // 8 Cell (Hypercube)
+    quatPerCellArray: centers_8_cell,
+    modelFileName: 'media/8-cell_cube_subdiv_flip_norm.obj',
+    nomDistance: 1.1
+  },
+  { // 16 Cell
+    quatPerCellArray: centers_16_cell,
+    modelFileName: 'media/16-cell_tet_subdiv_flip_norm.obj',
+    rotMatrixArray: makeRotMatrixArray(centers_16_cell_vert_centered, centers_8_cell, 1.0471975511965977462), //N[ArcCos[0.5]]
+    nomDistance: 1.2
+  },
+  { // 24 Cell (special snowflake)
+    quatPerCellArray: centers_24_cell,
+    modelFileName: 'media/24-cell_oct_subdiv_flip_norm.obj',
+    nomDistance: 0.8
+  },
+  { // 120 Cell (the best)
+    quatPerCellArray: centers_120_cell,
+    modelFileName: 'media/120-cell_dodec_subdiv_flip_norm.obj',
+    nomDistance: 0.6
+  },
+  { // 600 Cell
+    quatPerCellArray: centers_600_cell,
+    modelFileName: 'media/600-cell_tet_subdiv_flip_norm.obj',
+    rotMatrixArray: makeRotMatrixArray(centers_600_cell_vert_centered, centers_120_cell, 0.38813951537018876328), //N[ArcCos[GR*GR/Sqrt[8]]]
+    nomDistance: 0.4
+  }
+];
 
 var travelDir = centers_120_cell[3];
 var colourDir = centers_120_cell[3];
@@ -39,15 +58,6 @@ var headQuat = new THREE.Vector4().set(0,0,0,1);
 var controlsQuat = new THREE.Vector4().set(0,0,0,1);
 var moveQuat = new THREE.Vector4().set(0,0,0,1);
 
-var rotMatrixArrayDict = {"5": makeRotMatrixArray(centers_5_cell, centers_5_cell_dual, 1.31812),
-"8": "None",
-"16": makeRotMatrixArray(centers_16_cell_vert_centered, centers_8_cell, 1.0471975511965977462), // //N[ArcCos[0.5]]
-"24": "None",
-"120": "None",
-"600": makeRotMatrixArray(centers_600_cell_vert_centered, centers_120_cell, 0.38813951537018876328) //N[ArcCos[GR*GR/Sqrt[8]]]
-// "600": "None"
-};
-var rotMatrixArray = rotMatrixArrayDict[polychoron];
 var modelScale = 0.9;
 
 var timing = {
@@ -190,20 +200,18 @@ function init() {
   });
   materialBase.side = THREE.FrontSide;
 
-  levelTexture = new THREEx.DynamicTexture(1024,512).clear().drawText("Level 1", undefined, 64, "#00ffff", "normal 100px Helvetica")
-                    .drawText("NOM all the cells", undefined, 192, "#ffffff", "normal 60px Helvetica")
-                    .drawText("Press Space to Start", undefined, 256, "#ffffff", "normal 50px Helvetica");
-  levelMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, .5),
+  levelTexture = new THREEx.DynamicTexture(1024,512).clear();
+  levelMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(.5, .25),
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: levelTexture.texture, side: THREE.DoubleSide} ));
   levelMesh.position.z = -0.3;
-  scoreTexture = new THREEx.DynamicTexture(512,256).clear().drawText("", undefined, 64, "#ffffff", "normal 90px Helvetica");
+  scoreTexture = new THREEx.DynamicTexture(512,256).clear().drawText("", undefined, 64, "#ffffff", "normal 100px Helvetica");
   scoreMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.3, 0.1),
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: scoreTexture.texture, side: THREE.DoubleSide} ));
   scoreMesh.position.z = -0.3;
   // position score mesh differently if there is an hmd
   if(typeof navigator.getVRDevices !== "undefined"){
-    scoreMesh.position.x = -0.2;
-    scoreMesh.position.y = -0.4;
+    scoreMesh.position.x = -0.1;
+    scoreMesh.position.y = -0.2;
   } else {
     scoreMesh.position.x = -0.3;
     scoreMesh.position.y = -0.2;
@@ -258,12 +266,10 @@ function animate() {
       timing.end[level] = Date.now();
       winNoise.play();
       gamePoints = 0;
-      levelTexture.clear().drawText("Level " + (level+1) + "Score: ", undefined, 80, "#00ffff", "normal 100px Helvetica")
-      .drawText("" + Math.round((timing.end[level] - timing.start[level])/1000), undefined, 200, "#ffffff", "normal 60px Helvetica")
-      .drawText("Press Space for Level " + (level+2), undefined, 260, "#ffffff", "normal 50px Helvetica");
+      levelTexture.clear().drawText("Level " + (level+1) + "Score: "  + Math.round((timing.end[level] - timing.start[level])/1000), undefined, 80, "#00ffff", "normal 30px Helvetica");
       camera.add(levelMesh);
       camera.remove(scoreMesh);
-      for(var i; i < numCells; i++){
+      for(var i; i < numCells; i++) {
         objectArray[i].visible = true;
       }
     }
@@ -284,13 +290,12 @@ function startLevel(level){
     while (scene.children.length > 1) {
       scene.remove(scene.children[scene.children.length - 1]);
     }
-    polychoron = polychoraList[level];
-    quatPerCellArray = quatPerCellArrayDict[polychoron];
+    polychoron = polychora[level];
+    quatPerCellArray = polychoron.quatPerCellArray;
     numCells = quatPerCellArray.length;
     matArray = new Array(numCells);
-    modelFileName = modelFileNameDict[polychoron];
-    nomDistance = nomDistanceDict[polychoron];
-    rotMatrixArray = rotMatrixArrayDict[polychoron];
+    modelFileName = polychoron.modelFileName;
+    nomDistance = polychoron.nomDistance;
     objectArray = [];
 
     loadStuff();
@@ -302,10 +307,10 @@ function startLevel(level){
       matArray[i].uniforms.colourDir.value = colourDir;
       matArray[i].uniforms.HopfColorMatrix.value = HopfColorMatrix;
       matArray[i].uniforms.moveQuat.value = moveQuat;
-      if (rotMatrixArray == "None") {
+      if (typeof polychoron.rotMatrixArray === 'undefined') {
         matArray[i].uniforms.rotMatrix.value = new THREE.Matrix3();
       } else {
-        matArray[i].uniforms.rotMatrix.value = rotMatrixArray[i];
+        matArray[i].uniforms.rotMatrix.value = polychoron.rotMatrixArray[i];
       }
       matArray[i].uniforms.modelScale.value = modelScale;
     }

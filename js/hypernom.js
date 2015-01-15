@@ -14,9 +14,6 @@ var gamePoints = 0;
 var muteSound = false;
 var level = -1;
 
-// one quaternion per cell
-
-
 var polychora = [
   { // 5 Cell (Simplex)
     quatPerCellArray: centers_5_cell_dual,
@@ -209,15 +206,15 @@ function init() {
   materialBase.side = THREE.FrontSide;
 
   levelTexture = new THREEx.DynamicTexture(1024,512).clear();
-  levelMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(.5, .25),
+  levelMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.5, 0.25),
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: levelTexture.texture, side: THREE.DoubleSide} ));
   levelMesh.position.z = -0.29;
 
-  imageMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(.5, .4),
+  imageMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.5, 0.4),
     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, side: THREE.DoubleSide} ));
   imageMesh.position.z = -0.3;
 
-  introMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(.5, .4),
+  introMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.5, 0.4),
     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: THREE.ImageUtils.loadTexture('media/hypernomTitle.png'), side: THREE.DoubleSide} ));
   introMesh.position.z = -0.3;
 
@@ -234,7 +231,6 @@ function init() {
     scoreMesh.position.y = -0.2;
   }
 
-  camera.add(levelMesh);
   camera.add(introMesh);
   scene.add(camera);
 
@@ -285,7 +281,7 @@ function animate() {
       gamePoints = 0;
       levelTexture.clear().drawText("Last Level Score: "  + Math.round((timing.end[level] - timing.start[level])/1000), undefined, 100, "#E59400", "normal 60px Helvetica");
       camera.add(levelMesh);
-      imageMesh.material.map = THREE.ImageUtils.loadTexture(polychora[level+1].picture);
+      imageMesh.material.map = THREE.ImageUtils.loadTexture(polychora[(level+1)%6].picture);
       camera.add(imageMesh);
       camera.remove(scoreMesh);
       for(var i; i < numCells; i++) {
@@ -345,13 +341,31 @@ function startLevel(){
   }
 
   if (notFound) {
+    gamePoints = 0;
     while (scene.children.length > 1) {
       scene.remove(scene.children[scene.children.length - 1]);
     }
-    imageMesh.material.map = THREE.ImageUtils.loadTexture(polychora[level+1].picture);
+    imageMesh.material.map = THREE.ImageUtils.loadTexture(polychora[(level+1)%6].picture);
     camera.remove(introMesh);
+    camera.remove(scoreMesh);
     camera.add(imageMesh);
   }
+}
+
+function resetGame() {
+  level = -1;
+  gamePoints = 0;
+  objectArray = [];
+
+  while (scene.children.length > 1) {
+    scene.remove(scene.children[scene.children.length - 1]);
+  }
+
+  while (camera.children.length > 0) {
+    camera.remove(camera.children[camera.children.length-1]);
+  }
+  camera.add(introMesh);
+  scene.add(camera);
 }
 
 //Listen for double click event to enter full-screen VR mode
@@ -383,8 +397,10 @@ function onkey(event) {
       muteSound = true;
       winNoise.volume = 0;
     }
-  } else if (event.keyCode == 32) { // space
+  } else if (event.keyCode === 32) { // space
     startLevel();
+  } else if (event.keyCode ===82 ) { // r
+    resetGame();
   }
 }
 window.addEventListener("keydown", onkey, true);

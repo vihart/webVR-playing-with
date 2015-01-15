@@ -1,4 +1,6 @@
-var camera, scene, overlayScene, renderer, mesh, effect, controls, levelTexture, levelMesh, scoreTexture, scoreMesh, polychoron, numCells, matArray;
+var camera, scene, overlayScene, renderer, mesh, effect, controls,
+  levelTexture, levelMesh, scoreTexture, scoreMesh, introMesh, imageMesh,
+  polychoron, numCells, matArray;
 var objectArray = [];
 var noms = [
   document.querySelector('#nom1'),
@@ -20,34 +22,40 @@ var polychora = [
     quatPerCellArray: centers_5_cell_dual,
     modelFileName: 'media/5-cell_tet_subdiv_flip_norm.obj',
     rotMatrixArray: makeRotMatrixArray(centers_5_cell, centers_5_cell_dual, 1.31812),
-    nomDistance: 1.7
+    nomDistance: 1.7,
+    picture: 'media/hypernom5-cell.png'
   },
   { // 8 Cell (Hypercube)
     quatPerCellArray: centers_8_cell,
     modelFileName: 'media/8-cell_cube_subdiv_flip_norm.obj',
-    nomDistance: 1.1
+    nomDistance: 1.1,
+    picture: 'media/hypernom8-cell.png'
   },
   { // 16 Cell
     quatPerCellArray: centers_16_cell,
     modelFileName: 'media/16-cell_tet_subdiv_flip_norm.obj',
     rotMatrixArray: makeRotMatrixArray(centers_16_cell_vert_centered, centers_8_cell, 1.0471975511965977462), //N[ArcCos[0.5]]
-    nomDistance: 1.2
+    nomDistance: 1.2,
+    picture: 'media/hypernom16-cell.png'
   },
   { // 24 Cell (special snowflake)
     quatPerCellArray: centers_24_cell,
     modelFileName: 'media/24-cell_oct_subdiv_flip_norm.obj',
-    nomDistance: 0.8
+    nomDistance: 0.8,
+    picture: 'media/hypernom24-cell.png'
   },
   { // 120 Cell (the best)
     quatPerCellArray: centers_120_cell,
     modelFileName: 'media/120-cell_dodec_subdiv_flip_norm.obj',
-    nomDistance: 0.6
+    nomDistance: 0.6,
+    picture: 'media/hypernom120-cell.png'
   },
   { // 600 Cell
     quatPerCellArray: centers_600_cell,
     modelFileName: 'media/600-cell_tet_subdiv_flip_norm.obj',
     rotMatrixArray: makeRotMatrixArray(centers_600_cell_vert_centered, centers_120_cell, 0.38813951537018876328), //N[ArcCos[GR*GR/Sqrt[8]]]
-    nomDistance: 0.4
+    nomDistance: 0.4,
+    picture: 'media/hypernom600-cell.png'
   }
 ];
 
@@ -203,7 +211,16 @@ function init() {
   levelTexture = new THREEx.DynamicTexture(1024,512).clear();
   levelMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(.5, .25),
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: levelTexture.texture, side: THREE.DoubleSide} ));
-  levelMesh.position.z = -0.3;
+  levelMesh.position.z = -0.29;
+
+  imageMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(.5, .4),
+    new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, side: THREE.DoubleSide} ));
+  imageMesh.position.z = -0.3;
+
+  introMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(.5, .4),
+    new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: THREE.ImageUtils.loadTexture('media/hypernomTitle.png'), side: THREE.DoubleSide} ));
+  introMesh.position.z = -0.3;
+
   scoreTexture = new THREEx.DynamicTexture(512,256).clear().drawText("", undefined, 64, "#ffffff", "normal 100px Helvetica");
   scoreMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.3, 0.1),
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: scoreTexture.texture, side: THREE.DoubleSide} ));
@@ -218,7 +235,7 @@ function init() {
   }
 
   camera.add(levelMesh);
-  camera.add(scoreMesh);
+  camera.add(introMesh);
   scene.add(camera);
 
   window.addEventListener('resize', onWindowResize, false);
@@ -266,8 +283,10 @@ function animate() {
       timing.end[level] = Date.now();
       winNoise.play();
       gamePoints = 0;
-      levelTexture.clear().drawText("Level " + (level+1) + "Score: "  + Math.round((timing.end[level] - timing.start[level])/1000), undefined, 80, "#00ffff", "normal 30px Helvetica");
+      levelTexture.clear().drawText("Last Level Score: "  + Math.round((timing.end[level] - timing.start[level])/1000), undefined, 100, "#E59400", "normal 60px Helvetica");
       camera.add(levelMesh);
+      imageMesh.material.map = THREE.ImageUtils.loadTexture(polychora[level+1].picture);
+      camera.add(imageMesh);
       camera.remove(scoreMesh);
       for(var i; i < numCells; i++) {
         objectArray[i].visible = true;
@@ -282,38 +301,56 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-function startLevel(level){
-  camera.remove(levelMesh);
-  if (scene) {
-    timing.start[level] = Date.now();
-    camera.add(scoreMesh);
+function startLevel(){
+  var notFound = true;
+  for (var i=0; i < camera.children.length; i++) {
+    if (camera.children[i] === imageMesh) {
+      notFound = false;
+      camera.remove(imageMesh);
+      camera.remove(levelMesh);
+
+      level = (level+1)%6;
+      if (scene) {
+        timing.start[level] = Date.now();
+        camera.add(scoreMesh);
+        while (scene.children.length > 1) {
+          scene.remove(scene.children[scene.children.length - 1]);
+        }
+        polychoron = polychora[level];
+        quatPerCellArray = polychoron.quatPerCellArray;
+        numCells = quatPerCellArray.length;
+        matArray = new Array(numCells);
+        modelFileName = polychoron.modelFileName;
+        nomDistance = polychoron.nomDistance;
+        objectArray = [];
+
+        loadStuff();
+
+        for (var i = 0; i < numCells; i++) {
+          matArray[i].uniforms.quatPerCell.value = quatPerCellArray[i];
+          matArray[i].uniforms.time.value = 0.00025 * (Date.now() - timing.start);
+          matArray[i].uniforms.travelDir.value = travelDir;
+          matArray[i].uniforms.colourDir.value = colourDir;
+          matArray[i].uniforms.HopfColorMatrix.value = HopfColorMatrix;
+          matArray[i].uniforms.moveQuat.value = moveQuat;
+          if (typeof polychoron.rotMatrixArray === 'undefined') {
+            matArray[i].uniforms.rotMatrix.value = new THREE.Matrix3();
+          } else {
+            matArray[i].uniforms.rotMatrix.value = polychoron.rotMatrixArray[i];
+          }
+          matArray[i].uniforms.modelScale.value = modelScale;
+        }
+      }
+    }
+  }
+
+  if (notFound) {
     while (scene.children.length > 1) {
       scene.remove(scene.children[scene.children.length - 1]);
     }
-    polychoron = polychora[level];
-    quatPerCellArray = polychoron.quatPerCellArray;
-    numCells = quatPerCellArray.length;
-    matArray = new Array(numCells);
-    modelFileName = polychoron.modelFileName;
-    nomDistance = polychoron.nomDistance;
-    objectArray = [];
-
-    loadStuff();
-
-    for (var i = 0; i < numCells; i++) {
-      matArray[i].uniforms.quatPerCell.value = quatPerCellArray[i];
-      matArray[i].uniforms.time.value = 0.00025 * (Date.now() - timing.start);
-      matArray[i].uniforms.travelDir.value = travelDir;
-      matArray[i].uniforms.colourDir.value = colourDir;
-      matArray[i].uniforms.HopfColorMatrix.value = HopfColorMatrix;
-      matArray[i].uniforms.moveQuat.value = moveQuat;
-      if (typeof polychoron.rotMatrixArray === 'undefined') {
-        matArray[i].uniforms.rotMatrix.value = new THREE.Matrix3();
-      } else {
-        matArray[i].uniforms.rotMatrix.value = polychoron.rotMatrixArray[i];
-      }
-      matArray[i].uniforms.modelScale.value = modelScale;
-    }
+    imageMesh.material.map = THREE.ImageUtils.loadTexture(polychora[level+1].picture);
+    camera.remove(introMesh);
+    camera.add(imageMesh);
   }
 }
 
@@ -326,13 +363,13 @@ document.body.addEventListener( 'dblclick', function() {
 function onkey(event) {
   event.preventDefault();
 
-  if (event.keyCode == 90) { // z
+  if (event.keyCode === 90) { // z
     controls.zeroSensor(); //zero rotation
-  } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
+  } else if (event.keyCode === 70 || event.keyCode == 13) { //f or enter
     effect.setFullScreen(true); //fullscreen
   } else if (event.keyCode === 73){ //i
     infoSign.material.visible = !infoSign.material.visible;
-  } else if (event.keyCode == 80) {//p
+  } else if (event.keyCode === 80) {//p
     if (muteSound === true){
       for (var i = 0; i < noms.length; i++){
         noms[i].volume = 1;
@@ -347,8 +384,7 @@ function onkey(event) {
       winNoise.volume = 0;
     }
   } else if (event.keyCode == 32) { // space
-    level = (level+1)%6;
-    startLevel(level);
+    startLevel();
   }
 }
 window.addEventListener("keydown", onkey, true);

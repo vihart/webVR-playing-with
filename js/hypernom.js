@@ -241,7 +241,9 @@ function init() {
 
 function animate() {
   if (level >= 0) {
-    scoreTexture.clear().drawText(""+ Math.round((Date.now() - timing.start[level])/1000), undefined, 64, "#ffffff", "normal 90px Helvetica");
+    var currTime = Date.now();
+    scoreTexture.clear().drawText(Math.floor((currTime - timing.start[level])/1000) + "." +
+      (Math.floor((currTime - timing.start[level])/100) - (Math.floor((currTime - timing.start[level])/1000)*10)), undefined, 64, "#ffffff", "normal 90px Helvetica");
 
     for (var i = 0; i < numCells; i++) {
       matArray[i].uniforms.time.value = 0.00025 * (Date.now() - timing.start[0]);
@@ -279,7 +281,8 @@ function animate() {
       timing.end[level] = Date.now();
       winNoise.play();
       gamePoints = 0;
-      levelTexture.clear().drawText("Last Level Score: "  + Math.round((timing.end[level] - timing.start[level])/1000), undefined, 100, "#E59400", "normal 60px Helvetica");
+      levelTexture.clear()
+        .drawText("Last Level Score: "  + Math.round((timing.end[level] - timing.start[level])/100)/10, undefined, 100, "#E59400", "normal 60px Helvetica");
       camera.add(levelMesh);
       imageMesh.material.map = THREE.ImageUtils.loadTexture(polychora[(level+1)%6].picture);
       camera.add(imageMesh);

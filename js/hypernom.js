@@ -12,6 +12,7 @@ var noms = [
 var winNoise = document.querySelector('#win');
 var gamePoints = 0;
 var muteSound = false;
+var isShowScore = true;
 var level = -1;
 
 var polychora = [
@@ -227,8 +228,8 @@ function init() {
     scoreMesh.position.x = -0.1;
     scoreMesh.position.y = -0.2;
   } else {
-    scoreMesh.position.x = -0.3;
-    scoreMesh.position.y = -0.2;
+    scoreMesh.position.x = -0.2;
+    scoreMesh.position.y = -0.1;
   }
 
   camera.add(introMesh);
@@ -242,8 +243,13 @@ function init() {
 function animate() {
   if (level >= 0) {
     var currTime = Date.now();
-    scoreTexture.clear().drawText(Math.floor((currTime - timing.start[level])/1000) + "." +
-      (Math.floor((currTime - timing.start[level])/100) - (Math.floor((currTime - timing.start[level])/1000)*10)), undefined, 64, "#ffffff", "normal 90px Helvetica");
+    if (isShowScore) {
+      scoreTexture.clear().drawText(Math.floor((currTime - timing.start[level])/1000) + "." +
+        (Math.floor((currTime - timing.start[level])/100) - (Math.floor((currTime - timing.start[level])/1000)*10)), undefined, 64, "#ffffff", "normal 90px Helvetica")
+        .drawText(gamePoints + "/" + numCells, undefined, 150, "#ffffff", "normal 90px Helvetica");
+    } else {
+      scoreTexture.clear();
+    }
 
     for (var i = 0; i < numCells; i++) {
       matArray[i].uniforms.time.value = 0.00025 * (Date.now() - timing.start[0]);
@@ -404,7 +410,10 @@ function onkey(event) {
     startLevel();
   } else if (event.keyCode ===82 ) { // r
     resetGame();
+  } else if (event.keyCode === 72) { // h
+    isShowScore = !isShowScore;
   }
+
 }
 window.addEventListener("keydown", onkey, true);
 

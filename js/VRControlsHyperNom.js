@@ -129,7 +129,7 @@ THREE.VRControls = function ( camera, done ) {
 					vrState.hmd.rotation[1] !== 0 ||
 					vrState.hmd.rotation[2] !== 0 ||
 					vrState.hmd.rotation[3] !== 0) {
-        quat.multiply(totalRotation, manualRotation, vrState.hmd.rotation);
+        quat.multiply(totalRotation, vrState.hmd.rotation, manualRotation);
       } else {
         totalRotation = manualRotation;
       }

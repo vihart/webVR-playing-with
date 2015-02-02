@@ -211,18 +211,18 @@ function init() {
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: levelTexture.texture, side: THREE.DoubleSide} ));
   levelMesh.position.z = -0.29;
 
-  imageMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.5, 0.4),
+  imageMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.4, 0.3),
     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, side: THREE.DoubleSide} ));
-  imageMesh.position.z = -0.3;
+  imageMesh.position.z = -0.5;
 
-  introMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.5, 0.4),
+  introMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.4, 0.3),
     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: THREE.ImageUtils.loadTexture('media/hypernomTitle.png'), side: THREE.DoubleSide} ));
-  introMesh.position.z = -0.3;
+  introMesh.position.z = -0.5;
 
   scoreTexture = new THREEx.DynamicTexture(512,256).clear().drawText("", undefined, 64, "#ffffff", "normal 100px Helvetica");
-  scoreMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.3, 0.1),
+  scoreMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.2, 0.1),
                     new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 1, map: scoreTexture.texture, side: THREE.DoubleSide} ));
-  scoreMesh.position.z = -0.3;
+  scoreMesh.position.z = -0.5;
   // position score mesh differently if there is an hmd
   if(typeof navigator.getVRDevices !== "undefined"){
     scoreMesh.position.x = -0.1;
@@ -288,7 +288,7 @@ function animate() {
       winNoise.play();
       gamePoints = 0;
       levelTexture.clear()
-        .drawText("Last Level Score: "  + Math.round((timing.end[level] - timing.start[level])/100)/10, undefined, 100, "#E59400", "normal 60px Helvetica");
+        .drawText("Last Level Score: "  + Math.round((timing.end[level] - timing.start[level])/100)/10, undefined, 200, "#E59400", "normal 30px Helvetica");
       camera.add(levelMesh);
       imageMesh.material.map = THREE.ImageUtils.loadTexture(polychora[(level+1)%6].picture);
       camera.add(imageMesh);
@@ -390,8 +390,6 @@ function onkey(event) {
     controls.zeroSensor(); //zero rotation
   } else if (event.keyCode === 70 || event.keyCode == 13) { //f or enter
     effect.setFullScreen(true); //fullscreen
-  } else if (event.keyCode === 73){ //i
-    infoSign.material.visible = !infoSign.material.visible;
   } else if (event.keyCode === 80) {//p
     if (muteSound === true){
       for (var i = 0; i < noms.length; i++){
@@ -408,7 +406,7 @@ function onkey(event) {
     }
   } else if (event.keyCode === 32) { // space
     startLevel();
-  } else if (event.keyCode ===82 ) { // r
+  } else if (event.keyCode === 82 ) { // r
     resetGame();
   } else if (event.keyCode === 72) { // h
     isShowScore = !isShowScore;

@@ -153,6 +153,8 @@ function init() {
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   document.body.appendChild(renderer.domElement);
 
+  renderer.setClearColor( 0x000000, 1 );
+
   controls = new THREE.VRControls(camera);
 
   effect = new THREE.VREffect(renderer);
@@ -328,6 +330,8 @@ function startLevel(){
         modelFileName = polychoron.modelFileName;
         nomDistance = polychoron.nomDistance;
         objectArray = [];
+
+        camera.position.z = 1.5;
 
         loadStuff();
 

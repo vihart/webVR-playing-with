@@ -79,7 +79,7 @@ THREE.VRControls = function ( camera, done ) {
 
 		var interval = (newTime - oldTime) * 0.001;
 
-		///do translation 
+		///do translation
 		var m, offset;
 		if (this.manualMoveRate[0] != 0 || this.manualMoveRate[1] != 0 || this.manualMoveRate[2] != 0){
 		    offset = getFwdVector().multiplyScalar(2 * interval * this.manualMoveRate[0]).add(
@@ -93,7 +93,7 @@ THREE.VRControls = function ( camera, done ) {
 		//do parabolic motion
 		var m2, parabolicVector;
 		if (this.manualParabolicRate[0] != 0 || this.manualParabolicRate[1] != 0){
-			parabolicVector = new THREE.Vector2(0.2 * interval * this.manualParabolicRate[0], 
+			parabolicVector = new THREE.Vector2(0.2 * interval * this.manualParabolicRate[0],
 												0.2 * interval * this.manualParabolicRate[1]);
 		    m2 = parabolicBy2DVector(parabolicVector);
 		    m2.multiply(currentBoost);
@@ -112,7 +112,7 @@ THREE.VRControls = function ( camera, done ) {
 
 		// currentBoost.elements = fastGramSchmidt( currentBoost.elements );
 		currentBoost.elements = gramSchmidt( currentBoost.elements ); //seems more stable near infinity
- 
+
 
 	  var update = quat.fromValues(this.manualRotateRate[0] * 0.2 * interval,
 	                               this.manualRotateRate[1] * 0.2 * interval,
@@ -159,6 +159,9 @@ THREE.VRControls = function ( camera, done ) {
 			return null;
 		}
 		orientation	= vrInput.getState().orientation;
+		if (orientation == null) {
+			return null;
+		}
 		vrState = {
 			hmd : {
 				rotation : [

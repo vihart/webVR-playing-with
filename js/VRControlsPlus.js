@@ -75,7 +75,7 @@ THREE.VRControls = function ( camera, done ) {
 
 	  // camera.position = camera.position.add(getFwdVector());
 
-	  ///do translation 
+	  ///do translation
 		var offset = new THREE.Vector3();
 		if (this.manualMoveRate[0] != 0 || this.manualMoveRate[1] != 0 || this.manualMoveRate[2] != 0){
 		    offset = getFwdVector().multiplyScalar(4 * interval * this.manualMoveRate[0]).add(
@@ -129,6 +129,9 @@ THREE.VRControls = function ( camera, done ) {
 			return null;
 		}
 		orientation	= vrInput.getState().orientation;
+		if (orientation == null) {
+			return null;
+		}
 		vrState = {
 			hmd : {
 				rotation : [

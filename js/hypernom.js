@@ -13,7 +13,7 @@ var winNoise = document.querySelector('#win');
 var gamePoints = 0;
 var muteSound = false;
 var isShowScore = true;
-var level = -1;
+var level = 0;
 
 var polychora = [
   { // 5 Cell (Simplex)
@@ -147,11 +147,13 @@ function init() {
   overlayScene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.2, 25);
   camera.position.x = 0;
-  camera.position.z = 0;
+  camera.position.z = 1.7;
 
   // vr stuff
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   document.body.appendChild(renderer.domElement);
+
+  renderer.setClearColor( 0x000000, 1 );
 
   controls = new THREE.VRControls(camera);
 
@@ -328,6 +330,8 @@ function startLevel(){
         modelFileName = polychoron.modelFileName;
         nomDistance = polychoron.nomDistance;
         objectArray = [];
+
+        camera.position.z = 1.5;
 
         loadStuff();
 

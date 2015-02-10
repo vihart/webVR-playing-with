@@ -7,6 +7,9 @@
  */
 
 THREE.VRControls = function ( camera, done ) {
+	//---game controller stuff---
+	this.haveEvents = 'ongamepadconnected' in window;
+	this.controllers = {};
 
 	this._camera = camera;
 
@@ -18,11 +21,13 @@ THREE.VRControls = function ( camera, done ) {
 			}
 			return;
 		}
+
 		if ( navigator.getVRDevices ) {
 			navigator.getVRDevices().then( gotVRDevices );
 		} else {
 			navigator.mozGetVRDevices( gotVRDevices );
 		}
+
 		function gotVRDevices( devices ) {
 			var vrInput;
 			var error;
@@ -39,6 +44,41 @@ THREE.VRControls = function ( camera, done ) {
 				}
 				done( error );
 			}
+		}
+
+		function connecthandler(e) {
+			addgamepad(e.gamepad);
+		};
+
+		function addgamepad(gamepad) {
+			self.controllers[gamepad.index] = gamepad;
+		};
+
+		function disconnecthandler(e) {
+			removegamepad(e.gamepad);
+		};
+
+		function removegamepad(gamepad) {
+			delete self.controllers[gamepad.index];
+		};
+
+		function scangamepads() {
+			var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
+			for (var i = 0; i < gamepads.length; i++) {
+				if (gamepads[i]) {
+					if (gamepads[i].index in self.controllers) {
+						self.controllers[gamepads[i].index] = gamepads[i];
+					} else {
+						addgamepad(gamepads[i]);
+					}
+				}
+			}
+		};
+
+		window.addEventListener("gamepadconnected", connecthandler);
+		window.addEventListener("gamepaddisconnected", disconnecthandler);
+		if (!self.haveEvents) {
+			setInterval(scangamepads, 500);
 		}
 	};
 
@@ -85,23 +125,15 @@ THREE.VRControls = function ( camera, done ) {
 		/*
 		Get controller button info
 		*/
-		var j;
+		var j, i;
 
-		for (j in controllers) { //controllers defined in connectControllers.js
-			var controller = controllers[j];
+		for (j in this.controllers) {
+			var controller = this.controllers[j];
 
-			for (i = 0; i < controller.axes.length; i++) {
-				if (i === 0) {
-					this.manualMoveRate[1] = -1 * controller.axes[i];
-				} else if (i === 1) {
-					this.manualMoveRate[0] = controller.axes[i];
-				} else if (i === 2) {
-					this.manualRotateRate[1] = -1 * controller.axes[i];
-				} else if (i === 3) {
-					this.manualRotateRate[0] = -1 * controller.axes[i];
-				}
-
-			}
+			this.manualMoveRate[1] = -1 * controller.axes[0];
+			this.manualMoveRate[0] = controller.axes[1];
+			this.manualRotateRate[1] = -1 * controller.axes[2];
+			this.manualRotateRate[0] = -1 * controller.axes[3];
 		}
 
 	  ///do translation
@@ -115,7 +147,6 @@ THREE.VRControls = function ( camera, done ) {
 		camera.position = camera.position.add(offset);
 
 		///do quat movement
-
 		var offsetQuatTemp = new THREE.Vector3();
 		if (this.manualQuatRate[0] != 0 || this.manualQuatRate[1] != 0 || this.manualQuatRate[2] != 0){
 		    offsetQuatTemp = getFwdVector().multiplyScalar( interval * this.manualQuatRate[0]).add(

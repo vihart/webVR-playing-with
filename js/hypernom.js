@@ -14,6 +14,7 @@ var gamePoints = 0;
 var muteSound = false;
 var isShowScore = true;
 var level = 0;
+var aPressed = false, backPressed = false;
 
 var polychora = [
   { // 5 Cell (Simplex)
@@ -243,6 +244,8 @@ function init() {
 }
 
 function animate() {
+  var i, j;
+
   if (level >= 0) {
     var currTime = Date.now();
     if (isShowScore) {
@@ -253,7 +256,7 @@ function animate() {
       scoreTexture.clear();
     }
 
-    for (var i = 0; i < numCells; i++) {
+    for (i = 0; i < numCells; i++) {
       matArray[i].uniforms.time.value = 0.00025 * (Date.now() - timing.start[0]);
       moveQuat = quatMult(headQuat, controlsQuat);
       matArray[i].uniforms.moveQuat.value = moveQuat;
@@ -274,7 +277,7 @@ function animate() {
     var myPos = invStereoProj(camera.position);
     myPos = quatMult(quatInv(moveQuat), myPos);
 
-    for (var i = 0; i < objectArray.length; i++) {
+    for (i = 0; i < objectArray.length; i++) {
       var distToPoint = S3dist(myPos, quatPerCellArray[i]);
       if (distToPoint < nomDistance){
         if (objectArray[i].visible === true){
@@ -302,6 +305,18 @@ function animate() {
   }
 
   controls.update();
+  for (j in controls.controllers) {
+    var controller = controls.controllers[j];
+
+    if (controller.buttons[0].pressed && !aPressed) {
+      startLevel();
+    } else if (controller.buttons[8].pressed && !backPressed) {
+      resetGame();
+    }
+
+    aPressed = controller.buttons[0].pressed;
+    backPressed = controller.buttons[0].pressed;
+  }
 
   effect.render(scene, camera);
 

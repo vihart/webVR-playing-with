@@ -15,6 +15,42 @@ THREE.VRControls = function ( camera, done ) {
 
 	this._init = function () {
 		var self = this;
+
+		function connecthandler(e) {
+			addgamepad(e.gamepad);
+		}
+
+		function addgamepad(gamepad) {
+			self.controllers[gamepad.index] = gamepad;
+		}
+
+		function disconnecthandler(e) {
+			removegamepad(e.gamepad);
+		}
+
+		function removegamepad(gamepad) {
+			delete self.controllers[gamepad.index];
+		}
+
+		function scangamepads() {
+			var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
+			for (var i = 0; i < gamepads.length; i++) {
+				if (gamepads[i]) {
+					if (gamepads[i].index in self.controllers) {
+						self.controllers[gamepads[i].index] = gamepads[i];
+					} else {
+						addgamepad(gamepads[i]);
+					}
+				}
+			}
+		}
+
+		window.addEventListener("gamepadconnected", connecthandler);
+		window.addEventListener("gamepaddisconnected", disconnecthandler);
+		if (!self.haveEvents) {
+			setInterval(scangamepads, 500);
+		}
+
 		if ( !navigator.mozGetVRDevices && !navigator.getVRDevices ) {
 			if ( done ) {
 				done("Your browser is not VR Ready");
@@ -44,41 +80,6 @@ THREE.VRControls = function ( camera, done ) {
 				}
 				done( error );
 			}
-		}
-
-		function connecthandler(e) {
-			addgamepad(e.gamepad);
-		};
-
-		function addgamepad(gamepad) {
-			self.controllers[gamepad.index] = gamepad;
-		};
-
-		function disconnecthandler(e) {
-			removegamepad(e.gamepad);
-		};
-
-		function removegamepad(gamepad) {
-			delete self.controllers[gamepad.index];
-		};
-
-		function scangamepads() {
-			var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
-			for (var i = 0; i < gamepads.length; i++) {
-				if (gamepads[i]) {
-					if (gamepads[i].index in self.controllers) {
-						self.controllers[gamepads[i].index] = gamepads[i];
-					} else {
-						addgamepad(gamepads[i]);
-					}
-				}
-			}
-		};
-
-		window.addEventListener("gamepadconnected", connecthandler);
-		window.addEventListener("gamepaddisconnected", disconnecthandler);
-		if (!self.haveEvents) {
-			setInterval(scangamepads, 500);
 		}
 	};
 

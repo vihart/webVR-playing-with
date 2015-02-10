@@ -82,15 +82,35 @@ THREE.VRControls = function ( camera, done ) {
 
 	  var interval = (newTime - oldTime) * 0.0005;
 
-	  // camera.position = camera.position.add(getFwdVector());
+		/*
+		Get controller button info
+		*/
+		var j;
+
+		for (j in controllers) { //controllers defined in connectControllers.js
+			var controller = controllers[j];
+
+			for (i = 0; i < controller.axes.length; i++) {
+				if (i === 0) {
+					this.manualMoveRate[1] = -1 * controller.axes[i];
+				} else if (i === 1) {
+					this.manualMoveRate[0] = controller.axes[i];
+				} else if (i === 2) {
+					this.manualRotateRate[1] = -1 * controller.axes[i];
+				} else if (i === 3) {
+					this.manualRotateRate[0] = -1 * controller.axes[i];
+				}
+
+			}
+		}
 
 	  ///do translation
 		var offset = new THREE.Vector3();
 		if (this.manualMoveRate[0] != 0 || this.manualMoveRate[1] != 0 || this.manualMoveRate[2] != 0){
-		    offset = getFwdVector().multiplyScalar( interval * this.manualMoveRate[0]).add(
-		      		   getRightVector().multiplyScalar( interval * this.manualMoveRate[1])).add(
-		      		   getUpVector().multiplyScalar( interval * this.manualMoveRate[2]));
-		    }
+		    offset = getFwdVector().multiplyScalar( interval * this.manualMoveRate[0])
+						.add(getRightVector().multiplyScalar( interval * this.manualMoveRate[1]))
+						.add(getUpVector().multiplyScalar( interval * this.manualMoveRate[2]));
+		 }
 
 		camera.position = camera.position.add(offset);
 

@@ -113,15 +113,21 @@ THREE.VRControls = function ( camera, done ) {
     	currentHeadQuat.w = vrState.hmd.rotation[3];
 
     	// var offsetQuat = quatMult( currentHeadQuat, quatInv(lastHeadQuat));
+    	var offsetQuat = quatMult( quatInv(lastHeadQuat), currentHeadQuat);
 
-    	console.log('-');
-    	console.log(currentHeadQuat);
-    	console.log(lastHeadQuat);
+
+    	// console.log('-');
+    	// console.log(offsetQuat);
+    	// console.log(lastHeadQuat);
 
     	lastHeadQuat.copy(currentHeadQuat);
 
-    	// var fwd = getFwdVectorOf(offsetQuat);
+    	var fwd = getFwdVectorOf(offsetQuat).multiplyScalar(1.5);
     	// console.log(fwd);
+    	fwd.z = 0;
+    	camera.position = camera.position.add(fwd);
+
+    	var up = getUpVectorOf(offsetQuat);
 
       } else {
         totalRotation = manualRotation;
@@ -176,33 +182,6 @@ function getUpVectorOf(q) {
   return new THREE.Vector3(0,-1,0).applyQuaternion(q);
 }
 
-THREE.Matrix4.prototype.add = function (m) {
-  this.set.apply(this, [].map.call(this.elements, function (c, i) { return c + m.elements[i] }));
-};
-
-function translateByVector(v) {
-  var dx = v.x;
-  var dy = v.y;
-  var dz = v.z;
-  var len = Math.sqrt(dx*dx + dy*dy + dz*dz);
-  dx /= len;
-  dy /= len;
-  dz /= len;
-  var m = new THREE.Matrix4().set(
-    0, 0, 0, dx,
-    0, 0, 0, dy,
-    0, 0, 0, dz,
-    dx,dy,dz, 0);
-  var m2 = new THREE.Matrix4().copy(m).multiply(m);
-  var c1 = Math.sinh(len);
-  var c2 = Math.cosh(len) - 1;
-  m.multiplyScalar(c1);
-  m2.multiplyScalar(c2);
-  var result = new THREE.Matrix4().identity();
-  result.add(m);
-  result.add(m2);
-  return result;
-}
 
 //hold down keys to do rotations and stuff
 function key(event, sign) {

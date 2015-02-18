@@ -164,8 +164,8 @@ vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
     /// rotate [0,0,-1] to [-1,-1,-1]/sqrt(3)
 
     mat3 RotDownToDiag = mat3( vec3(0.707107, -0.707107, 0.),       ///// input columns not rows?!?!?!
-                               vec3(0.408248, 0.408248, -0.816497),
-                               vec3(0.57735, 0.57735, 0.57735) );
+                               vec3(0.408248, 0.408248, -0.816497),  //Because line n+3 is RotDownToDiag*newCol, not newCol*RotDownToDiag.
+                               vec3(0.57735, 0.57735, 0.57735) );    //This basically lets the shader do matrix multiplication via dot products, which is relatively efficient.
     vec3 newCol = vec3(r,g,b);
 
     newCol = RotDownToDiag * newCol;
@@ -222,14 +222,35 @@ void main()
 
     vec3 pColor = HopfColor(pt0);
     vColor = -0.5*(nColor-vec3(0.5,0.5,0.5)) + 1.0*(pColor-vec3(0.5,0.5,0.5)) + vec3(0.5,0.5,0.5);
+	
+	
     // vColor = pColor;
     // vColor = nColor;
 
 	// take the final 3D position and project it onto the screen
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.7,-2.3), 1.0 );
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 , 1.0 );
+    gl_Position = modelViewMatrix * vec4( pos3 , 1.0 ); //truncate before the projectionMatrix transform (continued on line 253)
+	
+	//Okay, now a slightly tricky thing:
+	//The camera's going to cull any vertices that are closer than 0.2, or further away than 25, from the camera.
+	//(in practice, this seems to be slightly different. I'm not sure why.)
+	//When this happens, it creates the black triangle of death, which pulls the viewer out of the virtual reality.
+	//To get around this, we're going to flatten out each vertex just before it reaches 0.2 or 25, moving it to where it would be.
+	//So, essentially, this is like replacing actual stars with a correctly painted planetarium.
+	//In case there's some weird z-layering going on, we're going to map -0.3,0  to -0.3, -0.2, preserving order.
 
+	float oldz=gl_Position.z;
+	
+	if(oldz>-0.3 && oldz<0.0){
+		//map [-0.3, 0.0] to [-0.3,-0.2]
+		float newz=(oldz*0.3333333 - 0.2);
+				gl_Position.x=gl_Position.x*newz/(oldz);
+		gl_Position.y=gl_Position.y*newz/(oldz);
+		gl_Position.z=newz;
+		gl_Position.w=1.0;
+	}
+	gl_Position=projectionMatrix * gl_Position;
     // do fog
     // if ( fogType == 1 )
     // {
@@ -246,7 +267,7 @@ void main()
         else
             fogScale = fogScale / 0.1;
         // mutliply color by this value to make it go to black
-        // vColor *= fogScale;
+         vColor *= fogScale; //2015-02-17: fog re-enabled
     // }
     // else if ( fogType == 2 )
     // {

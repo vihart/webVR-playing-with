@@ -315,7 +315,7 @@ function animate() {
     }
 
     aPressed = controller.buttons[0].pressed;
-    backPressed = controller.buttons[0].pressed;
+    backPressed = controller.buttons[8].pressed;
   }
 
   effect.render(scene, camera);

@@ -3,7 +3,7 @@
 <html lang="en">
 	<head>
 		<title>Quaternion Monkeys</title>
-		
+
 		<!--
 		4D Monkeys
 
@@ -16,13 +16,13 @@
 
 
 		It has oculus support for webVR browsers (thanks Mozilla!)
-		
+
 		https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate
 
 		And WASD + E/Q navigation support both in and out of VR (thanks, Andrea Hawksley!)
 		Enter to go into VR mode, S for sound,
 		Space to click links based on camera rotation
-		
+
 		https://github.com/hawksley
 
 		-->
@@ -41,7 +41,7 @@
 	</head>
 
 	<body>
-	<audio id='music' src="media/monkeygif.mp3"/> 
+	<audio id='music' src="media/monkeygif.mp3"/>
 
 	</body>
 
@@ -71,19 +71,19 @@
     <script src="js/centers_24_cell.js"></script>
     <script src="js/centers_120_cell.js"></script>
 
-    <script src="js/loaders/OBJLoader.js"></script>  
-     
+    <script src="js/loaders/OBJLoader.js"></script>
+
     <script type="x-shader/x-vertex" id="vertexShader">
 // This shader moves vertices around
 
 // glsl Quaternion Multiplication
-vec4 quatMult( in vec4 p, in vec4 q ) 
+vec4 quatMult( in vec4 p, in vec4 q )
 {
-    vec4 r;    
+    vec4 r;
     r.w = + p.w*q.w - p.x*q.x - p.y*q.y - p.z*q.z;
     r.x = + p.w*q.x + p.x*q.w + p.y*q.z - p.z*q.y;
     r.y = + p.w*q.y - p.x*q.z + p.y*q.w + p.z*q.x;
-    r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;    
+    r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;
     return r;
 }
 vec4 quatInv( in vec4 p )
@@ -127,7 +127,7 @@ uniform float modelScale; //p3sphere = normalize( vec4(-position.zyx, modelScale
 // Hopf fibration coloring
 // returns a color based on the 4D normal
 vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
-{    
+{
     /////////first rotate the 4D normal to a space aligned with the 120-cell
 
     vec4 n = HopfColorMatrix * nBase;
@@ -147,7 +147,7 @@ vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
     /// rotate [0,0,-1] to [-1,-1,-1]/sqrt(3)
 
     mat3 RotDownToDiag = mat3( vec3(0.707107, -0.707107, 0.),       ///// input columns not rows?!?!?!
-                               vec3(0.408248, 0.408248, -0.816497), 
+                               vec3(0.408248, 0.408248, -0.816497),
                                vec3(0.57735, 0.57735, 0.57735) );
     vec3 newCol = vec3(r,g,b);
 
@@ -160,23 +160,23 @@ vec3 HopfColor( in vec4 nBase )  /// head foot are all same colour
 varying vec3 vColor; // this shader computes the color of each vertex
 
 // this gets called once per vertex of the monkey mesh (and numMonkeys times since there are numMonkeys monkeys)
-void main() 
+void main()
 {
     // base position
 	// turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing to get onto the unit 3-sphere
 
     vec4 p3sphere = normalize( vec4(-position.zyx, modelScale ) );
-	
+
 	// then rotate using this monkey's quaternion to place in 4D
     vec4 pt0 = quatMult( quatPerMonkey, p3sphere ); //position at time = 0
 
 	// this is the normal to the point
 	// same concept as for the position, but we add a 0 as the w component
 	vec4 n3sphere = vec4( normal.zyx, 0.0);
-    // above is normal on a cubical cell of the hypercube, below we get the corresponding 
+    // above is normal on a cubical cell of the hypercube, below we get the corresponding
     // normal on the 3-sphere
-    n3sphere = projVecPerp( n3sphere, p3sphere ); 
-    // rotate the normal using this monkey's quaternion 
+    n3sphere = projVecPerp( n3sphere, p3sphere );
+    // rotate the normal using this monkey's quaternion
 	vec4 nt0 = quatMult(quatPerMonkey, n3sphere );
 
  //    // also rotate everything over time
@@ -188,13 +188,13 @@ void main()
 
     // stereographic projection from 4D to 3D
     vec3 pos3 = vec3( p.x / (1.0-p.w), p.y / (1.0-p.w), p.z / (1.0-p.w) );
-    
+
 	// compute the color from the normal
 
     //// using HopfColor again...
     vec3 nColor = HopfColor(nt0);
 
-    //// or the transported back to 1 normal 
+    //// or the transported back to 1 normal
     // vec4 nTransported = quatMult(quatInv(pt0), nt0);
     // vec3 nColor = vec3(0.5,0.5,0.5) + 0.5*normalize( vec3( nTransported.x, nTransported.y, nTransported.z) );
 
@@ -217,18 +217,18 @@ void main()
         float zz = gl_Position.z / gl_Position.w;
         // go from 1 to 0 instead (0 is furthest and 1 is where the camera is )
         // ( note that the computed distance is not linear )
-        float fogScale = 1. - zz; 
+        float fogScale = 1. - zz;
         // anything closer than 0.1 gets regular color
-        if ( fogScale > 0.1 ) 
+        if ( fogScale > 0.1 )
             fogScale = 1.0;
         // everything else ramps from 0 to 1
-        else 
+        else
             fogScale = fogScale / 0.1;
         // mutliply color by this value to make it go to black
         vColor *= fogScale;
     }
     else if ( fogType == 2 )
-    {    
+    {
         // near fog
         float zz = gl_Position.z / gl_Position.w;
         // go from 1 to 0, and make the curve less straight
@@ -250,293 +250,12 @@ void main()
 <script type="x-shader/x-vertex" id="fragmentShader">
 // this gets called once per pixel
 varying vec3 vColor;
-void main() 
+void main()
 {
 	// just use the color we computed and assign it to this pixel
     gl_FragColor = vec4( vColor, 1. );
 }
 </script>
 
-<script type="text/javascript" id="mainCode">
-var camera;
-var scene;
-var renderer;
-var mesh;
-
-var effect;
-var controls;
-var clicky = 1;
-var mouseX = 1;
-var mouseY = 1;
-
-
-// one quaternion per monkey
-var polychoraList = ["8","24","24dual","24both","120"];
-var polychoron = polychoraList[0];
-var quatPerMonkeyArrayDict = { "8": centers_8_cell, "24": centers_24_cell, "24dual": centers_24_cell_dual, "24both": centers_24_cell_dual.concat(centers_24_cell), "120": centers_120_cell};
-
-// var quatPerMonkeyArray = centers_24_cell_dual.concat(centers_24_cell); 
-var quatPerMonkeyArray = quatPerMonkeyArrayDict[polychoron]; 
-
-var numMonkeys = quatPerMonkeyArray.length;
-var matArray = new Array(numMonkeys);
-
-var travelDirDict = {"8": centers_8_cell[5], "24": centers_24_cell_dual[4], "24dual": centers_24_cell_dual[4], "24both": centers_24_cell_dual[4], "120": centers_120_cell[3]};
-
-var travelDir = travelDirDict[polychoron];  //for 24-cell_dual //4 is down head/foot.  //12 is (0,0,0,1)
-var colourDir = travelDir;
-var HopfColorMatrix = makeHopfColorMatrix(colourDir);
-
-var modelScaleDict = {"8":1, "24":50, "24dual":50, "24both":50, "120":3.07768}
-var modelScale = modelScaleDict[polychoron];
-
-var modelFileNameDict = {"8":'media/monkey_15k_tris_closed.obj', 
-                        "24":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
-                        "24dual":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
-                        "24both":'media/24-cell_monkey_lowpoly_001_cen-vert_50_flip.obj', 
-                        "120":'media/120-cell_monkey_lowpoly_003_left_screw.obj'};
-var modelFileName = modelFileNameDict[polychoron];
-
-init();
-animate();
-
-function onkey(event) {
-    event.preventDefault();
-    if (event.keyCode == 90) { // z
-        controls.zeroSensor();
-    }
-};
-window.addEventListener("keydown", onkey, true);
- 
-document.body.addEventListener('dblclick', function () {
-    effect.setFullScreen(true);
-});
-
-function loadStuff(){ 
-    // one material per monkey, since they have a different quaternion
-    for (var i = 0; i < numMonkeys; i++)
-    {
-        matArray[i] = materialBase.clone();
-    }
-
-    // load the monkey mesh
-    var manager = new THREE.LoadingManager();
-    var loader = new THREE.OBJLoader(manager);
-    loader.load(modelFileName, function (object) {
-    // loader.load('media/dodecDualRot90.obj', function (object) {
-
-        // make numMonkeys copies of the mesh and assign them a unique material out of the numMonkeys we created previously
-        for (var i = 0; i < numMonkeys; i++)
-        {
-            var newObject = object.clone();
-            newObject.traverse(function (child) {
-                if (child instanceof THREE.Mesh) {
-                    child.material = matArray[i];
-                    child.frustumCulled = false;
-                }
-            });
-            scene.add(newObject);
-        }
-    });
-
-    for (var i = 0; i < numMonkeys; i++)
-    {
-        matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
-        matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
-        matArray[i].uniforms['fogType'].value = clicky;
-        matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
-        matArray[i].uniforms['travelDir'].value = travelDir;
-        matArray[i].uniforms['colourDir'].value = colourDir;
-        matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
-        matArray[i].uniforms['modelScale'].value = modelScale;
-    }
-
-} 
-
-function init()
-{
-    start = Date.now();
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.x = 0;
-    camera.position.z = 0;
-
-    // -----
-	// vr stuff
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    document.body.appendChild(renderer.domElement);
-
-    controls = new THREE.VRControls(camera);
-
-    effect = new THREE.VREffect(renderer);
-    effect.setSize(window.innerWidth, window.innerHeight);
-    // -----
-
-	// material for the monkeys is a shader
-    materialBase = new THREE.ShaderMaterial({
-		// these are the parameters for the shader
-        uniforms: {
-			// global time
-            time: {
-                type: "f",
-                value: 0.0
-            },
-			// quaternion that moves this monkey into 4-space, set once per monkey
-            quatPerMonkey: {
-                type: "v4",
-                value: new THREE.Vector4( 0, 0, 0, 0 )
-            },
-            fogType: {
-                type: "i",
-                value: 0
-            },
-            mousePos: {
-            	type: "v2",
-            	value: new THREE.Vector2(0,0)
-            },
-            travelDir: {
-                type: "v4",
-                value: new THREE.Vector4( 0, 0, 0, 0 )
-            },
-            colourDir: {
-                type: "v4",
-                value: new THREE.Vector4( 0, 0, 0, 0 )
-            },
-                HopfColorMatrix: {
-                type: "m4",
-                value: new THREE.Matrix4().set( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
-            },
-            modelScale: {
-                type: "f",
-                value: 1.0
-            }
-        },
-        vertexShader: document.getElementById('vertexShader').textContent,
-        fragmentShader: document.getElementById('fragmentShader').textContent
-    });
-    materialBase.side = THREE.FrontSide;
-
-    loadStuff();
-
-    window.addEventListener('resize', onWindowResize, false);
-
-    effect.render(scene, camera);
-}
-
-function animate() {
-
-    
-	// send the time every frame so that we can rotate the monkeys over time
-    for (var i = 0; i < numMonkeys; i++)
-    {
-        // matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
-        matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
-        matArray[i].uniforms['fogType'].value = clicky;
-        matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
-        // matArray[i].uniforms['travelDir'].value = travelDir;
-        // matArray[i].uniforms['colourDir'].value = colourDir;
-        // matArray[i].uniforms['HopfColorMatrix'].value = HopfColorMatrix;
-        // matArray[i].uniforms['modelScale'].value = modelScale;
-    }
-
-
-    controls.update();
-
-        effect.render(scene, camera);
-
-    requestAnimationFrame(animate);
-}
-
-document.addEventListener('keydown', function(event) { selectPolychora(event); }, false);
-
-function selectPolychora(event) {
-
-  var keySelect = event.keyCode - 48; //1 is 49
-
-  if (keySelect > 0 && keySelect < 6){
-     if (scene) {
-       while (scene.children.length > 0) {
-           scene.remove(scene.children[scene.children.length - 1]);
-       }
-    polychoron = polychoraList[(keySelect-1)];
-    quatPerMonkeyArray = quatPerMonkeyArrayDict[polychoron]; 
-    numMonkeys = quatPerMonkeyArray.length;
-    matArray = new Array(numMonkeys);
-    travelDir = travelDirDict[polychoron];  //for 24-cell_dual //4 is down head/foot.  //12 is (0,0,0,1)
-    colourDir = travelDir;
-    HopfColorMatrix = makeHopfColorMatrix(colourDir);
-    modelScale = modelScaleDict[polychoron];
-    modelFileName = modelFileNameDict[polychoron];
-
-    loadStuff();
-    }
-  }
-}
-
-		//listen for mouse movement to get mouseX and mouseY
-
-		document.body.addEventListener( 'mousemove', function (event) {
-		 	mouseY = event.clientY;
-		 	mouseX = event.clientX;
-		});
-
-		//listen for click
-
-		document.body.addEventListener( 'click', function(){
-			clicky = (clicky + 1) % 2;
-		})
-		/*
-		Listen for double click event to enter full-screen VR mode
-		*/
-		document.body.addEventListener( 'dblclick', function() {
-			effect.setFullScreen( true );
-		});
-		/*
-		Listen for keyboard events 
-		*/
-		function onkey(event) {
-	    event.preventDefault();
-
-	    if (event.keyCode == 90) { // z
-	    	controls.zeroSensor(); //zero rotation
-	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
-	    	effect.setFullScreen(true) //fullscreen
-	  	}else if (event.keyCode === 73){ //i
-	  		infoSign.material.visible = !infoSign.material.visible;
-	  	}else if (event.keyCode == 80) {//p
-	  		var music = document.querySelector('#music');
-	  		if (music.paused){
-	  			music.play();
-	  		} else{
-	  			music.pause();	
-	  		} 
-	  	}
-
-
-	  };
-	  window.addEventListener("keydown", onkey, true);
-
-	  	  //hold down keys to do rotations and stuff
-		// function key(event, sign) {
-		//   var control = controls.manualControls[String.fromCharCode(event.keyCode).toLowerCase()];
-		//   if (!control)
-		//     return;
-		//   if (sign === 1 && control.active || sign === -1 && !control.active)
-		//     return;
-		//   control.active = (sign === 1);
-		//   controls.manualRotateRate[control.index] += sign * control.sign;
-		// }
-		document.addEventListener('keydown', function(event) { key(event, 1); }, false);
-		document.addEventListener('keyup', function(event) { key(event, -1); }, false);
-
-		/*
-		Handle window resizes
-		*/
-		function onWindowResize() {
-			camera.aspect = window.innerWidth / window.innerHeight;
-			camera.updateProjectionMatrix();
-			effect.setSize( window.innerWidth, window.innerHeight );
-		}
-		window.addEventListener( 'resize', onWindowResize, false );
-	</script>
+<script type="text/javascript" id="mainCode" src="js/monkeys.js">	</script>
 </html>

@@ -7,11 +7,50 @@
  */
 
 THREE.VRControls = function ( camera, done ) {
+	//---game controller stuff---
+	this.haveEvents = 'ongamepadconnected' in window;
+	this.controllers = {};
 
 	this._camera = camera;
 
 	this._init = function () {
 		var self = this;
+
+		function connecthandler(e) {
+			addgamepad(e.gamepad);
+		}
+
+		function addgamepad(gamepad) {
+			self.controllers[gamepad.index] = gamepad;
+		}
+
+		function disconnecthandler(e) {
+			removegamepad(e.gamepad);
+		}
+
+		function removegamepad(gamepad) {
+			delete self.controllers[gamepad.index];
+		}
+
+		function scangamepads() {
+			var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
+			for (var i = 0; i < gamepads.length; i++) {
+				if (gamepads[i]) {
+					if (gamepads[i].index in self.controllers) {
+						self.controllers[gamepads[i].index] = gamepads[i];
+					} else {
+						addgamepad(gamepads[i]);
+					}
+				}
+			}
+		}
+
+		window.addEventListener("gamepadconnected", connecthandler);
+		window.addEventListener("gamepaddisconnected", disconnecthandler);
+		if (!self.haveEvents) {
+			setInterval(scangamepads, 500);
+		}
+
 		if ( !navigator.mozGetVRDevices && !navigator.getVRDevices ) {
 			if ( done ) {
 				done("Your browser is not VR Ready");
@@ -74,6 +113,15 @@ THREE.VRControls = function ( camera, done ) {
 		this.updateTime = newTime;
 
 	  var interval = (newTime - oldTime) * 0.0005;
+
+		for (var j in this.controllers) {
+			var controller = this.controllers[j];
+
+			this.manualMoveRate[1] = -1 * Math.round(controller.axes[0]);
+			this.manualMoveRate[0] = Math.round(controller.axes[1]);
+			this.manualRotateRate[1] = -1 * Math.round(controller.axes[2]);
+			this.manualRotateRate[0] = -1 * Math.round(controller.axes[3]);
+		}
 
 	  // camera.position = camera.position.add(getFwdVector());
 

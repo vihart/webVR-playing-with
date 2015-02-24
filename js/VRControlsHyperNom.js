@@ -86,6 +86,7 @@ THREE.VRControls = function ( camera, done ) {
 	this._init();
 
 	this.manualRotation = quat.create();
+	this.manualQuat = quat.create();
 
 	this.manualControls = {
       65 : {index: 1, sign: 1, active: 0},  // a
@@ -94,18 +95,20 @@ THREE.VRControls = function ( camera, done ) {
       83 : {index: 0, sign: -1, active: 0}, // s
       81 : {index: 2, sign: -1, active: 0}, // q
       69 : {index: 2, sign: 1, active: 0},  // e
+
       38 : {index: 3, sign: -1, active: 0},  // up
       40 : {index: 3, sign: 1, active: 0}, // down
       37 : {index: 4, sign: 1, active: 0}, // left
       39 : {index: 4, sign: -1, active: 0},   // right
       191 : {index: 5, sign: 1, active: 0}, // fwd slash
       222 : {index: 5, sign: -1, active: 0},   // single quote
-      73 : {index: 6, sign: -1, active: 0}, //i
-      75 : {index: 6, sign: +1, active: 0}, //k
-      74 : {index: 7, sign: +1, active: 0}, //j
+
+      74 : {index: 7, sign: 1, active: 0}, //j
       76 : {index: 7, sign: -1, active: 0}, //l
-      85 : {index: 8, sign: +1, active: 0}, //u
-      79 : {index: 8, sign: -1, active: 0}, //o
+      73 : {index: 6, sign: 1, active: 0}, //i
+      75 : {index: 6, sign: -1, active: 0}, //k
+      85 : {index: 8, sign: -1, active: 0}, //u
+      79 : {index: 8, sign: 1, active: 0}, //o
     };
 
 	this.manualRotateRate = new Float32Array([0, 0, 0]);
@@ -117,6 +120,7 @@ THREE.VRControls = function ( camera, done ) {
 		var camera = this._camera;
 		var vrState = this.getVRState();
 		var manualRotation = this.manualRotation;
+		var manualQuat = this.manualQuat;
 		var oldTime = this.updateTime;
 		var newTime = performance.now();
 		this.updateTime = newTime;
@@ -148,46 +152,71 @@ THREE.VRControls = function ( camera, done ) {
 		camera.position = camera.position.add(offset);
 
 		///do quat movement
-		var offsetQuatTemp = new THREE.Vector3();
-		if (this.manualQuatRate[0] != 0 || this.manualQuatRate[1] != 0 || this.manualQuatRate[2] != 0){
-		    offsetQuatTemp = getFwdVector().multiplyScalar( interval * this.manualQuatRate[0]).add(
-		      		   getRightVector().multiplyScalar( interval * this.manualQuatRate[1])).add(
-		      		   getUpVector().multiplyScalar( interval * this.manualQuatRate[2]));
-		    }
-		var offsetQuatVelocity = new THREE.Vector4(offsetQuatTemp.x, offsetQuatTemp.y, offsetQuatTemp.z, 0.0);
-		var quatAmount = offsetQuatVelocity.length();
-		offsetQuatVelocity.normalize();
-		var offsetQuat = pointOnS3Geod( new THREE.Vector4(0.0,0.0,0.0,1.0), offsetQuatVelocity, quatAmount );
-		controlsQuat = quatMult( offsetQuat, controlsQuat );
+		// var offsetQuatTemp = new THREE.Vector3();
+		// if (this.manualQuatRate[0] != 0 || this.manualQuatRate[1] != 0 || this.manualQuatRate[2] != 0){
+		//     offsetQuatTemp = getFwdVector().multiplyScalar( interval * this.manualQuatRate[0]).add(
+		//       		   getRightVector().multiplyScalar( interval * this.manualQuatRate[1])).add(
+		//       		   getUpVector().multiplyScalar( interval * this.manualQuatRate[2]));
+		//     }
+		// var offsetQuatVelocity = new THREE.Vector4(offsetQuatTemp.x, offsetQuatTemp.y, offsetQuatTemp.z, 0.0);
+		// var quatAmount = offsetQuatVelocity.length();
+		// offsetQuatVelocity.normalize();
+		// var offsetQuat = pointOnS3Geod( new THREE.Vector4(0.0,0.0,0.0,1.0), offsetQuatVelocity, quatAmount );
+		// controlsQuat = quatMult( offsetQuat, controlsQuat );
 		// controlsQuat = quatMult( controlsQuat, offsetQuat );
+		// manualRotation = quat.fromValues(controlsQuat.x, controlsQuat.y, controlsQuat.z, controlsQuat.w);
 
-		//// do camera rotation
+		// new do quat movement, also does rotation
+	  var updateQ = quat.fromValues(this.manualQuatRate[0] * interval,
+	                                this.manualQuatRate[1] * interval,
+	                                this.manualQuatRate[2] * interval, 1.0);
+	  quat.normalize(updateQ, updateQ);
+	  quat.multiply(manualQuat, manualQuat, updateQ);
+	  quat.normalize(manualQuat, manualQuat);
+
+	  controlsQuat.x = manualQuat[0];
+	  controlsQuat.y = manualQuat[1];
+	  controlsQuat.z = manualQuat[2];
+	  controlsQuat.w = manualQuat[3];
+
+		// do camera rotation
 	  var update = quat.fromValues(this.manualRotateRate[0] * interval,
 	                               this.manualRotateRate[1] * interval,
 	                               this.manualRotateRate[2] * interval, 1.0);
 	  quat.normalize(update, update);
 	  quat.multiply(manualRotation, manualRotation, update);
+	  quat.normalize(manualRotation, manualRotation);
+
+
+
+	  var totalRotation = quat.create();
+	  quat.multiply(totalRotation, manualQuat, manualRotation);  //both manual quat and manual rot applied...
+
 
 		if ( camera ) {
 			if ( !vrState ) {
-				camera.quaternion.fromArray(manualRotation);
+				camera.quaternion.fromArray(totalRotation);
 				return;
 			}
 
 			// Applies head rotation from sensors data.
-			var totalRotation = quat.create();
-      var state = vrState.hmd.rotation;
+	        var state = vrState.hmd.rotation;
       if (vrState.hmd.rotation[0] !== 0 ||
 					vrState.hmd.rotation[1] !== 0 ||
 					vrState.hmd.rotation[2] !== 0 ||
 					vrState.hmd.rotation[3] !== 0) {
-        quat.multiply(totalRotation, vrState.hmd.rotation, manualRotation);
-      } else {
-        totalRotation = manualRotation;
-      }
+         // quat.multiply(totalRotation, vrState.hmd.rotation, manualRotation);
+		 quat.multiply(totalRotation, vrState.hmd.rotation, totalRotation);
+
+      } 
+      // else {
+      //   totalRotation = manualRotation;
+      // }
 
 			camera.quaternion.fromArray( totalRotation );
+
 		}
+
 	};
 
 	this.zeroSensor = function() {

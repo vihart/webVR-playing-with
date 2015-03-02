@@ -430,9 +430,11 @@ function onkey(event) {
   } else if (event.keyCode === 72) { // h
     isShowScore = !isShowScore;
   }
-
 }
 window.addEventListener("keydown", onkey, true);
+
+//listen for click
+document.body.addEventListener( 'click', startLevel);
 
 //hold down keys to do rotations and stuff
 document.addEventListener('keydown', function(event) { key(event, 1); }, false);

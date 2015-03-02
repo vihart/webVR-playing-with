@@ -64,6 +64,7 @@
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
+	<script src="js/PhoneVR.js"></script>
 	<script src="js/VRControlsHyperNom.js"></script>
 
 
@@ -222,8 +223,8 @@ void main()
 
     vec3 pColor = HopfColor(pt0);
     vColor = -0.5*(nColor-vec3(0.5,0.5,0.5)) + 1.0*(pColor-vec3(0.5,0.5,0.5)) + vec3(0.5,0.5,0.5);
-	
-	
+
+
     // vColor = pColor;
     // vColor = nColor;
 
@@ -231,7 +232,7 @@ void main()
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.7,-2.3), 1.0 );
     gl_Position = modelViewMatrix * vec4( pos3 , 1.0 ); //truncate before the projectionMatrix transform (continued on line 253)
-	
+
 	//Okay, now a slightly tricky thing:
 	//The camera's going to cull any vertices that are closer than 0.2, or further away than 25, from the camera.
 	//(in practice, this seems to be slightly different. I'm not sure why.)
@@ -241,7 +242,7 @@ void main()
 	//In case there's some weird z-layering going on, we're going to map -0.3,0  to -0.3, -0.2, preserving order.
 
 	float oldz=gl_Position.z;
-	
+
 	if(oldz>-0.3 && oldz<0.0){
 		//map [-0.3, 0.0] to [-0.3,-0.2]
 		float newz=(oldz*0.3333333 - 0.2);

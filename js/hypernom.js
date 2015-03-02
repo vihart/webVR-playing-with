@@ -148,7 +148,8 @@ function init() {
   overlayScene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.2, 25);
   camera.position.x = 0;
-  camera.position.z = 1.7;
+  // camera.position.z = 1.7;
+  camera.position.z = 0;
 
   // vr stuff
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -346,7 +347,7 @@ function startLevel(){
         nomDistance = polychoron.nomDistance;
         objectArray = [];
 
-        camera.position.z = 1.5;
+        // camera.position.z = 1.5;
 
         loadStuff();
 

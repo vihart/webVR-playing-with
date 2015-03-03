@@ -68,7 +68,7 @@ THREE.VRControls = function ( camera, done ) {
 		var vrState = this.getVRState();
 		var manualRotation = this.manualRotation;
 		var oldTime = this.updateTime;
-		var newTime = performance.now();
+		var newTime = Date.now();
 		this.updateTime = newTime;
 
 	  var interval = (newTime - oldTime) * 0.001;

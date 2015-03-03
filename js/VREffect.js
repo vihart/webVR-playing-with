@@ -30,6 +30,15 @@ THREE.VREffect = function ( renderer, done ) {
 
 	this._init = function() {
 		var self = this;
+
+		// default some stuff for mobile VR
+		self.phoneVR = new PhoneVR();
+		self.leftEyeTranslation = { x: -0.03200000151991844, y: -0, z: -0, w: 0 };
+		self.rightEyeTranslation = { x: 0.03200000151991844, y: -0, z: -0, w: 0 };
+		self.leftEyeFOV = { upDegrees: 53.04646464878503, rightDegrees: 47.52769258067174, downDegrees: 53.04646464878503, leftDegrees: 46.63209579904155 };
+		self.rightEyeFOV = { upDegrees: 53.04646464878503, rightDegrees: 46.63209579904155, downDegrees: 53.04646464878503, leftDegrees: 47.52769258067174 };
+
+
 		if ( !navigator.mozGetVRDevices && !navigator.getVRDevices ) {
 			if ( done ) {
 				done("Your browser is not VR Ready");
@@ -55,6 +64,7 @@ THREE.VREffect = function ( renderer, done ) {
 					break; // We keep the first we encounter
 				}
 			}
+
 			if ( done ) {
 				if ( !vrHMD ) {
 				 error = 'HMD not available';
@@ -75,6 +85,12 @@ THREE.VREffect = function ( renderer, done ) {
 			this.renderStereo.apply( this, arguments );
 			return;
 		}
+
+		if (this.phoneVR.deviceAlpha !== null) { //default to stereo render for devices with orientation sensor, like mobile
+			this.renderStereo.apply( this, arguments );
+			return;
+		}
+
 		// Regular render mode if not HMD
 		renderer.render.apply( this._renderer, arguments );
 	};

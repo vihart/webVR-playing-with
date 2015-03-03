@@ -123,7 +123,7 @@ THREE.VRControls = function ( camera, done ) {
 		var manualRotation = this.manualRotation;
 		var manualQuat = this.manualQuat;
 		var oldTime = this.updateTime;
-		var newTime = performance.now();
+		var newTime = Date.now();
 		this.updateTime = newTime;
 
 	  var interval = (newTime - oldTime) * 0.0005;
@@ -209,7 +209,7 @@ THREE.VRControls = function ( camera, done ) {
          // quat.multiply(totalRotation, vrState.hmd.rotation, manualRotation);
 		 quat.multiply(totalRotation, vrState.hmd.rotation, totalRotation);
 
-      } 
+      }
       // else {
       //   totalRotation = manualRotation;
       // }

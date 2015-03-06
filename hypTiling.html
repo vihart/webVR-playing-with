@@ -68,13 +68,13 @@
     }
 
     // Quaternion Multiplication
-    vec4 quatMult( in vec4 p, in vec4 q ) 
+    vec4 quatMult( in vec4 p, in vec4 q )
     {
-        vec4 r;    
+        vec4 r;
         r.w = + p.w*q.w - p.x*q.x - p.y*q.y - p.z*q.z;
         r.x = + p.w*q.x + p.x*q.w + p.y*q.z - p.z*q.y;
         r.y = + p.w*q.y - p.x*q.z + p.y*q.w + p.z*q.x;
-        r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;    
+        r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;
         return r;
     }
 
@@ -105,7 +105,7 @@
     // Hopf fibration coloring
     // returns a color based on the 4D normal
     vec3 HopfColor( in vec4 nBase )
-    {    
+    {
         vec4 n = quatMult( nBase, vec4(0,1,0,0) );  //makes hypTiling monkeys have nicer colours
 
       // compute the color
@@ -135,7 +135,7 @@
       return result;
     }
 
-////// scaling regular euclidean polyhedron with face center at dist 1 from center so that it projects onto hyperboloid 
+////// scaling regular euclidean polyhedron with face center at dist 1 from center so that it projects onto hyperboloid
 ////// correctly:
 
 ////// for cube, tiling {4,3,n}
@@ -148,7 +148,7 @@
 
 //////  scale so that in Klein model 1 becomes d.
 
-//////  hyp dist d, cosh(d) = cd = cos(pi/n) / sin(pi/4) by hyperbolic law of cosines. 
+//////  hyp dist d, cosh(d) = cd = cos(pi/n) / sin(pi/4) by hyperbolic law of cosines.
 //////  In Klein model, d becomes tanh(arccosh(cd)) = sqrt(cd*cd-1)/cd
 
 //////  For dodec, centerAngle = 0.55357435889704525151 = ArcCos[(1/2) Sqrt[(5/2) + 11 Sqrt[5]/10] / ((3 + Sqrt[5])/4)]
@@ -163,7 +163,7 @@
       //use S^3 quaternion pullback to get consistent texturing
       vec4 p3sphere = normalize( vec4(position.zyx, 1.0) );
       vec4 n3sphere = vec4( normal.zyx, 0.0);
-      n3sphere = projVecPerp(  n3sphere, p3sphere ); 
+      n3sphere = projVecPerp(  n3sphere, p3sphere );
       n3sphere = quatMult( n3sphere, quatInv( p3sphere ) );
       n3sphere = normalize(n3sphere);
       vColor = HopfColor(n3sphere);
@@ -174,7 +174,7 @@
       // float scaling = 0.760072; /// {5,3,5}
       // float scaling = 0.619712;  /// {4,3,7}
       vec4 p = projectToHyperboloid( vec4(position.zyx * scaling, 1.0) ); //0.57735 = tanh(arccosh(sqrt(3/2)))
-      // scale cube of (face center) rad 1 so it maps to correct cube in Klein model on w=1, 
+      // scale cube of (face center) rad 1 so it maps to correct cube in Klein model on w=1,
       // Klein model euclidean dist from 0 = tanh(hyp dist from 0)
       p = boost * translation * p;
 
@@ -183,7 +183,7 @@
 
       // take the final 3D position and project it onto the screen
 
-      gl_Position = projectionMatrix * modelViewMatrix * p; 
+      gl_Position = projectionMatrix * modelViewMatrix * p;
     }
   </script>
 
@@ -200,24 +200,25 @@
     <!--
     three.js 3d library
     -->
-    <script src="js/three.min.js"></script>
+    <script src="js/lib/three.min.js"></script>
 
     <!--
     library for fast quaternion rotation
     -->
-    <script src="lib/gl-matrix.js"></script>
+    <script src="js/lib/gl-matrix.js"></script>
 
 
     <script src="js/hypMath.js"></script>
     <!--
     VRControlsHyperbolic.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object. Also deals with hyperbolic and parabolic motions.
      -->
-    <script src="js/VRControlsHyperbolic.js"></script>
+     <script src="js/vr/PhoneVR.js"></script>
+    <script src="js/vr/VRControlsHyperbolic.js"></script>
 
     <!--
     VREffect.js handles stereo camera setup and rendering.
     -->
-    <script src="js/VREffect.js"></script>
+    <script src="js/vr/VREffect.js"></script>
 
     <script src="js/loaders/OBJLoader.js"></script>
         <!--

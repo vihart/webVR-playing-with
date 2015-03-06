@@ -4,7 +4,7 @@
 	<head>
 		<title>Under Construction</title>
 
-		<!-- 
+		<!--
 		Placeholder site for your great upcoming webVR experiences!!!
 		 -->
 
@@ -23,28 +23,29 @@
 
 	<body>
 	<!--Audio from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
-	<audio id='music' src="media/satie.mp3" autoplay=true loop=true/> 
+	<audio id='music' src="media/satie.mp3" autoplay=true loop=true/>
 	</body>
 
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 	<!--
 	library for fast quaternion rotation
 	-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControls.js"></script>
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 	<!--font from http://mrdoob.github.com/three.js/examples/fonts/helvetiker_regular.typeface.js -->
 	<script src="lib/helvetiker.js"></script>
@@ -85,8 +86,8 @@
 		var clicky = 0;
 
 		//create info overlay
-		var infoText = THREE.ImageUtils.loadTexture( "media/infographic.jpg" ); 
-		var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, color: 0xffffff}); 
+		var infoText = THREE.ImageUtils.loadTexture( "media/infographic.jpg" );
+		var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, color: 0xffffff});
 		var infoBox = new THREE.BoxGeometry(2,2,2);
 		var infoSign = new THREE.Mesh( infoBox, infoMaterial );
 		infoSign.position.z = -3;
@@ -146,7 +147,7 @@
 		 messageGroup2[i].add(message2[i]);
 		 messageGroup2[i].rotation.y = i*.7;
 		 scene.add(messageGroup2[i]);
-		  } 
+		  }
 
 		  //create under construction text
 		var message = [];
@@ -163,12 +164,12 @@
 		 messageGroup[i].add(message[i]);
 		 messageGroup[i].rotation.y = i* 2.1;
 		 scene.add(messageGroup[i]);
-		  } 
+		  }
 
 		  var message3 = [];
 		 var message3Group = [];
 		 var comeBackSoon = ['Come', 'back', 'soon!']
-		 
+
 		 for (var i = 0; i < 3; i++) {
 		    message3[i] = new THREE.Mesh(
 		    	new THREE.TextGeometry(comeBackSoon[i]),
@@ -180,7 +181,7 @@
 		 message3Group[i].add(message3[i]);
 		 message3Group[i].rotation.y = i* 4.2;
 		 scene.add(message3Group[i]);
-		  } 
+		  }
 
 		  var message4 = new THREE.Mesh(
 		  	new THREE.TextGeometry("HARD HAT AREA"),
@@ -313,7 +314,7 @@
 		var cautionTape = new THREE.Mesh(
 			new THREE.CylinderGeometry(1000,1000,100,50,0,0),
 			new THREE.MeshBasicMaterial({
-				color:0xffffff, 
+				color:0xffffff,
 				map: THREE.ImageUtils.loadTexture("media/caution2.png"),
 				}));
 		cautionTape.material.side = THREE.BackSide;
@@ -322,7 +323,7 @@
 		var cautionTape2 = new THREE.Mesh(
 			new THREE.CylinderGeometry(1020,1020,100,50,0,0),
 			new THREE.MeshBasicMaterial({
-				color:0xffffff, 
+				color:0xffffff,
 				map: THREE.ImageUtils.loadTexture("media/caution2.png"),
 				}));
 		cautionTape2.material.side = THREE.BackSide;
@@ -334,7 +335,7 @@
 		var cautionTape3 = new THREE.Mesh(
 			new THREE.CylinderGeometry(1040,1040,100,50,0,0),
 			new THREE.MeshBasicMaterial({
-				color:0xffffff, 
+				color:0xffffff,
 				map: THREE.ImageUtils.loadTexture("media/caution2.png"),
 				}));
 		cautionTape3.material.side = THREE.BackSide;
@@ -346,36 +347,36 @@
 		//create light
 		var light = new THREE.PointLight( 0xffffff, 10, 600);
 		light.position.set( -100,1,1);
-		light.castShadow = true; 
+		light.castShadow = true;
 		scene.add( light );
 
 		var light2 = new THREE.PointLight( 0xffffff, 10, 1000);
 		light2.position.set( 0,400,1);
-		light2.castShadow = true; 
+		light2.castShadow = true;
 		scene.add( light2 );
 
 
 		// var light3 = new THREE.PointLight( 0xffffff, 60, 800);
 		// light3.position.set( 0,600,1);
-		// light3.castShadow = true; 
+		// light3.castShadow = true;
 		// scene.add( light3 );
 
 		//sprite adapted from http://www.textfiles.com/underconstruction/
 		var map1 = THREE.ImageUtils.loadTexture( "media/shovel1.png" );
 		var map2 = THREE.ImageUtils.loadTexture( "media/shovel2.png" );
 		var map3 = THREE.ImageUtils.loadTexture( "media/shovel3.png" );
-		var map4 = THREE.ImageUtils.loadTexture( "media/shovel4.png" ); 
+		var map4 = THREE.ImageUtils.loadTexture( "media/shovel4.png" );
 
 		var spriteMap = [map1,map2,map3,map4];
 
-		var maSprite = new THREE.SpriteMaterial( { 
-				map: spriteMap[0], 
-				color: 0xffffff, 
-				fog:true, 
-				// blending: THREE.AdditiveBlending,  
+		var maSprite = new THREE.SpriteMaterial( {
+				map: spriteMap[0],
+				color: 0xffffff,
+				fog:true,
+				// blending: THREE.AdditiveBlending,
 				// transparent: false
-				}); 
-		var sprite = new THREE.Sprite( maSprite ); 
+				});
+		var sprite = new THREE.Sprite( maSprite );
 		// sprite.position.x = 50;
 		sprite.position.z = -.1;
 		sprite.position.x = 2;
@@ -418,7 +419,7 @@
 
 			triangle.position.y += Math.sin(exclamation.rotation.y)/8;
 
-			
+
 			exclamation.rotation.y += .05;
 			exclamation.position.y += Math.sin(exclamation.rotation.y)/10;
 
@@ -443,7 +444,7 @@
 			var pCount = particleCount;
 
 			particleSystem.rotation.y -= mouseX/50000 - .01;
-	
+
 			while (pCount--) {
 
 			    // get the particle
@@ -471,7 +472,7 @@
 
 		       	particle.velocity.x = Math.random();
 		       	particle.velocity.y = -Math.random()*(mouseY/100);
-		       	particle.velocity.z = Math.random(); 
+		       	particle.velocity.z = Math.random();
 
 
 		 	 }
@@ -525,7 +526,7 @@
 			effect.setFullScreen( true );
 		});
 		/*
-		Listen for keyboard events 
+		Listen for keyboard events
 		*/
 		function onkey(event) {
 	    event.preventDefault();
@@ -541,8 +542,8 @@
 	  		if (music.paused){
 	  			music.play();
 	  		} else{
-	  			music.pause();	
-	  		} 
+	  			music.pause();
+	  		}
 	  	} else if (event.keyCode === 73){ //i
 	  		infoSign.material.visible = !infoSign.material.visible;
 	  		infoSign.position.y = -.5;

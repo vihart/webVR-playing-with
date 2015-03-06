@@ -18,39 +18,40 @@
 
 	<body>
 		<iframe id="frame" allowFullScreen=true style="display:none"></iframe>
-		<audio id='music' src="media/intro.ogg" /> 
+		<audio id='music' src="media/intro.ogg" />
 	</body>
 
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 	<!--rotating quaternions library-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
-	 -->
-	<script src="js/VRControls.js"></script>
+	-->
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script> 
+	<script src="js/vr/VREffect.js"></script>
 
 	<!--vertex shader for monkeys-->
 	<script type="x-shader/x-vertex" id="vertexShader">
 // This shader moves vertices around
 
 // Quaternion Multiplication
-vec4 quatMult( in vec4 p, in vec4 q ) 
+vec4 quatMult( in vec4 p, in vec4 q )
 {
-    vec4 r;    
+    vec4 r;
     r.w = + p.w*q.w - p.x*q.x - p.y*q.y - p.z*q.z;
     r.x = + p.w*q.x + p.x*q.w + p.y*q.z - p.z*q.y;
     r.y = + p.w*q.y - p.x*q.z + p.y*q.w + p.z*q.x;
-    r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;    
+    r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;
     return r;
 }
 
@@ -58,12 +59,12 @@ vec4 quatMult( in vec4 p, in vec4 q )
 uniform float time; // global time in seconds
 uniform vec4 quatPerMonkey; // quaternion that moves this monkey into 4-space, set once per monkey
 
-void main() 
+void main()
 {
     // base position
 	// turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing To get onto the unit 3-sphere
 	vec4 p3sphere = normalize( vec4(position.zyx, 1.0) );
-	
+
 	// then rotate using this monkey's quaternion to place in 4D
     vec4 p = quatMult( p3sphere, quatPerMonkey );
     // also rotate everything over time
@@ -72,13 +73,13 @@ void main()
 
     // stereographic projection from 4D to 3D
     vec3 pos3 = vec3( p.x / (1.0-p.w), -p.y / (1.0-p.w), p.z / (1.0-p.w) );
-	
+
 	// take the final 3D position and project it onto the screen
     gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(4.0,-2.0,5.0), 1.0 );
 }
-</script> 
+</script>
 <script type="x-shader/x-vertex" id="fragmentShader">
-void main() 
+void main()
 {
 	// just use the color we computed and assign it to this pixel
     gl_FragColor = vec4(0.8,0.2,0.3, 1. );
@@ -125,8 +126,8 @@ void main()
 		var clicky = 0;
 
 		//create info overlay
-		var infoText = THREE.ImageUtils.loadTexture( "media/overlay.png" ); 
-		var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, wireframe: false, color: 0xffff00 }); 
+		var infoText = THREE.ImageUtils.loadTexture( "media/overlay.png" );
+		var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, wireframe: false, color: 0xffff00 });
 		var infoBox = new THREE.BoxGeometry(1,1,1);
 		var infoSprite = new THREE.Mesh( infoBox, infoMaterial );
 		infoSprite.position.z = -2;
@@ -264,7 +265,7 @@ void main()
 		  pointThings[i].position.y = -20;
 		  pointThings[i].position.z = Math.floor(i/3)*6 -9;
 		  }
-		
+
 
 		//create exclamation point
 		var exclaim = new THREE.Mesh(
@@ -326,7 +327,7 @@ void main()
 		//create light
 		var light = new THREE.PointLight( 0xffffff, 10, 600);
 		light.position.set( -10,1,1);
-		light.castShadow = true; 
+		light.castShadow = true;
 		scene.add( light );
 
 		//particles
@@ -416,7 +417,7 @@ void main()
 		  //animate particles
 		  for (var p = 0; p<partCount; p++){
 		  	//update velocity
-		  	particles.vertices[p].velocity.y -= (particles.vertices[p].y-20)/1000 + Math.random()/100; 
+		  	particles.vertices[p].velocity.y -= (particles.vertices[p].y-20)/1000 + Math.random()/100;
 		  	particles.vertices[p].velocity.z -= (particles.vertices[p].z+20)/1200 + Math.random()/200;
 		  	particles.vertices[p].velocity.x -= (particles.vertices[p].x-20)/1300 + Math.random()/200;
 		  	//update position based on velocity
@@ -533,7 +534,7 @@ void main()
 	  		if (music.paused){
 	  			music.play();
 	  		} else{
-	  			music.pause();	
+	  			music.pause();
 	  		}
 	  	}
 	  };

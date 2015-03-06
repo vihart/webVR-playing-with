@@ -7,10 +7,11 @@
  */
 
 THREE.VRControls = function ( camera, done ) {
+	this.phoneVR = new PhoneVR();
+
 	//---game controller stuff---
 	this.haveEvents = 'ongamepadconnected' in window;
 	this.controllers = {};
-	this.phoneVR = new PhoneVR();
 
 	this._camera = camera;
 
@@ -201,21 +202,15 @@ THREE.VRControls = function ( camera, done ) {
 			}
 
 			// Applies head rotation from sensors data.
-	        var state = vrState.hmd.rotation;
+	    var state = vrState.hmd.rotation;
       if (vrState.hmd.rotation[0] !== 0 ||
 					vrState.hmd.rotation[1] !== 0 ||
 					vrState.hmd.rotation[2] !== 0 ||
 					vrState.hmd.rotation[3] !== 0) {
-         // quat.multiply(totalRotation, vrState.hmd.rotation, manualRotation);
-		 quat.multiply(totalRotation, vrState.hmd.rotation, totalRotation);
-
+		 			quat.multiply(totalRotation, vrState.hmd.rotation, totalRotation);
       }
-      // else {
-      //   totalRotation = manualRotation;
-      // }
 
 			camera.quaternion.fromArray( totalRotation );
-
 		}
 
 	};

@@ -4,7 +4,7 @@
 	<head>
 		<title>Child</title>
 
-		<!-- 
+		<!--
 		music video game for VR, by Vi Hart
 
 		uses three.js, Mozilla's webVR basics, and Andrea Hawksley's webVR navigation.
@@ -26,22 +26,22 @@
 	<body>
 		<audio id='music' src="media/child1.ogg" autoplay=true loop=true/>
 		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/>
-		<audio id='child3' src="media/child3.ogg" > 
-		<audio id='teeth' src="media/teeth_and_clicks.ogg" > 
+		<audio id='child3' src="media/child3.ogg" >
+		<audio id='teeth' src="media/teeth_and_clicks.ogg" >
 		<audio id='bing' src="media/bing.ogg" >
-		<audio id='fishNoise' src="media/fishNoise.ogg" > 
-		<audio id='cube1' src="media/cube1.ogg" > 
-		<audio id='cube2' src="media/cube2.ogg" > 
-		<audio id='cube3' src="media/cube3.ogg" > 
-		<audio id='cube4' src="media/cube4.ogg" > 
-		<audio id='cube5' src="media/cube5.ogg" > 
-		<audio id='cube6' src="media/cube6.ogg" > 
-		<audio id='cube7' src="media/cube7.ogg" > 
-		<audio id='cube8' src="media/cube8.ogg" > 
-		<audio id='cube9' src="media/cube9.ogg" > 
-		<audio id='cube10' src="media/cube10.ogg" > 
-		<audio id='cube11' src="media/cube11.ogg" > 
-		<audio id='cube12' src="media/cube12.ogg" > 
+		<audio id='fishNoise' src="media/fishNoise.ogg" >
+		<audio id='cube1' src="media/cube1.ogg" >
+		<audio id='cube2' src="media/cube2.ogg" >
+		<audio id='cube3' src="media/cube3.ogg" >
+		<audio id='cube4' src="media/cube4.ogg" >
+		<audio id='cube5' src="media/cube5.ogg" >
+		<audio id='cube6' src="media/cube6.ogg" >
+		<audio id='cube7' src="media/cube7.ogg" >
+		<audio id='cube8' src="media/cube8.ogg" >
+		<audio id='cube9' src="media/cube9.ogg" >
+		<audio id='cube10' src="media/cube10.ogg" >
+		<audio id='cube11' src="media/cube11.ogg" >
+		<audio id='cube12' src="media/cube12.ogg" >
 		<audio id='cubeUp1' src="media/cubeUp1.ogg" >
 		<audio id='cubeUp2' src="media/cubeUp2.ogg" >
 		<audio id='cubeUp3' src="media/cubeUp3.ogg" >
@@ -53,28 +53,29 @@
 		<audio id='cubeUp9' src="media/cubeUp9.ogg" >
 		<audio id='cubeUp10' src="media/cubeUp10.ogg" >
 		<audio id='cubeUp11' src="media/cubeUp11.ogg" >
-		<audio id='cubeUp12' src="media/cubeUp12.ogg" >  
+		<audio id='cubeUp12' src="media/cubeUp12.ogg" >
 	</body>
 
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 	<!--
 	library for fast quaternion rotation
 	-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControlsPlus adds rotation and movement controls that move and rotate the world relative to the camera, using arrow keys, WASD, plus interaction controls.
 	 -->
-	<script src="js/VRControlsPlus.js"></script>
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControlsPlus.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 
 	<script>
@@ -107,10 +108,10 @@
 		var foundLight = 0;
 		var lightPlace = new THREE.Vector3(Math.r)
 		var music = document.querySelector('#music');
-  		var music2 = document.querySelector('#music2');	
-  		var child3 = document.querySelector('#child3');	
-  		var teeth = document.querySelector('#teeth');	
-  		var bing = document.querySelector('#bing');	
+  		var music2 = document.querySelector('#music2');
+  		var child3 = document.querySelector('#child3');
+  		var teeth = document.querySelector('#teeth');
+  		var bing = document.querySelector('#bing');
   		var fishNoise = document.querySelector('#fishNoise');
   		var cubeSfx = [
   			document.querySelector('#cube1'),
@@ -145,7 +146,7 @@
 
 		camera.position.y = -30;
   		music2.volume = 0;
-  		
+
 		//make particles
 		var particles = new THREE.Geometry();
 		var partCount = 1500;
@@ -171,7 +172,7 @@
 				transparent: true
 				});
 		var particleSystem = new THREE.PointCloud(particles, partMat);
-			
+
 		particleSystem.sortParticles = true;
 		scene.add(particleSystem);
 
@@ -184,7 +185,7 @@
 		dodecahome.position.y = camera.position.y;
 		while (dodecahome.position.distanceTo(camera.position) < 20){
 			dodecahome.position.set(
-					Math.random()*100 -50, 
+					Math.random()*100 -50,
 					camera.position.y,
 					Math.random()*100 -50);
 		}
@@ -223,7 +224,7 @@
 
 		particleSystem2.position.x = dodecahome.position.x;
 		particleSystem2.position.z = dodecahome.position.z;
-		
+
 		//other dodecahedra
 		var dodecArray = [];
 		var dodecCount = 140;
@@ -234,7 +235,7 @@
 		for (var p = 0; p<dodecCount; p++){
 			dodecArray[p] = new THREE.Mesh(dodecGeom, dodecMat);
 			dodecArray[p].position.set(
-				Math.random()*100 -50, 
+				Math.random()*100 -50,
 				Math.random()*18 -44,
 				Math.random()*100 -50);
 			if (dodecArray[p].position.distanceTo(camera.position) < 10 || dodecArray[p].position.distanceTo(dodecahome.position) < 9){
@@ -266,8 +267,8 @@
 		for (var p = 0; p<icosCount; p++){
 			icosArray[p] = new THREE.Mesh(icosGeom, icosMat);
 			icosArray[p].position.set(
-				Math.random()*120 -60, 
-				Math.random()*10 -30, 
+				Math.random()*120 -60,
+				Math.random()*10 -30,
 				Math.random()*120 -60);
 			size = Math.random()*20;
 			icosArray[p].scale.set(size, size, size);
@@ -278,17 +279,17 @@
 		var cubeSpot = new THREE.Vector3();
 		while (cubeSpot.distanceTo(camera.position) < 50 || cubeSpot.distanceTo(dodecahome.position) < 25){
 			cubeSpot = new THREE.Vector3(
-			Math.random()*120 - 60, 
-			camera.position.y, 
+			Math.random()*120 - 60,
+			camera.position.y,
 			Math.random()*120 - 60);
-		}	
+		}
 
 		var cubeArray = [];
 		var cubeCount = 12;
 
 		for (var p = 0; p<cubeCount; p++){
 			cubeArray[p] = new THREE.Mesh(
-				new THREE.BoxGeometry(4,4,4,4,6+Math.floor(Math.random()*90),4), 
+				new THREE.BoxGeometry(4,4,4,4,6+Math.floor(Math.random()*90),4),
 				new THREE.MeshLambertMaterial({wireframe:true}));
 			cubeArray[p].material.color.setRGB(Math.random()+.5, Math.random()/2 + .2, Math.random()+.3);
 			cubeArray[p].position.y = cubeSpot.y;
@@ -315,8 +316,8 @@
 		}
 		scene.add(tet);
 
-		//flocktahedra	
-		var octFlock = new THREE.Object3D();	
+		//flocktahedra
+		var octFlock = new THREE.Object3D();
 		var octArray = [];
 		var octCount = 8;
 		var octVelocity = [];
@@ -362,8 +363,8 @@
 				new THREE.MeshLambertMaterial({color: cubeArray[i].material.color})
 				);
 			icosignVertex[i].position.set(
-				icosign.geometry.vertices[i].x, 
-				icosign.geometry.vertices[i].y, 
+				icosign.geometry.vertices[i].x,
+				icosign.geometry.vertices[i].y,
 				icosign.geometry.vertices[i].z
 				);
 			win.add(icosignVertex[i]);
@@ -376,58 +377,58 @@
 				new THREE.TetrahedronGeometry(.1),
 				new THREE.MeshLambertMaterial({color: 0xff3333})
 				);
-			icosignFace[i].geometry.vertices[3].set( 
-				(icosign.geometry.vertices[icosign.geometry.faces[i].a].x 
-				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].x 
+			icosignFace[i].geometry.vertices[3].set(
+				(icosign.geometry.vertices[icosign.geometry.faces[i].a].x
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].x
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].x)/3
 				+icosign.geometry.faces[i].normal.x/3,
 
-				(icosign.geometry.vertices[icosign.geometry.faces[i].a].y 
-				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].y 
+				(icosign.geometry.vertices[icosign.geometry.faces[i].a].y
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].y
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].y)/3
 				+icosign.geometry.faces[i].normal.y/3,
 
-				(icosign.geometry.vertices[icosign.geometry.faces[i].a].z 
-				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].z 
+				(icosign.geometry.vertices[icosign.geometry.faces[i].a].z
+				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].z
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].z)/3
 				+icosign.geometry.faces[i].normal.z/3
 				);
-			icosignFace[i].geometry.vertices[0].set( 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].a].x 
+			icosignFace[i].geometry.vertices[0].set(
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].x
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].x)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].x)/2,
 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].a].y 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].y
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].y)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].y)/2,
 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].a].z 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].z
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].z)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].z)/2
 				);
-			icosignFace[i].geometry.vertices[1].set( 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].b].x 
+			icosignFace[i].geometry.vertices[1].set(
+				((icosign.geometry.vertices[icosign.geometry.faces[i].b].x
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].x)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].a].x)/2,
 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].b].y 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].b].y
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].y)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].a].y)/2,
 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].b].z 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].b].z
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].z)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].a].z)/2
 				);
-			icosignFace[i].geometry.vertices[2].set( 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].a].x 
+			icosignFace[i].geometry.vertices[2].set(
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].x
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].x)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].x)/2,
 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].a].y 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].y
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].y)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].y)/2,
 
-				((icosign.geometry.vertices[icosign.geometry.faces[i].a].z 
+				((icosign.geometry.vertices[icosign.geometry.faces[i].a].z
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].c].z)/2
 				+ icosign.geometry.vertices[icosign.geometry.faces[i].b].z)/2
 				);
@@ -442,17 +443,17 @@
 		//create light
 		var light = new THREE.SpotLight( 0xffffff, .8, 800);
 		light.position.set( -50,20,.1);
-		light.castShadow = true; 
+		light.castShadow = true;
 		scene.add( light );
 
 		var light2 = new THREE.SpotLight( 0xffffff, .4, 600);
 		light2.position.set( 30,10,40);
-		light2.castShadow = true; 
+		light2.castShadow = true;
 		scene.add( light2 );
 
 		var light3 = new THREE.SpotLight( 0xffffff, .2, 500);
 		light3.position.set( -10,15,20);
-		light3.castShadow = true; 
+		light3.castShadow = true;
 		scene.add( light3 );
 
 		var fishLight =new THREE.PointLight( 0x88ffff, .8, 5);
@@ -476,22 +477,22 @@
 		var dodecLight2 =new THREE.PointLight( 0xff0000, .3, 15);
 		dodecLight2.position.set(dodecahome.position.x, dodecahome.position.y-2, dodecahome.position.z+2);
 		dodecLight2.castShadow = true;
-		scene.add(dodecLight2);			
+		scene.add(dodecLight2);
 
 		var goldLight = new THREE.PointLight( 0xffdd00, .6, 10);
 		goldLight.position.y = camera.position.y;
 		while (goldLight.position.distanceTo(camera.position) < 15 || goldLight.position.distanceTo(tet.position) < 10 || goldLight.position.distanceTo(cubeSpot) < 10 || goldLight.position.distanceTo(dodecahome.position) < 14){
 			goldLight.position.set(
-			Math.random()*100 -50, 
+			Math.random()*100 -50,
 			Math.random()*18 -44,
 			Math.random()*100 -50);
 		}
-		goldLight.castShadow = false; 
-		scene.add( goldLight );	
+		goldLight.castShadow = false;
+		scene.add( goldLight );
 
 		var winLight = new THREE.PointLight( 0xffffdd, .5, 25);
 		winLight.position.set(win.position.x, win.position.y, win.position.z);
-		scene.add(winLight);	
+		scene.add(winLight);
 
 		var partVector = new THREE.Vector3;
 		var boingVector = new THREE.Vector3;
@@ -664,7 +665,7 @@
 					goldLight.distance = (19 * goldLight.distance + 12) / 20;
 					if (goldLight.intensity > 4){
 						newPos.set(
-							Math.random()*100 -50, 
+							Math.random()*100 -50,
 							Math.random()*18 -44,
 							Math.random()*100 -50);
 						foundLight = 2;
@@ -707,18 +708,18 @@
 			      	snowFloor + 95,
 			      	120*Math.random() - 80);
 			      particles.vertices[p].velocity.y = -Math.random();
-			    } 
+			    }
 
 			    if (foundLight == 0 ){
 		       		particles.vertices[p].velocity.x = Math.random()/10;
 		       		particles.vertices[p].velocity.y = -Math.random()*.2;
-		       		particles.vertices[p].velocity.z = Math.random()/10; 
+		       		particles.vertices[p].velocity.z = Math.random()/10;
 		    	}
 
 		       	if (boing>0 && particles.vertices[p].distanceTo(tet.position) < 20){ //boing back
 		       		partVector = new THREE.Vector3(
-		       				particles.vertices[p].x, 
-		       				particles.vertices[p].y, 
+		       				particles.vertices[p].x,
+		       				particles.vertices[p].y,
 		       				particles.vertices[p].z);
 					particles.vertices[p].x += boing*partVector.sub(tet.position).x/400;
 					particles.vertices[p].y += boing*partVector.sub(tet.position).y/400;
@@ -747,10 +748,10 @@
 			    particles.vertices[p].z += particles.vertices[p].velocity.z;
 			    particles.vertices[p].x += particles.vertices[p].velocity.x;
 		 	 }
-			
+
 			//dodecahome particles
 		 	particleSystem2.rotation.y += .005;
-		 	 for (var p = 0; p<partCount2; p++) { 
+		 	 for (var p = 0; p<partCount2; p++) {
 			    particles2.vertices[p].y +=  Math.sin(2*t+10*particles2.vertices[p].velocity.y)/23;
 			    particles2.vertices[p].z += Math.sin(2*t+40*particles2.vertices[p].velocity.y)/33;
 			    particles2.vertices[p].x += Math.cos(2*t+40*particles2.vertices[p].velocity.y)/33;
@@ -787,7 +788,7 @@
 	    	controls.zeroSensor(); //zero rotation
 	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
 	    	effect.setFullScreen(true) //fullscreen else if (event.keyCode == 80) {//p
-	  		
+
 	  	} else if (event.keyCode == 32 || event.keyCode == 80) { //space or p
 	  		if (music.paused){
 		  			music.play();
@@ -803,7 +804,7 @@
 		  			}
 		  		}
 	  		} else{
-	  			music.pause();	
+	  			music.pause();
 	  			music2.pause();
 	  			child3.muted = true;
 	  			bing.muted = true;

@@ -23,20 +23,21 @@
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 		<!--rotating quaternions library-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControls.js"></script>
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 	<script>
 		/*
@@ -119,8 +120,8 @@
 
 
 		//create pizza john link
-		var pizzaText = THREE.ImageUtils.loadTexture( "media/pizzajohn.png" ); 
-		var pizzaMaterial = new THREE.MeshBasicMaterial( {map: pizzaText, wireframe: true, color: 0xffff00 }); 
+		var pizzaText = THREE.ImageUtils.loadTexture( "media/pizzajohn.png" );
+		var pizzaMaterial = new THREE.MeshBasicMaterial( {map: pizzaText, wireframe: true, color: 0xffff00 });
 		var pizzaBox = new THREE.BoxGeometry(1,1,1);
 		var pizza = new THREE.Mesh( pizzaBox, pizzaMaterial );
 		pizza.position.z = -1;
@@ -150,7 +151,7 @@
 			spiralArray[i].position.y = i*10 - 200;
 			scene.add(spiralArray[i]);
 		}
-	
+
 
 		/*
 		Request animation frame loop function
@@ -169,7 +170,7 @@
 		}	else{
 			materialX=material2;
 			pizza.material.wireframe = true;
-		}	
+		}
 
 		pizza.rotation.y += .001 * (mouseX/400);
 		pizza.rotation.z += .003 * (mouseY/200);
@@ -261,7 +262,7 @@
 			}
 
 		}
-		
+
 
 		/*
 		Listen for keyboard events zero positional sensor on appropriate keypress.

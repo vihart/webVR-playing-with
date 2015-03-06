@@ -23,20 +23,22 @@
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 		<!--rotating quaternions library-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControls.js"></script>
+	
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 
 
@@ -95,7 +97,7 @@
 		  Things[i].position.z = -30;
 		  }
 
-		 
+
 
 		/*
 		Request animation frame loop function
@@ -118,7 +120,7 @@
 			 if (clicky==1) {
 			 	for (var i = 0; i<32; i++){
 			 	Things[i].position.z += 10*(Math.sin(zWave*(1/i+2)));
-			 	} 
+			 	}
 			 }else if (clicky == 2) {
 			 	for (var i = 0; i<32; i++){
 			 	Things[i].material.wireframe = true;
@@ -141,8 +143,8 @@
 			 	Things[i].material.color.setHex(Things[0].material.color.getHex());
 			 	}
 			 }
-			 
-			
+
+
 
 
 			/*
@@ -176,7 +178,7 @@
 		function link(){
 			   window.location="http://vihart.github.io/webVR-playing-with/index.html";
 		}
-		
+
 		/*
 		Listen for keyboard events zero positional sensor on appropriate keypress.
 		*/

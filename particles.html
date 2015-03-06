@@ -27,22 +27,23 @@
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 	<!--
 	library for fast quaternion rotation
 	-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControls.js"></script>
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 
 	<script>
@@ -124,7 +125,7 @@
 			if(clicky===1){
 			particleSystem.rotation.y -= mouseX/50000 - .01;
 			}
-	
+
 			while (pCount--) {
 
 			    // get the particle
@@ -186,8 +187,8 @@
 			    if(clicky===5){
 			       	particle.velocity.x = Math.random();
 			       	particle.velocity.y = -Math.random()*2;
-			       	particle.velocity.z = Math.random(); 
-			  		
+			       	particle.velocity.z = Math.random();
+
 			    }
 
 		 	 }
@@ -240,7 +241,7 @@
 			effect.setFullScreen( true );
 		});
 		/*
-		Listen for keyboard events 
+		Listen for keyboard events
 		*/
 		function onkey(event) {
 	    event.preventDefault();

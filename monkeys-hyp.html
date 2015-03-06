@@ -3,7 +3,7 @@
 <html lang="en">
     <head>
         <title>Quaternion Monkeys</title>
-        
+
         <!--
         4D Monkeys
 
@@ -16,13 +16,13 @@
 
 
         It has oculus support for webVR browsers (thanks Mozilla!)
-        
+
         https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate
 
         And WASD + E/Q navigation support both in and out of VR (thanks, Andrea Hawksley!)
         Enter to go into VR mode, S for sound,
         Space to click links based on camera rotation
-        
+
         https://github.com/hawksley
 
         -->
@@ -41,43 +41,44 @@
     </head>
 
     <body>
-    <audio id='music' src="media/monkeygif.mp3"/> 
+    <audio id='music' src="media/monkeygif.mp3"/>
 
     </body>
 
     <!--
     three.js 3d library
     -->
-    <script src="js/three.min.js"></script>
+    <script src="js/lib/three.min.js"></script>
 
     <!--
     library for fast quaternion rotation
     -->
-    <script src="lib/gl-matrix.js"></script>
+    <script src="js/lib/gl-matrix.js"></script>
 
     <!--
     VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
      -->
-    <script src="js/VRControls.js"></script>
+     <script src="js/vr/PhoneVR.js"></script>
+    <script src="js/vr/VRControls.js"></script>
 
     <!--
     VREffect.js handles stereo camera setup and rendering.
     -->
-    <script src="js/VREffect.js"></script>
+    <script src="js/vr/VREffect.js"></script>
 
-<script src="js/loaders/OBJLoader.js"></script>  
- 
+<script src="js/loaders/OBJLoader.js"></script>
+
 <script type="x-shader/x-vertex" id="vertexShader">
 // This shader moves vertices around
 
 // Quaternion Multiplication
-vec4 quatMult( in vec4 p, in vec4 q ) 
+vec4 quatMult( in vec4 p, in vec4 q )
 {
-    vec4 r;    
+    vec4 r;
     r.w = + p.w*q.w - p.x*q.x - p.y*q.y - p.z*q.z;
     r.x = + p.w*q.x + p.x*q.w + p.y*q.z - p.z*q.y;
     r.y = + p.w*q.y - p.x*q.z + p.y*q.w + p.z*q.x;
-    r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;    
+    r.z = + p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;
     return r;
 }
 
@@ -91,7 +92,7 @@ uniform mat4 boost;
 // Hopf fibration coloring
 // returns a color based on the 4D normal
 vec3 HopfColor( in vec4 nBase )
-{    
+{
     // first rotate the 4D normal to a space aligned with the 120-cell
     float cosx = -sqrt( 0.1*(5.+sqrt(5.)) );
     float sinx = sqrt( 0.1*(5.-sqrt(5.)) );
@@ -136,23 +137,23 @@ vec4 projectToHyperboloid(vec4 v) {
 }
 
 // this gets called once per vertex of the monkey mesh (and 8 times since there are 8 monkeys)
-void main() 
+void main()
 {
     // base position
     // turn a 3D position of a monkey into a 4D position by adding a 1 as the w component then normalizing To get onto the unit 3-sphere
     vec4 p = projectToHyperboloid( vec4(position.zyx, 1.0) );
     p = boost * p;
-    
+
     // this is the normal to the point
     // same concept as for the position, but we add a 0 as the w component
     vec4 n3sphere = vec4( normal.zyx, 0.0);
-    
+
     // compute the color from the normal
     vColor = HopfColor(n3sphere);
-    
+
     // take the final 3D position and project it onto the screen
     gl_Position = projectionMatrix * modelViewMatrix * p; //vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
-    
+
     // do fog
     if ( fogType == 1 )
     {
@@ -161,18 +162,18 @@ void main()
         float zz = gl_Position.z / gl_Position.w;
         // go from 1 to 0 instead (0 is furthest and 1 is where the camera is )
         // ( note that the computed distance is not linear )
-        float fogScale = 1. - zz; 
+        float fogScale = 1. - zz;
         // anything closer than 0.1 gets regular color
-        if ( fogScale > 0.1 ) 
+        if ( fogScale > 0.1 )
             fogScale = 1.0;
         // everything else ramps from 0 to 1
-        else 
+        else
             fogScale = fogScale / 0.1;
         // mutliply color by this value to make it go to black
         vColor *= fogScale;
     }
     else if ( fogType == 2 )
-    {    
+    {
         // near fog
         float zz = gl_Position.z / gl_Position.w;
         // go from 1 to 0, and make the curve less straight
@@ -194,7 +195,7 @@ void main()
 <script type="x-shader/x-vertex" id="fragmentShader">
 // this gets called once per pixel
 varying vec3 vColor;
-void main() 
+void main()
 {
     // just use the color we computed and assign it to this pixel
     gl_FragColor = vec4( vColor, 1. );
@@ -227,7 +228,7 @@ var quatPerMonkeyArray = [
     new THREE.Vector4(0, 0, -1, 0),
     new THREE.Vector4(0, 0, 0, -1)
 ];
- 
+
 
 init();
 animate();
@@ -239,7 +240,7 @@ function onkey(event) {
     }
 };
 window.addEventListener("keydown", onkey, true);
- 
+
 document.body.addEventListener('dblclick', function () {
     effect.setFullScreen(true);
 });
@@ -328,7 +329,7 @@ function init()
 
 function animate() {
 
-    
+
     // send the time every frame so that we can rotate the monkeys over time
     for (var i = 0; i < 8; i++)
     {
@@ -352,7 +353,7 @@ function animate() {
 function link(){
 
         window.location="http://vihart.github.io/webVR-playing-with/index.html";
-    
+
 
 }
 
@@ -376,7 +377,7 @@ document.body.addEventListener( 'dblclick', function() {
 });
 
 /*
-Listen for keyboard events 
+Listen for keyboard events
 */
 function onkey(event) {
     event.preventDefault();
@@ -394,8 +395,8 @@ function onkey(event) {
         if (music.paused){
             music.play();
         } else{
-            music.pause();  
-        } 
+            music.pause();
+        }
     }
 };
 window.addEventListener("keydown", onkey, true);

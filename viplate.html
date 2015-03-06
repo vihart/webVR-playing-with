@@ -3,7 +3,7 @@
 <html lang="en">
 	<head>
 		<title>Vi Hart's webVR boilerplate, using Mozilla's three.js webVR boilerplate + Andrea Hawksley's VR controls</title>
-		
+
 		<!--
 
 		This is what I'm starting with for my webVR experiments right now, so that they all have the same interactions.
@@ -35,29 +35,30 @@
 
 	<body>
 	<!--Audio from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
-	<audio id='music' src="media/satie.mp3"/> 
+	<audio id='music' src="media/satie.mp3"/>
 
 	</body>
 
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 	<!--
 	library for fast quaternion rotation
 	-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControls.js"></script>
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 
 	<script>
@@ -95,8 +96,8 @@
 		var clicky = 0;
 
 		//create info overlay
-		var infoText = THREE.ImageUtils.loadTexture( "media/overlay.png" ); 
-		var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, color: 0xffffff}); 
+		var infoText = THREE.ImageUtils.loadTexture( "media/overlay.png" );
+		var infoMaterial = new THREE.MeshBasicMaterial( {map: infoText, color: 0xffffff});
 		var infoBox = new THREE.BoxGeometry(2,2,2);
 		var infoSign = new THREE.Mesh( infoBox, infoMaterial );
 		infoSign.position.z = -3;
@@ -131,7 +132,7 @@
 			/*
 			Apply rotation to mesh
 			*/
-				
+
 			thing.rotation.x += .01;
 			infoSign.rotation.y +=.001;
 
@@ -161,7 +162,7 @@
 
 		function link(){
 			if(camera.rotation.x > -.1 && camera.rotation.x < .5 && camera.rotation.y > -.2 && camera.rotation.y < .3){
-				window.location="http://vihart.com";		
+				window.location="http://vihart.com";
 			}else{
 				window.location="http://vihart.github.io/webVR-playing-with/index.html";
 			}
@@ -187,7 +188,7 @@
 			effect.setFullScreen( true );
 		});
 		/*
-		Listen for keyboard events 
+		Listen for keyboard events
 		*/
 		function onkey(event) {
 	    event.preventDefault();
@@ -205,8 +206,8 @@
 	  		if (music.paused){
 	  			music.play();
 	  		} else{
-	  			music.pause();	
-	  		} 
+	  			music.pause();
+	  		}
 	  	}
 
 

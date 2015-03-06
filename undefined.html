@@ -24,22 +24,23 @@
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 	<!--
 	library for fast quaternion rotation
 	-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControls.js"></script>
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 	<!--font-->
 	<script src="lib/helvetiker.js"></script>
@@ -113,7 +114,7 @@
 		Request animation frame loop function
 		*/
 		function animate() {
-			
+
 			if(clicky===0){
 				for( var i=0; i<mytext.length; i++){
 				RotateAround(mytext[i], -i,-i,5, .0004*i,.0005*i,.01);
@@ -148,7 +149,7 @@
 					} else{
 					mytext[i].position.x = 0;
 					mytext[i].position.y = 0;
-					mytext[i].position.z = 0;	
+					mytext[i].position.z = 0;
 					}
 				mytext[i].lookAt(camera.position);
 				}
@@ -196,7 +197,7 @@
 			effect.setFullScreen( true );
 		});
 		/*
-		Listen for keyboard events 
+		Listen for keyboard events
 		*/
 		function onkey(event) {
 	    event.preventDefault();

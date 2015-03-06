@@ -4,7 +4,7 @@
 	<head>
 		<title>The First Pizza John for Virtual Reality</title>
 
-		<!-- 
+		<!--
 		webVR Pizza John experience
 
 		uses three.js, Mozilla's webVR basics, and Andrea Hawksley's webVR navigation.
@@ -24,28 +24,29 @@
 	</head>
 
 	<body>
-		<audio id='music' src="media/pizzajohn.ogg" autoplay=true loop=true/> 
+		<audio id='music' src="media/pizzajohn.ogg" autoplay=true loop=true/>
 	</body>
 
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 	<!--
 	library for fast quaternion rotation
 	-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControls.js"></script>
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 
 	<script>
@@ -147,7 +148,7 @@
 		  	//animate pizza particles
 		  // for (var p = 0; p<partCount; p++){
 		  // 	//update velocity
-		  // 	pizzicles.vertices[p].velocity.y -= (pizzicles.vertices[p].y+10)/1000 + Math.random()/100; 
+		  // 	pizzicles.vertices[p].velocity.y -= (pizzicles.vertices[p].y+10)/1000 + Math.random()/100;
 		  // 	pizzicles.vertices[p].velocity.z += (Math.random() - .5)/200;
 		  // 	pizzicles.vertices[p].velocity.x += (Math.random() - .5)/200;
 		  // 	//update position based on velocity
@@ -165,7 +166,7 @@
 			if(clicky===1){
 			particleSystem.rotation.y -= mouseX/50000 - .01;
 			}
-	
+
 			while (pCount--) {
 
 			    // get the particle
@@ -229,11 +230,11 @@
 			    if(clicky===5){
 			       	particle.velocity.x = Math.random();
 			       	particle.velocity.y = -Math.random()*2;
-			       	particle.velocity.z = Math.random(); 
+			       	particle.velocity.z = Math.random();
 			       	particleSystem.material=pizza.material;
 			       	particleSystem.material.color.setRGB(1,1,1);
 			       	renderer.setClearColor( 0x000000 + mouseX/10, 1 );
-			  		
+
 			    }
 
 		 	 }
@@ -280,7 +281,7 @@
 			effect.setFullScreen( true );
 		});
 		/*
-		Listen for keyboard events 
+		Listen for keyboard events
 		*/
 		function onkey(event) {
 	    event.preventDefault();
@@ -296,7 +297,7 @@
 	  		if (music.paused){
 	  			music.play();
 	  		} else{
-	  			music.pause();	
+	  			music.pause();
 	  		}
 	  	}
 

@@ -23,20 +23,21 @@
 	<!--
 	three.js 3d library
 	-->
-	<script src="js/three.min.js"></script>
+	<script src="js/lib/three.min.js"></script>
 
 		<!--rotating quaternions library-->
-	<script src="lib/gl-matrix.js"></script>
+	<script src="js/lib/gl-matrix.js"></script>
 
 	<!--
 	VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 	 -->
-	<script src="js/VRControls.js"></script>
+	<script src="js/vr/PhoneVR.js"></script>
+	<script src="js/vr/VRControls.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
 	-->
-	<script src="js/VREffect.js"></script>
+	<script src="js/vr/VREffect.js"></script>
 
 
 
@@ -107,19 +108,19 @@
 			 	for (var i = 0; i<Things.length; i++){
 			 	Things[i].material.color.setRGB((Things[i].position.x/400),(Math.abs(Things[i].position.y)/20),.5);
 			 	}
-			 
+
 			 if (clicky == 1) {
 			 	for (var i = 0; i<Things.length; i++){
 			 	Things[i].position.y = Math.sin(boxWave*(mouseY/1000));
 			 	}
-			 } 
+			 }
 
 			 if( clicky == 2) {
 			 	for (var i = 0; i<Things.length; i++){
 			 	Things[i].position.y = Math.sin(boxWave*(((Things[i].position.x)/mouseX)+2))*(mouseY/100) + Math.sin(boxWave*(3/Things[i].position.z)) - 10;
 			 	}
 			 }
-			 
+
 			 if( clicky == 3) {
 			 	for (var i = 0; i<Things.length; i++){
 			 	Things[i].position.y = Math.sin(boxWave*(((Things[i].position.x)/mouseX)+2))*(mouseY/100) + Math.sin(boxWave*(Things[i].position.z)/mouseY) - 10;
@@ -127,7 +128,7 @@
 			 	}
 
 			 }
-			
+
 
 
 			/*
@@ -161,7 +162,7 @@
 		function link(){
 			   window.location="http://vihart.github.io/webVR-playing-with/index.html";
 		}
-		
+
 		/*
 		Listen for keyboard events zero positional sensor on appropriate keypress.
 		*/

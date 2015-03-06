@@ -89,7 +89,7 @@
 
       // take the final 3D position and project it onto the screen
 
-      gl_Position = projectionMatrix * modelViewMatrix * p; 
+      gl_Position = projectionMatrix * modelViewMatrix * p;
     }
   </script>
 
@@ -106,23 +106,24 @@
     <!--
     three.js 3d library
     -->
-    <script src="js/three.min.js"></script>
+    <script src="js/lib/three.min.js"></script>
 
     <!--
     library for fast quaternion rotation
     -->
-    <script src="lib/gl-matrix.js"></script>
+    <script src="js/lib/gl-matrix.js"></script>
 
     <script src="js/hypMath.js"></script>
     <!--
     VRControlsHyperbolic.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object. Also deals with hyperbolic and parabolic motions.
      -->
-    <script src="js/VRControlsHyperbolic.js"></script>
+     <script src="js/vr/PhoneVR.js"></script>
+    <script src="js/vr/VRControlsHyperbolic.js"></script>
 
     <!--
     VREffect.js handles stereo camera setup and rendering.
     -->
-    <script src="js/VREffect.js"></script>
+    <script src="js/vr/VREffect.js"></script>
 
     <script src="js/loaders/OBJLoader.js"></script>
         <!--

@@ -7,6 +7,8 @@
  */
 
 THREE.VRControls = function ( camera, done ) {
+	this.phoneVR = new PhoneVR();
+
 	//---game controller stuff---
 	this.haveEvents = 'ongamepadconnected' in window;
 	this.controllers = {};
@@ -175,10 +177,14 @@ THREE.VRControls = function ( camera, done ) {
 		var vrInput = this._vrInput;
 		var orientation;
 		var vrState;
-		if ( !vrInput ) {
+		if ( vrInput ) {
+			orientation	= vrInput.getState().orientation;
+		} else if (this.phoneVR.rotationQuat()) {
+			orientation = this.phoneVR.rotationQuat();
+		} else {
 			return null;
 		}
-		orientation	= vrInput.getState().orientation;
+		
 		if (orientation == null) {
 			return null;
 		}

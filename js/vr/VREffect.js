@@ -140,14 +140,24 @@ THREE.VREffect = function ( renderer, done ) {
 		var renderer = this._renderer;
 		var vrHMD = this._vrHMD;
 		var canvasOriginalSize = this._canvasOriginalSize;
-		if (!vrHMD) {
-			return;
-		}
+
 		// If state doesn't change we do nothing
 		if ( enable === this._fullScreen ) {
 			return;
 		}
 		this._fullScreen = !!enable;
+
+		if (!vrHMD) {
+			var canvas = renderer.domElement;
+			if (canvas.mozRequestFullScreen) {
+				canvas.mozRequestFullScreen(); // Firefox
+			} else if (canvas.webkitRequestFullscreen) {
+				canvas.webkitRequestFullscreen(); // Chrome and Safari
+			} else if (canvas.requestFullScreen){
+				canvas.requestFullscreen();
+			}
+			return;
+		}
 
 		// VR Mode disabled
 		if ( !enable ) {

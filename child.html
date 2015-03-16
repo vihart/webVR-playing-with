@@ -777,8 +777,12 @@
 		animate();
 
 
-		document.body.addEventListener( 'dblclick', function() {
+		document.body.addEventListener( 'click', function() {
 			effect.setFullScreen( true );
+			if (music.paused){
+		  			music.play();
+		  			music2.play();
+		  	}
 		});
 
 		function onkey(event) {

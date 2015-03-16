@@ -71,6 +71,11 @@
 	 -->
 	<script src="js/vr/PhoneVR.js"></script>
 	<script src="js/vr/VRControls.js"></script>
+	
+	<!--
+	tapMove makes it so that you move forward at a speed based on where on screen you tap
+	-->
+	<script src="js/tapMove.js"></script>
 
 	<!--
 	VREffect.js handles stereo camera setup and rendering.
@@ -629,8 +634,8 @@
 				boingWin =true;
 			}
 			if (boing>0){ //boing backwards briefly
-				var boingVector = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion)
-				var boingness = boingVector.multiplyScalar(.1)
+				var boingVector = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+				var boingness = boingVector.multiplyScalar(.1);
 				camera.position.sub(boingness);
 				boingLight.distance = boing*10 + 4
 				boing -= .05;
@@ -768,6 +773,7 @@
 			 	child3.volume = Math.min(1, 2/camera.position.distanceTo(dodecahome.position));
 			 }
 
+			tapMovement();
 			controls.update();
 			effect.render( scene, camera );
 			requestAnimationFrame( animate );

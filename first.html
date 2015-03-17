@@ -70,6 +70,7 @@
 		Setup three.js WebGL renderer
 		*/
 		var renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setClearColor( 0x333333, 1 );
 		/*
 		Append the canvas element created by the renderer to document body element.
 		*/
@@ -109,6 +110,13 @@
 		var geometry = new THREE.TextGeometry(text);
 		var material = new THREE.MeshNormalMaterial();
 		var first = new THREE.Mesh( geometry, material );
+
+		var turn = new THREE.Mesh( 
+			new THREE.TextGeometry('TURN'), 
+			new THREE.MeshNormalMaterial);
+		scene.add(turn);
+		turn.position.z = -300;
+		turn.position.x = -200;
 
 
 		var clickmessage = new THREE.Mesh( 
@@ -197,6 +205,7 @@
 				message2.rotation.y = camera.rotation.y;
 
 			} else if(clicky === 2){
+				turn.material.visible = false;
 				message3.material.visible = true;
 				message3.position.z = -800*(Math.abs(camera.rotation.y));
 				message3.position.x = 50*(Math.abs(camera.rotation.y));
@@ -213,6 +222,7 @@
 				message2.material.visible = false;
 				message3.material.visible = false;
 				for( var i=0; i<letters.length; i++){
+					letters[i].material.visible = true;
 					RotateAround(letters[i], -500*i,-50*i,5, .0004*i,.0005*i,.01);
 				}
 			}else if (clicky === 5){

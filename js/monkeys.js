@@ -161,6 +161,9 @@ function init()
     window.addEventListener('resize', onWindowResize, false);
 
     effect.render(scene, camera);
+    camera.position.x = .2;
+    camera.position.z = .4;
+    camera.position.y = .2;
 }
 
 function animate() {
@@ -259,7 +262,7 @@ function changePolychoron(selected) {
     /*
     Listen for double click event to enter full-screen VR mode
     */
-    document.body.addEventListener( 'dblclick', function() {
+    document.body.addEventListener( 'click', function() {
       effect.setFullScreen( true );
     });
     /*

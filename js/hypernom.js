@@ -398,7 +398,7 @@ function resetGame() {
 }
 
 //Listen for double click event to enter full-screen VR mode
-document.body.addEventListener( 'dblclick', function() {
+document.body.addEventListener( 'click', function() {
   effect.setFullScreen( true );
 });
 

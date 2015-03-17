@@ -26,7 +26,7 @@
 	<body>
 		<audio id='music' src="media/child1.ogg" autoplay=true loop=true/>
 		<audio id='music2' src="media/child2.ogg" autoplay=true loop=true/>
-		<audio id='child3' src="media/child3.ogg" >
+		<audio id='child3' src="media/child3.ogg" autoplay=true loop=true/>
 		<audio id='teeth' src="media/teeth_and_clicks.ogg" >
 		<audio id='bing' src="media/bing.ogg" >
 		<audio id='fishNoise' src="media/fishNoise.ogg" >
@@ -115,6 +115,7 @@
 		var music = document.querySelector('#music');
   		var music2 = document.querySelector('#music2');
   		var child3 = document.querySelector('#child3');
+		child3.volume = 0; //so that it plays on click on phones but has no volume until needed.
   		var teeth = document.querySelector('#teeth');
   		var bing = document.querySelector('#bing');
   		var fishNoise = document.querySelector('#fishNoise');
@@ -764,7 +765,7 @@
 
 		 	if ( camera.position.distanceTo(dodecahome.position) < 16) {
 		 		music.volume = (9*music.volume + .000001)/10;
-		 		child3.play();
+		 		// child3.play();
 		 		if (camera.position.distanceTo(dodecahome.position) < 12){
 		 			dodecWin = true;
 		 		}
@@ -773,7 +774,7 @@
 			 	child3.volume = Math.min(1, 2/camera.position.distanceTo(dodecahome.position));
 			 }
 
-			tapMovement();
+			tapMovement(0.8);//.8 scaled for this thing
 			controls.update();
 			effect.render( scene, camera );
 			requestAnimationFrame( animate );
@@ -788,6 +789,7 @@
 			if (music.paused){
 		  			music.play();
 		  			music2.play();
+		  			child3.play();
 		  	}
 		});
 

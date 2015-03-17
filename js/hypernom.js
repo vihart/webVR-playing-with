@@ -13,7 +13,7 @@ var winNoise = document.querySelector('#win');
 var gamePoints = 0;
 var muteSound = false;
 var isShowScore = true;
-var level = 0;
+var level = 3;
 var aPressed = false, backPressed = false;
 
 var polychora = [
@@ -397,7 +397,7 @@ function resetGame() {
   scene.add(camera);
 }
 
-//Listen for double click event to enter full-screen VR mode
+//Listen for click event to enter full-screen VR mode
 document.body.addEventListener( 'click', function() {
   effect.setFullScreen( true );
 });

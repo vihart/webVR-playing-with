@@ -484,6 +484,7 @@ void main()
 
 		document.body.addEventListener( 'click', function(){
 			clicky = (clicky + 1) % 2;
+		  effect.setFullScreen( true );
 		})
 		var frame = document.getElementById('frame');
 		frame.height = window.innerHeight;
@@ -569,6 +570,7 @@ void main()
 		}
 
 		window.addEventListener( 'resize', onWindowResize, false );
+
 
 	</script>
 </html>

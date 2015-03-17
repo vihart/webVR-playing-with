@@ -171,6 +171,7 @@
 		//listen for click
 		document.body.addEventListener( 'click', function(){
 			clicky = (clicky+1) % 5
+			effect.setFullScreen( true );
 		})
 
 		//linking function
@@ -192,12 +193,6 @@
 	  		link();
 	  	}
 
-		/*
-		Listen for click event to enter full-screen VR mode
-		*/
-		document.body.addEventListener( 'click', function() {
-			effect.setFullScreen( true );
-		});
 
 	  };
 	  window.addEventListener("keydown", onkey, true);

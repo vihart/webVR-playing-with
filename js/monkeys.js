@@ -83,7 +83,6 @@ function loadStuff(){
     {
         matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
-        matArray[i].uniforms['fogType'].value = clicky;
         matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
         matArray[i].uniforms['travelDir'].value = travelDir;
         matArray[i].uniforms['colourDir'].value = colourDir;
@@ -125,10 +124,6 @@ function init()
             quatPerMonkey: {
                 type: "v4",
                 value: new THREE.Vector4( 0, 0, 0, 0 )
-            },
-            fogType: {
-                type: "i",
-                value: 0
             },
             mousePos: {
               type: "v2",
@@ -174,7 +169,6 @@ function animate() {
     {
         // matArray[i].uniforms['quatPerMonkey'].value = quatPerMonkeyArray[i];
         matArray[i].uniforms['time'].value = .00025 * (Date.now() - start);
-        matArray[i].uniforms['fogType'].value = clicky;
         matArray[i].uniforms['mousePos'].value = new THREE.Vector2(mouseX, mouseY);
         // matArray[i].uniforms['travelDir'].value = travelDir;
         // matArray[i].uniforms['colourDir'].value = colourDir;
@@ -257,14 +251,11 @@ function changePolychoron(selected) {
     //listen for click
 
     document.body.addEventListener( 'click', function(){
-      clicky = (clicky + 1) % 2;
-    })
-    /*
-    Listen for double click event to enter full-screen VR mode
-    */
-    document.body.addEventListener( 'click', function() {
+      clicky = (clicky + 1) % 5 + 1;
+      changePolychoron(clicky);
       effect.setFullScreen( true );
-    });
+    })
+
     /*
     Listen for keyboard events
     */

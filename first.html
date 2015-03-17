@@ -2,8 +2,8 @@
 
 <html lang="en">
 	<head>
-		<title>[]</title>
-		<!--in celebration of a beautiful bug-->
+		<title>The World's First "First" for VR</title>
+
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
@@ -42,12 +42,12 @@
 	-->
 	<script src="js/vr/VREffect.js"></script>
 
-	<!--font-->
+	<!--font from http://mrdoob.github.com/three.js/examples/fonts/helvetiker_regular.typeface.js -->
 	<script src="js/lib/helvetiker.js"></script>
 
 
 	<script>
-		//rotation function by Marc ten Bosch
+
         function RotateAround(object, centerX, centerY, centerZ, rotateX, rotateY, rotateZ) {
 
 
@@ -97,65 +97,129 @@
 		*/
 		var mouseY = 1;
 		var mouseX = 1;
-		var clicky = 0;
+		var clicky = 4;
 
-		var mytext = [];
 
+		var text = 'first';
+
+		/*
+		Create 3d objects
+		*/
+
+		var geometry = new THREE.TextGeometry(text);
+		var material = new THREE.MeshNormalMaterial();
+		var first = new THREE.Mesh( geometry, material );
+
+
+		var clickmessage = new THREE.Mesh( 
+			new THREE.TextGeometry('(click to continue)'), 
+			new THREE.MeshNormalMaterial);
+		scene.add(clickmessage);
+		clickmessage.position.z = -600;
+		clickmessage.position.y = -900;
+		clickmessage.rotation.y = -1;
+		clickmessage.rotation.x = -.3;
+		clickmessage.rotation.z = .3;
+
+		var message1 = new THREE.Mesh( 
+			new THREE.TextGeometry('Hi, this is Vi Hart!'), 
+			new THREE.MeshNormalMaterial);
+		scene.add(message1);
+		message1.position.z = -200;
+		message1.position.x = 500;
+		message1.rotation.y = 2;
+
+		var message2 = new THREE.Mesh( 
+			new THREE.TextGeometry('Welcome to my webVR page!'), 
+			new THREE.MeshNormalMaterial);
+		scene.add(message2);
+		message2.position.z = -200;
+		message2.position.x = 200;
+		message2.position.y = 120;
+		message2.rotation.y = 2;
+
+
+		var message3 = new THREE.Mesh( 
+			new THREE.TextGeometry('Would you like to interact?'), 
+			new THREE.MeshNormalMaterial);
+		scene.add(message3);
+		message3.position.z = -200;
+		message3.position.x = 5;
+		message3.position.y = -150;
+		message3.rotation.y = .7;
+
+		var letters = [];
 		for (var i = 0; i < 20; i++) {
-		    mytext[i] = new THREE.Mesh(
-		    	new THREE.TextGeometry(mytext[i]),
+		    letters[i] = new THREE.Mesh(
+		    	new THREE.TextGeometry('THE WORLDS FIRST PAGE THAT SAYS'),
 		    	new THREE.MeshNormalMaterial());
-		  scene.add(mytext[i]);
+		  scene.add(letters[i]);
+		 letters[i].position.x = -800*(i+1);
+		 letters[i].position.y = -20*(i+1);
+		 letters[i].position.z = -200*(i+1);
+		 letters[i].rotation.y = .5;
 		}
 
-		camera.position.z=100;
+
+		/*
+		Position mesh
+		*/
+
+		first.position.z = -50;
+		first.rotation.z = .5;
+		first.rotation.y = .5;
+		first.rotation.x = .5;
+
+		/*
+		Add cube mesh to your three.js scene
+		*/
+		scene.add( first );
 
 		/*
 		Request animation frame loop function
 		*/
 		function animate() {
+				
 
-			if(clicky===0){
-				for( var i=0; i<mytext.length; i++){
-				RotateAround(mytext[i], -i,-i,5, .0004*i,.0005*i,.01);
-				mytext[i].material.wireframe=true;
-				}
+			clickmessage.rotation.x = -.1 + camera.rotation.z/5;
 
-			}
-			if(clicky===1){
-				for( var i=0; i<mytext.length; i++){
-				RotateAround(mytext[i], -(mouseX)*i,-(mouseY/10)*i,5, .0004*i,.0005*i,.01);
-				}
-			}
-			if(clicky===2){
-				for( var i=0; i<mytext.length; i++){
-				mytext[i].lookAt(camera.position);
-				mytext[i].material.wireframe = false;
-				}
-			}
-			if(clicky===3){
-				for( var i=0; i<mytext.length; i++){
-				RotateAround(mytext[i], -500*i,-50*i,5, .0004*i,.0005*i,.01);
-				mytext[i].material.wireframe=true;
-				mytext[i].lookAt(camera.position);
-				}
-			}
-			if(clicky===4){
-				for (var i=0; i<mytext.length; i++){
-				if((Math.abs(mytext[i].position.x+mytext[i].position.y+mytext[i].position.z)) > 10){
-					mytext[i].position.x = Math.abs(mytext[i].position.x)-(mouseY/100);
-					mytext[i].position.y = Math.abs(mytext[i].position.y)-(mouseX/200);
-					mytext[i].position.z = Math.abs(mytext[i].position.z)-(mouseY/50);
-					} else{
-					mytext[i].position.x = 0;
-					mytext[i].position.y = 0;
-					mytext[i].position.z = 0;
-					}
-				mytext[i].lookAt(camera.position);
-				}
+			//change parameters on click
+			if (clicky === 0){
+				clickmessage.material.visible = true;
+				message1.position.z = -800*(Math.abs(camera.rotation.y));
+				message1.position.x = 50*(Math.abs(camera.rotation.y));
+				message1.rotation.y = camera.rotation.y;
 
-			}
+			} else if(clicky === 1){
+				message2.material.visible = true;
+				message2.position.z = -800*(Math.abs(camera.rotation.y));
+				message2.position.x = 50*(Math.abs(camera.rotation.y));
+				message2.rotation.y = camera.rotation.y;
 
+			} else if(clicky === 2){
+				message3.material.visible = true;
+				message3.position.z = -800*(Math.abs(camera.rotation.y));
+				message3.position.x = 50*(Math.abs(camera.rotation.y));
+				message3.rotation.y = camera.rotation.y;
+			} else if (clicky === 3){
+				first.material.visible = true;
+				clickmessage.material.visible = false;
+				first.rotation.z += .01;
+				first.rotation.y += .02;
+				first.rotation.x += .03;
+			} else if (clicky === 4){
+				first.material.visible = false;
+				message1.material.visible = false;
+				message2.material.visible = false;
+				message3.material.visible = false;
+				for( var i=0; i<letters.length; i++){
+					RotateAround(letters[i], -500*i,-50*i,5, .0004*i,.0005*i,.01);
+				}
+			}else if (clicky === 5){
+				for( var i=0; i<letters.length; i++){
+					RotateAround(letters[i], -500*i,-50*i,5, .0004*i,.0005*i,.01);
+				}
+				}
 
 			/*
 			Update VR headset position and apply to camera.
@@ -175,7 +239,12 @@
 		//links
 
 		function link(){
+			if(camera.rotation.x > -.1 && camera.rotation.x < .5 && camera.rotation.y > -.2 && camera.rotation.y < .3){
+				window.location="http://vihart.com";		
+			}else{
 				window.location="http://vihart.github.io/webVR-playing-with/index.html";
+			}
+
 		}
 
 		//listen for mouse movement to get mouseX and mouseY
@@ -188,12 +257,11 @@
 		//listen for click
 
 		document.body.addEventListener( 'click', function(){
-			clicky = (clicky + 1) % 5;
+			clicky = (clicky + 1) % 6;
 			effect.setFullScreen( true );
 		})
-		
 		/*
-		Listen for keyboard events
+		Listen for keyboard events 
 		*/
 		function onkey(event) {
 	    event.preventDefault();

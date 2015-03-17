@@ -97,7 +97,7 @@
 		*/
 		var mouseY = 1;
 		var mouseX = 1;
-		var clicky = 4;
+		var clicky = 5;
 
 
 		var text = 'first';
@@ -217,9 +217,14 @@
 				}
 			}else if (clicky === 5){
 				for( var i=0; i<letters.length; i++){
-					RotateAround(letters[i], -500*i,-50*i,5, .0004*i,.0005*i,.01);
+					letters[i].material.visible = false;
 				}
-				}
+				first.material.visible = false;
+				message1.material.visible = false;
+				message2.material.visible = false;
+				message3.material.visible = false;
+				clickmessage.material.visible = true;
+			}
 
 			/*
 			Update VR headset position and apply to camera.

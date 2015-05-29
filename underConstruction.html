@@ -22,8 +22,16 @@
 	</head>
 
 	<body>
-	<!--Audio from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
+	<!--Music from Peter J https://musopen.org/music/349/erik-satie/gymnopedie-no-1-harp-arr/ -->
 	<audio id='music' src="media/satie.mp3" autoplay=true loop=true/>
+	<!--jumping sounds recorded by yours truly-->
+	<audio id='jump1' src="media/jump1.ogg">
+	<audio id='jump2' src="media/jump2.ogg">
+	<audio id='jump3' src="media/jump3.ogg">
+	<audio id='jump4' src="media/jump4.ogg">
+	<audio id='jump5' src="media/jump5.ogg">
+	<audio id='jump6' src="media/jump6.ogg">
+	<audio id='jump7' src="media/jump7.ogg">
 	</body>
 
 	<!--
@@ -78,6 +86,17 @@
 		var effect = new THREE.VREffect( renderer );
 		effect.setSize( window.innerWidth, window.innerHeight );
 
+		//jumping sound effects
+
+		var jumpSounds = [
+			document.querySelector('#jump1'),
+			document.querySelector('#jump2'),
+			document.querySelector('#jump3'),
+			document.querySelector('#jump4'),
+			document.querySelector('#jump5'),
+			document.querySelector('#jump6'),
+			document.querySelector('#jump7')
+			];
 		/*
 		define interaction variables
 		*/
@@ -536,7 +555,8 @@
 	    } else if (event.keyCode == 70 || event.keyCode == 13) { //f or enter
 	    	effect.setFullScreen(true) //fullscreen
 	    } else if (event.keyCode == 32) {//space
-	  		link();
+	    	var j = Math.floor(Math.random()*7);
+	  		jumpSounds[j].play();
 	  	} else if (event.keyCode == 80) {//p
 	  		var music = document.querySelector('#music');
 	  		if (music.paused){

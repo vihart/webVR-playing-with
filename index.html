@@ -545,7 +545,8 @@ void main()
 
 	  //hold down keys to do rotations and stuff
 		function key(event, sign) {
-		  var control = controls.manualControls[String.fromCharCode(event.keyCode).toLowerCase()];
+
+		  var control = controls.manualControls[event.keyCode];
 		  if (!control)
 		    return;
 		  if (sign === 1 && control.active || sign === -1 && !control.active)
